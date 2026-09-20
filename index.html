@@ -16,8 +16,9 @@
 <body>
 <div id="app">
   <noscript>Programu hii inahitaji JavaScript kufanya kazi.</noscript>
+  <div id="boot-msg" style="padding:24px;font-family:sans-serif;color:#9aa4b2;text-align:center;">Inapakia programu…</div>
 </div>
 
-<script src="script.js"></script>
+<script src="script.js" onerror="var m=document.getElementById('boot-msg');if(m){m.style.color='#e0492f';m.innerHTML='❌ Faili <b>script.js</b> haijapatikana.<br>Hakikisha index.html, style.css na script.js zipo kwenye folda ile ile kwenye GitHub, na majina yameandikwa kwa herufi ndogo kama yalivyo.';}"></script>
 </body>
 </html>
