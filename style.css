@@ -505,6 +505,9 @@ main {
 .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 260px; margin: 0 auto; }
 .pin-pad button { padding: 16px; font-size: 20px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--bg-raised-2); color: var(--text); }
 
+/* Sidebar inaonekana kwenye kompyuta tu; simu inatumia bar ya chini */
+.sidebar { display: none; }
+
 @media (min-width: 760px) {
   :root { --nav-h: var(--nav-row-h); }
   main { padding-bottom: 40px; }
