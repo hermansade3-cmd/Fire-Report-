@@ -1,10 +1,10 @@
 "use strict";
-/* script.js — Offline Incident & Rescue Report
+/* script.js \u2014 Offline Incident & Rescue Report
  * Msimbo wote wa JavaScript umeunganishwa hapa kwa mpangilio huu:
- *   1) db.js       — IndexedDB (RescueDB)
- *   2) pdf-lite.js — Kizio cha PDF bila maktaba za nje
- *   3) export.js   — Ripoti, PDF, Copy, Share, Backup
- *   4) app.js      — Programu kuu (SPA, routes, UI)
+ *   1) db.js       \u2014 IndexedDB (RescueDB)
+ *   2) pdf-lite.js \u2014 Kizio cha PDF bila maktaba za nje
+ *   3) export.js   \u2014 Ripoti, PDF, Copy, Share, Backup
+ *   4) app.js      \u2014 Programu kuu (SPA, routes, UI)
  * Created by Herman Sade */
 /* ================================================================
  * 1) db.js
@@ -269,13 +269,13 @@ window.RescueDB = RescueDB;
 /* ================================================================
  * 2) pdf-lite.js
  * ================================================================ */
-/* pdf-lite.js — Kizio (module) cha kutengeneza PDF bila maktaba yoyote ya nje,
+/* pdf-lite.js \u2014 Kizio (module) cha kutengeneza PDF bila maktaba yoyote ya nje,
  * bila CDN, na bila internet. Kinatumia herufi za msingi za PDF (Helvetica,
  * fonti ya kawaida inayojumuishwa kwenye kila kisomaji cha PDF) kuandika
  * hati ya maandishi (text) yenye kurasa nyingi (A4), vichwa vya habari na
  * footer kwenye kila ukurasa.
  *
- * Haihitaji internet wala server — inatengeneza Blob ya PDF moja kwa moja
+ * Haihitaji internet wala server \u2014 inatengeneza Blob ya PDF moja kwa moja
  * kwenye kifaa (browser).
  */
 (function () {
@@ -401,8 +401,8 @@ window.RescueDB = RescueDB;
         const lines = buildLines(bodyText);
         const pages = paginate(lines);
         const totalPages = pages.length;
-        const objects = []; // { num, body } — tutajaza num baadaye
-        // 1: Catalog, 2: Pages — tutaziweka mwishoni baada ya kujua idadi ya kurasa
+        const objects = []; // { num, body } \u2014 tutajaza num baadaye
+        // 1: Catalog, 2: Pages \u2014 tutaziweka mwishoni baada ya kujua idadi ya kurasa
         const pageObjNums = [];
         const contentObjNums = [];
         const fontRegularNum = 3 + totalPages * 2;
@@ -469,8 +469,8 @@ window.RescueDB = RescueDB;
 /* ================================================================
  * 3) export.js
  * ================================================================ */
-/* export.js — Ripoti (report) formatting, PDF, Copy, Share, Backup/Export
- * kwa Offline Incident & Rescue Report. Hakuna maktaba ya nje/CDN — kila
+/* export.js \u2014 Ripoti (report) formatting, PDF, Copy, Share, Backup/Export
+ * kwa Offline Incident & Rescue Report. Hakuna maktaba ya nje/CDN \u2014 kila
  * kitu kinafanya kazi 100% offline kwenye kifaa.
  */
 (function () {
@@ -910,7 +910,7 @@ window.RescueDB = RescueDB;
 /* ================================================================
  * 4) app.js
  * ================================================================ */
-/* app.js — Offline Incident & Rescue Report
+/* app.js \u2014 Offline Incident & Rescue Report
  * Vanilla JS SPA. No build step, no external CDN. All state persisted via
  * RescueDB (IndexedDB, see db.js). Route state lives in location.hash.
  */
@@ -1070,7 +1070,7 @@ window.RescueDB = RescueDB;
     // Persistence: auto-save with debounce + immediate flush
     // ---------------------------------------------------------------
     function markSaving() { setIndicator("saving", "Inahifadhi..."); }
-    function markSaved() { setIndicator("saved", "IMEHIFADHIWA ✓"); }
+    function markSaved() { setIndicator("saved", "IMEHIFADHIWA \u2713"); }
     function markError() { setIndicator("error", "Imeshindikana. Retry"); }
     function setIndicator(cls, text) {
         const el = $("#save-indicator");
@@ -1177,17 +1177,17 @@ window.RescueDB = RescueDB;
       <div class="stat-box"><div class="num">${counts.archived}</div><div class="label">Archived</div></div>
       <div class="stat-box"><div class="num">${counts.today}</div><div class="label">Leo</div></div>
       <div class="stat-box"><div class="num">${counts.month}</div><div class="label">Mwezi Huu</div></div>
-      <div class="stat-box trash-stat" data-nav="/trash"><div class="num">${counts.trash}</div><div class="label">🗑️ Trash</div></div>
+      <div class="stat-box trash-stat" data-nav="/trash"><div class="num">${counts.trash}</div><div class="label">\uD83D\uDDD1\uFE0F Trash</div></div>
     </div>
     <div class="dash-actions">
-      <button class="btn btn-primary" data-nav="/report/new"><span class="ic">＋</span>Ripoti Mpya</button>
-      <button class="btn" data-nav="/reports?status=DRAFT"><span class="ic">📝</span>Drafti</button>
-      <button class="btn" data-nav="/reports?status=COMPLETED"><span class="ic">✅</span>Zilizokamilika</button>
-      <button class="btn" data-nav="/reports?status=ARCHIVED"><span class="ic">🗄️</span>Archive</button>
-      <button class="btn" data-nav="/search"><span class="ic">🔍</span>Tafuta</button>
-      <button class="btn" data-nav="/trash"><span class="ic">🗑️</span>Trash</button>
-      <button class="btn" data-nav="/statistics"><span class="ic">📊</span>Takwimu</button>
-      <button class="btn" data-nav="/backup"><span class="ic">⬇️</span>Export/Backup</button>
+      <button class="btn btn-primary" data-nav="/report/new"><span class="ic">\uFF0B</span>Ripoti Mpya</button>
+      <button class="btn" data-nav="/reports?status=DRAFT"><span class="ic">\uD83D\uDCDD</span>Drafti</button>
+      <button class="btn" data-nav="/reports?status=COMPLETED"><span class="ic">\u2705</span>Zilizokamilika</button>
+      <button class="btn" data-nav="/reports?status=ARCHIVED"><span class="ic">\uD83D\uDDC4\uFE0F</span>Archive</button>
+      <button class="btn" data-nav="/search"><span class="ic">\uD83D\uDD0D</span>Tafuta</button>
+      <button class="btn" data-nav="/trash"><span class="ic">\uD83D\uDDD1\uFE0F</span>Trash</button>
+      <button class="btn" data-nav="/statistics"><span class="ic">\uD83D\uDCCA</span>Takwimu</button>
+      <button class="btn" data-nav="/backup"><span class="ic">\u2B07\uFE0F</span>Export/Backup</button>
     </div>
     <div id="drafts-continue"></div>
     <div class="card">
@@ -1222,9 +1222,9 @@ window.RescueDB = RescueDB;
       <span class="id">${escapeHtml(reportTitle)}</span>
       <span class="badge ${badgeClass}">${(r.status || "").replace("_", " ")}</span>
     </div>
-    <div class="meta">${escapeHtml(fmtDate(((_d = r.incident) === null || _d === void 0 ? void 0 : _d.date) || r.createdAt))} · ${escapeHtml(type)}</div>
-    <div class="summary">${escapeHtml(loc)}${r.casualtyCount ? " · Majeruhi: " + r.casualtyCount : ""}</div>
-    <div class="hold-hint">↕ Shikilia sekunde 1 kuleta chaguo la Delete</div>
+    <div class="meta">${escapeHtml(fmtDate(((_d = r.incident) === null || _d === void 0 ? void 0 : _d.date) || r.createdAt))} \u00B7 ${escapeHtml(type)}</div>
+    <div class="summary">${escapeHtml(loc)}${r.casualtyCount ? " \u00B7 Majeruhi: " + r.casualtyCount : ""}</div>
+    <div class="hold-hint">\u2195 Shikilia sekunde 1 kuleta chaguo la Delete</div>
   </div>`;
     }
     // ---------------------------------------------------------------
@@ -1240,7 +1240,7 @@ window.RescueDB = RescueDB;
     <div class="filter-row">
       ${["ALL", "DRAFT", "IN_PROGRESS", "COMPLETED", "ARCHIVED"].map((s) => `<span class="chip ${s === status ? "selected" : ""}" data-nav="/reports?status=${s}">${titleMap[s]}</span>`).join("")}
     </div>
-    <div id="list">${sorted.length ? sorted.map(reportListItemHtml).join("") : '<div class="empty-state"><div class="ic">📄</div>Hakuna ripoti katika kundi hili.</div>'}</div>
+    <div id="list">${sorted.length ? sorted.map(reportListItemHtml).join("") : '<div class="empty-state"><div class="ic">\uD83D\uDCC4</div>Hakuna ripoti katika kundi hili.</div>'}</div>
   `, titleMap[status] || "Ripoti");
         setupLongPressDelete();
     });
@@ -1320,7 +1320,7 @@ window.RescueDB = RescueDB;
         const trash = (await RescueDB.getAllTrash()).sort((a, b) => (b.deletedAt || "").localeCompare(a.deletedAt || ""));
         setMain(`
     <p class="muted">Ripoti zilizofutwa huhifadhiwa hapa mpaka uzifute kabisa.</p>
-    <div id="trash-list">${trash.length ? trash.map(trashItemHtml).join("") : '<div class="empty-state"><div class="ic">🗑️</div>Trash iko wazi.</div>'}</div>
+    <div id="trash-list">${trash.length ? trash.map(trashItemHtml).join("") : '<div class="empty-state"><div class="ic">\uD83D\uDDD1\uFE0F</div>Trash iko wazi.</div>'}</div>
   `, "Trash");
     });
     function trashItemHtml(r) {
@@ -1330,7 +1330,7 @@ window.RescueDB = RescueDB;
       <strong>${escapeHtml(friendlyReportTitle(r))}</strong>
       <span class="muted">Ilifutwa: ${escapeHtml(fmtDateTime(r.deletedAt))}</span>
     </div>
-    <p class="muted">${escapeHtml(((_a = r.incident) === null || _a === void 0 ? void 0 : _a.type) || "")} · ${escapeHtml(fmtDate((_b = r.incident) === null || _b === void 0 ? void 0 : _b.date))}</p>
+    <p class="muted">${escapeHtml(((_a = r.incident) === null || _a === void 0 ? void 0 : _a.type) || "")} \u00B7 ${escapeHtml(fmtDate((_b = r.incident) === null || _b === void 0 ? void 0 : _b.date))}</p>
     <div class="btn-row">
       <button class="btn btn-sm" data-action="restore-trash" data-id="${r.incidentId}">Restore</button>
       <button class="btn btn-sm btn-danger" data-action="perma-delete" data-id="${r.incidentId}">Futa Kabisa</button>
@@ -1476,7 +1476,7 @@ window.RescueDB = RescueDB;
       <div class="card-title">Usalama wa Kufuta</div>
       <div class="security-note">Ripoti iliyofutwa itafutwa kabisa pamoja na picha zake. Ili kuifuta lazima uweke password ya kufuta.</div>
       <div class="switch-row">
-        <div><div class="lbl">Password ya Kufuta</div><div class="sub">${s.deletePasswordHash ? "Imewekwa ✓" : "Bado haijawekwa"}</div></div>
+        <div><div class="lbl">Password ya Kufuta</div><div class="sub">${s.deletePasswordHash ? "Imewekwa \u2713" : "Bado haijawekwa"}</div></div>
         <button class="btn btn-sm" id="delete-password-btn">${s.deletePasswordHash ? "Badilisha" : "Weka Password"}</button>
       </div>
     </div>
@@ -1537,7 +1537,7 @@ window.RescueDB = RescueDB;
       <div class="pin-dots" id="pin-dots">${"<span class='dot'></span>".repeat(4)}</div>
       <div class="pin-pad">
         ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button data-d="${n}">${n}</button>`).join("")}
-        <button data-d="clear">C</button><button data-d="0">0</button><button data-d="back">⌫</button>
+        <button data-d="clear">C</button><button data-d="0">0</button><button data-d="back">\u232B</button>
       </div>
       <div class="btn-row"><button class="btn btn-block btn-ghost" id="pin-cancel">Ghairi</button></div>
     </div>`;
@@ -1759,11 +1759,11 @@ window.RescueDB = RescueDB;
       ${fieldInput("Maelezo ya Eneo", "location.description", l.description, { type: "textarea" })}
     </div>
     <div class="card">
-      <div class="card-title">GPS (Optional — si lazima)</div>
+      <div class="card-title">GPS (Optional \u2014 si lazima)</div>
       <div id="gps-info" class="muted" style="margin-bottom:10px;">
-        ${g.lat ? `Lat: ${escapeHtml(g.lat)}, Lng: ${escapeHtml(g.lng)} (±${escapeHtml(g.accuracy)}m) — ${escapeHtml(fmtDateTime(g.timestamp))}` : "GPS haijawekwa bado."}
+        ${g.lat ? `Lat: ${escapeHtml(g.lat)}, Lng: ${escapeHtml(g.lng)} (\u00B1${escapeHtml(g.accuracy)}m) \u2014 ${escapeHtml(fmtDateTime(g.timestamp))}` : "GPS haijawekwa bado."}
       </div>
-      <button class="btn btn-block" id="capture-gps-btn">📍 Capture Current Location</button>
+      <button class="btn btn-block" id="capture-gps-btn">\uD83D\uDCCD Capture Current Location</button>
     </div>`;
     }
     // ---- Step: Timeline ----
@@ -1970,8 +1970,8 @@ window.RescueDB = RescueDB;
         return `
     <div class="card">
       <div class="btn-row">
-        <label class="btn btn-primary" style="flex:1;">📷 Take Photo<input type="file" accept="image/*" capture="environment" id="photo-take" style="display:none"></label>
-        <label class="btn" style="flex:1;">🖼️ Choose Photo<input type="file" accept="image/*" multiple id="photo-choose" style="display:none"></label>
+        <label class="btn btn-primary" style="flex:1;">\uD83D\uDCF7 Take Photo<input type="file" accept="image/*" capture="environment" id="photo-take" style="display:none"></label>
+        <label class="btn" style="flex:1;">\uD83D\uDDBC\uFE0F Choose Photo<input type="file" accept="image/*" multiple id="photo-choose" style="display:none"></label>
       </div>
     </div>
     <div class="photo-grid" id="photo-grid"><div class="muted">Inapakia...</div></div>`;
@@ -1989,7 +1989,7 @@ window.RescueDB = RescueDB;
             const url = URL.createObjectURL(p.blob);
             return `<div class="photo-thumb" data-photo-id="${p.photoId}">
       <img src="${url}" alt="">
-      <button class="del" data-del-photo="${p.photoId}">×</button>
+      <button class="del" data-del-photo="${p.photoId}">\u00D7</button>
       <input class="cap-input" placeholder="Caption" value="${escapeHtml(p.caption || "")}" data-caption="${p.photoId}">
     </div>`;
         }).join("");
@@ -2019,7 +2019,7 @@ window.RescueDB = RescueDB;
         return `
     <div class="card">
       <p>Umekamilisha sehemu zote. Hakiki taarifa kabla ya "Complete Report".</p>
-      <button class="btn btn-block" id="preview-btn">👁️ Preview Report</button>
+      <button class="btn btn-block" id="preview-btn">\uD83D\uDC41\uFE0F Preview Report</button>
     </div>
     <div class="card">
       <div class="card-title">Report Status</div>
@@ -2048,9 +2048,4 @@ window.RescueDB = RescueDB;
                     renderReportForm();
                     toast("Eneo limewekwa", "ok");
                 }, () => {
-                    toast("Imeshindikana kupata GPS. Unaweza kuendelea bila GPS.", "err");
-                    $("#capture-gps-btn").textContent = "📍 Capture Current Location";
-                }, { enableHighAccuracy: true, timeout: 10000 });
-            });
-        }
-        if (key === "vehicles
+              
