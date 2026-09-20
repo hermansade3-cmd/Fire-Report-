@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rescue Report">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 <div id="app">
@@ -19,6 +19,29 @@
   <div id="boot-msg" style="padding:24px;font-family:sans-serif;color:#9aa4b2;text-align:center;">Inapakia programu…</div>
 </div>
 
-<script src="script.js" onerror="var m=document.getElementById('boot-msg');if(m){m.style.color='#e0492f';m.innerHTML='❌ Faili <b>script.js</b> haijapatikana.<br>Hakikisha index.html, style.css na script.js zipo kwenye folda ile ile kwenye GitHub, na majina yameandikwa kwa herufi ndogo kama yalivyo.';}"></script>
+<script>
+/* Uchunguzi wa makosa: unaonyesha kosa la JavaScript kwenye skrini (badala ya "Inapakia..." isiyoisha) */
+(function () {
+  var errs = [];
+  function show() {
+    var m = document.getElementById('boot-msg');
+    if (!m) return;
+    m.style.color = '#e0492f';
+    m.innerHTML = '&#10060; Programu imeshindwa kuanza.<br><br>' +
+      (errs.length ? '<code style="font-size:12px;word-break:break-word;">' + errs.join('<br>') + '</code><br><br>' : '') +
+      'Jaribu: 1) Fungua kwa Chrome iliyosasishwa, 2) Futa cache ya kivinjari, 3) Tuma picha ya skrini hii kwa msanidi.';
+  }
+  window.addEventListener('error', function (e) {
+    errs.push(String(e.message || 'Kosa') + (e.lineno ? ' (mstari ' + e.lineno + ')' : ''));
+    show();
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    errs.push('Promise: ' + String((e.reason && e.reason.message) || e.reason));
+    show();
+  });
+  setTimeout(function () { if (document.getElementById('boot-msg')) show(); }, 5000);
+})();
+</script>
+<script src="script.js?v=3" onerror="var m=document.getElementById('boot-msg');if(m){m.style.color='#e0492f';m.innerHTML='&#10060; Faili <b>script.js</b> haijapatikana.<br>Hakikisha index.html, style.css na script.js zipo kwenye folda ile ile kwenye GitHub, na majina yameandikwa kwa herufi ndogo kama yalivyo.';}"></script>
 </body>
 </html>
