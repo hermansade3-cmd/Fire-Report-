@@ -18,18 +18,7 @@
   <noscript>Programu hii inahitaji JavaScript kufanya kazi.</noscript>
   <div id="boot-msg" style="padding:24px;font-family:sans-serif;color:#9aa4b2;text-align:center;">Inapakia programu…</div>
 </div>
-  window.addEventListener('error', function (e) {
-    errs.push(String(e.message || 'Kosa') + (e.lineno ? ' (mstari ' + e.lineno + ')' : ''));
-    show();
-  });
-  window.addEventListener('unhandledrejection', function (e) {
-    errs.push('Promise: ' + String((e.reason && e.reason.message) || e.reason));
-    show();
-  });
-  setTimeout(function () { if (document.getElementById('boot-msg')) show(); }, 5000);
-})();
-</script>
-<script src="core.js?v=5" onerror="var m=document.getElementById('boot-msg');if(m){m.style.color='#e0492f';m.innerHTML='&#10060; Faili <b>core.js</b> haijapatikana.<br>Hakikisha index.html, style.css na script.js zipo kwenye folda ile ile kwenye GitHub, na majina yameandikwa kwa herufi ndogo kama yalivyo.';}"></script>
-<script src="script.js?v=5" onerror="var m=document.getElementById('boot-msg');if(m){m.style.color='#e0492f';m.innerHTML='&#10060; Faili <b>script.js</b> haijapatikana.<br>Hakikisha index.html, style.css na script.js zipo kwenye folda ile ile kwenye GitHub, na majina yameandikwa kwa herufi ndogo kama yalivyo.';}"></script>
+<script src="core.js?v=5"></script>
+<script src="script.js?v=5"></script>
 </body>
 </html>
