@@ -18,19 +18,6 @@
   <noscript>Programu hii inahitaji JavaScript kufanya kazi.</noscript>
   <div id="boot-msg" style="padding:24px;font-family:sans-serif;color:#9aa4b2;text-align:center;">Inapakia programu…</div>
 </div>
-
-<script>
-/* Uchunguzi wa makosa: unaonyesha kosa la JavaScript kwenye skrini (badala ya "Inapakia..." isiyoisha) */
-(function () {
-  var errs = [];
-  function show() {
-    var m = document.getElementById('boot-msg');
-    if (!m) return;
-    m.style.color = '#e0492f';
-    m.innerHTML = '&#10060; Programu imeshindwa kuanza.<br><br>' +
-      (errs.length ? '<code style="font-size:12px;word-break:break-word;">' + errs.join('<br>') + '</code><br><br>' : '') +
-      'Jaribu: 1) Fungua kwa Chrome iliyosasishwa, 2) Futa cache ya kivinjari, 3) Tuma picha ya skrini hii kwa msanidi.';
-  }
   window.addEventListener('error', function (e) {
     errs.push(String(e.message || 'Kosa') + (e.lineno ? ' (mstari ' + e.lineno + ')' : ''));
     show();
