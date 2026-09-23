@@ -33,7 +33,10 @@
         Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
       },
     });
-    if (!res.ok) throw new Error("HTTP " + res.status);
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "");
+      throw new Error("HTTP " + res.status + " " + errText.slice(0, 120));
+    }
     return res.json();
   }
 
@@ -67,7 +70,7 @@
     } catch (e) {
       const cached = window.RescueDB ? await window.RescueDB.getSetting(CACHE_KEY, []) : [];
       bodyEl.innerHTML =
-        `<div style="padding:10px 4px;color:#e0a03c;font-size:12px;">Huna intaneti — inaonyesha matangazo yaliyohifadhiwa mara ya mwisho.</div>` +
+        `<div style="padding:10px 4px;color:#e0a03c;font-size:12px;">Tatizo la kuvuta data: ${esc(e && e.message)}. Inaonyesha matangazo yaliyohifadhiwa mara ya mwisho.</div>` +
         renderList(cached);
     }
   }
