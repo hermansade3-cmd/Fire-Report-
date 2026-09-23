@@ -1,6 +1,6 @@
 "use strict";
 /* ================================================================
- * announcements.js — Tab ya "Matangazo"
+ * announcements.js — Tab ya "New"
  * Inasoma posts zenye status "published" kutoka Supabase na
  * kuzionyesha kwenye app ya crew. Haiguzi core.js/script.js kabisa —
  * inaongeza kitufe chake cha nav na overlay yake yenyewe kwenye DOM.
