@@ -26,7 +26,7 @@
   }
 
   async function fetchAnnouncements() {
-    const url = `${SUPABASE_URL}/rest/v1/posts?select=*&published=eq.true&order=publication_date.desc`;
+    const url = `${SUPABASE_URL}/rest/v1/posts?select=*&published=eq.true&order=published_at.desc`;
     const res = await fetch(url, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -48,7 +48,7 @@
       const title = esc(p.title || "Tangazo");
       const body = esc(p.content || p.body || p.excerpt || "");
       const img = p.image || p.image_url || p.cover_image || "";
-      const when = fmt(p.publication_date || p.published_at || p.created_at);
+      const when = fmt(p.published_at || p.publication_date || p.created_at);
       return `
         <div style="background:#161c2b;border:1px solid #232b3e;border-radius:10px;margin:0 0 14px 0;overflow:hidden;">
           ${img ? `<img src="${esc(img)}" style="width:100%;max-height:180px;object-fit:cover;display:block;">` : ""}
@@ -94,7 +94,7 @@
   function makeNavButton() {
     const btn = document.createElement("button");
     btn.className = "nav-btn";
-    btn.innerHTML = `<span class="ic">📢</span><span>New</span>`;
+    btn.innerHTML = `<span class="ic">📢</span><span>Matangazo</span>`;
     btn.addEventListener("click", openOverlay);
     return btn;
   }
@@ -124,3 +124,4 @@
 
   window.addEventListener("load", () => waitAndInject(50));
 })();
+
