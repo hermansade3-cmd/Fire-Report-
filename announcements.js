@@ -94,7 +94,7 @@
   function makeNavButton() {
     const btn = document.createElement("button");
     btn.className = "nav-btn";
-    btn.innerHTML = `<span class="ic">📢</span><span>Matangazo</span>`;
+    btn.innerHTML = `<span class="ic">📢</span><span>New</span>`;
     btn.addEventListener("click", openOverlay);
     return btn;
   }
