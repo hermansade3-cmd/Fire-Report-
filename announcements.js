@@ -1,6 +1,6 @@
 "use strict";
 /* ================================================================
- * announcements.js — Tab ya "New"
+ * announcements.js — Tab ya "Matangazo"
  * Inasoma posts zenye status "published" kutoka Supabase na
  * kuzionyesha kwenye app ya crew. Haiguzi core.js/script.js kabisa —
  * inaongeza kitufe chake cha nav na overlay yake yenyewe kwenye DOM.
@@ -26,7 +26,7 @@
   }
 
   async function fetchAnnouncements() {
-    const url = `${SUPABASE_URL}/rest/v1/posts?select=*&published=eq.true&order=published_at.desc`;
+    const url = `${SUPABASE_URL}/rest/v1/posts?select=*&status=eq.published&deleted_at=is.null&order=published_at.desc`;
     const res = await fetch(url, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -94,7 +94,7 @@
   function makeNavButton() {
     const btn = document.createElement("button");
     btn.className = "nav-btn";
-    btn.innerHTML = `<span class="ic">📢</span><span>New</span>`;
+    btn.innerHTML = `<span class="ic">📢</span><span>Matangazo</span>`;
     btn.addEventListener("click", openOverlay);
     return btn;
   }
