@@ -26,7 +26,7 @@
   }
 
   async function fetchAnnouncements() {
-    const url = `${SUPABASE_URL}/rest/v1/posts?select=*&status=eq.published&deleted_at=is.null&order=published_at.desc`;
+    const url = `${SUPABASE_URL}/rest/v1/posts?select=*&published=eq.true&order=publication_date.desc`;
     const res = await fetch(url, {
       headers: {
         apikey: SUPABASE_ANON_KEY,
@@ -46,9 +46,9 @@
     }
     return posts.map((p) => {
       const title = esc(p.title || "Tangazo");
-      const body = esc(p.body || p.content || p.excerpt || "");
-      const img = p.image_url || p.cover_image || p.image || "";
-      const when = fmt(p.published_at || p.created_at);
+      const body = esc(p.content || p.body || p.excerpt || "");
+      const img = p.image || p.image_url || p.cover_image || "";
+      const when = fmt(p.publication_date || p.published_at || p.created_at);
       return `
         <div style="background:#161c2b;border:1px solid #232b3e;border-radius:10px;margin:0 0 14px 0;overflow:hidden;">
           ${img ? `<img src="${esc(img)}" style="width:100%;max-height:180px;object-fit:cover;display:block;">` : ""}
