@@ -9,8 +9,8 @@
  * ================================================================ */
 
 (function () {
-  const SUPABASE_URL = "https://lovqecgjzispwdtooyph.supabase.co";
-  const SUPABASE_ANON_KEY = "sb_publishable_TAEeEIAPg6y7GMs8_rRnKg_oiszo1N9";
+  const SUPABASE_URL = "https://c--7f6fe176-f458-46d1-add7-d90bba190bf5-prod.lovable.cloud";
+  const SUPABASE_ANON_KEY = "sb_publishable_6nwtjI7yQSuQF5DLJ6Nmbw_EtLzZVqo";
   const CACHE_KEY = "cachedAnnouncements";
 
   function esc(s) {
