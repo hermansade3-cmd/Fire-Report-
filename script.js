@@ -77,6 +77,28 @@ el.textContent = msg;
 host.appendChild(el);
 setTimeout(() => el.remove(), 2600);
 }
+/* ---------------- APK Download / Share ---------------- */
+const APK_FILE = "Fire_Report__v0.6_1789911909111.apk";
+const APK_URL = new URL(APK_FILE, location.href).href;
+async function shareApk() {
+const shareData = {
+title: "Fire Report App",
+text: "Pakua programu ya Fire Report (Offline Incident & Rescue Report):",
+url: APK_URL,
+};
+if (navigator.share) {
+try { await navigator.share(shareData); }
+catch (e) { if (e && e.name !== "AbortError") console.error(e); }
+return;
+}
+try {
+await navigator.clipboard.writeText(APK_URL);
+toast("Link ya APK imenakiliwa", "ok");
+}
+catch (e) {
+toast(APK_URL);
+}
+}
 const State = {
 settings: {},
 currentReport: null, // report object being edited
@@ -541,6 +563,15 @@ setMain(`
       <p class="muted">Offline-first incident reporting application.</p>
       <p class="muted">Created by Herman Sade</p>
     </div>
+
+    <div class="card">
+      <div class="card-title">Programu (APK)</div>
+      <p class="muted">Pakua programu hii kama APK ya Android, au itume kwa wenzako.</p>
+      <div class="btn-row">
+        <a class="btn btn-block" id="download-apk-btn" href="${APK_FILE}" download>\u2B07\uFE0F Pakua APK</a>
+        <button class="btn btn-block" id="share-apk-btn" type="button">\u2197 Share APK</button>
+      </div>
+    </div>
   `, "Settings");
 $$("[data-set]").forEach((input) => {
 input.addEventListener("change", async () => {
@@ -579,6 +610,12 @@ changePinBtn.addEventListener("click", openPinSetupModal);
 const deletePasswordBtn = $("#delete-password-btn");
 if (deletePasswordBtn)
 deletePasswordBtn.addEventListener("click", openDeletePasswordModal);
+const shareApkBtn = $("#share-apk-btn");
+if (shareApkBtn)
+shareApkBtn.addEventListener("click", shareApk);
+const downloadApkBtn = $("#download-apk-btn");
+if (downloadApkBtn)
+downloadApkBtn.addEventListener("click", () => toast("Inapakua APK\u2026", "ok"));
 });
 function openPinSetupModal() {
 let pin = "";
