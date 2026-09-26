@@ -78,7 +78,7 @@ host.appendChild(el);
 setTimeout(() => el.remove(), 2600);
 }
 /* ---------------- APK Download ---------------- */
-const APK_FILE = "Fire_Report__v0.6_1789911909111.apk";
+const APK_FILE = "Fire_Report-v0.6.apk";
 const State = {
 settings: {},
 currentReport: null, // report object being edited
