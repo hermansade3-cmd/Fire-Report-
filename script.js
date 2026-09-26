@@ -79,25 +79,38 @@ setTimeout(() => el.remove(), 2600);
 }
 /* ---------------- APK Download / Share ---------------- */
 const APK_FILE = "Fire_Report__v0.6_1789911909111.apk";
-const APK_URL = new URL(APK_FILE, location.href).href;
+async function downloadApkFile() {
+const a = document.createElement("a");
+a.href = APK_FILE;
+a.download = APK_FILE;
+document.body.appendChild(a);
+a.click();
+a.remove();
+}
 async function shareApk() {
-const shareData = {
-title: "Fire Report App",
-text: "Pakua programu ya Fire Report (Offline Incident & Rescue Report):",
-url: APK_URL,
-};
-if (navigator.share) {
-try { await navigator.share(shareData); }
-catch (e) { if (e && e.name !== "AbortError") console.error(e); }
+// Tunashare FAILI la APK moja kwa moja (files:[...]) — TUSIWEKE "url" wala
+// link ya website popote hapa, ili mtu anayepokea asifikie/kuona chanzo
+// (source code) cha tovuti; aone tu jina la app na faili la kupakua.
+try {
+const res = await fetch(APK_FILE);
+if (!res.ok)
+throw new Error("Imeshindikana kupata faili la APK");
+const blob = await res.blob();
+const file = new File([blob], APK_FILE, { type: "application/vnd.android.package-archive" });
+if (navigator.canShare && navigator.canShare({ files: [file] })) {
+await navigator.share({ files: [file], title: "Fire Report App" });
 return;
 }
-try {
-await navigator.clipboard.writeText(APK_URL);
-toast("Link ya APK imenakiliwa", "ok");
 }
 catch (e) {
-toast(APK_URL);
+if (e && e.name === "AbortError")
+return;
+console.error("shareApk:", e);
 }
+// Fallback: kivinjari hiki hakiwezi ku-share faili moja kwa moja,
+// hivyo tunapakua APK badala ya kutoa link ya website.
+await downloadApkFile();
+toast("Kivinjari hiki hakiwezi ku-share faili moja kwa moja \u2014 APK imepakuliwa badala yake", "ok");
 }
 const State = {
 settings: {},
