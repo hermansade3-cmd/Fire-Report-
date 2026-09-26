@@ -1297,8 +1297,15 @@ setMain(`
     </div>
 
     <div class="card" id="view-report-card">
-      <div class="card-title">Taarifa Kamili ya Tukio</div>
-      <div id="print-area"><div class="preview-doc">${doc}</div></div>
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span>Taarifa Kamili ya Tukio</span>
+        <span style="display:flex;gap:6px;">
+          <button class="btn btn-sm" id="edit-narrative-btn" type="button">\u270F\uFE0F Hariri</button>
+          <button class="btn btn-sm btn-primary" id="save-narrative-btn" type="button" style="display:none;">\uD83D\uDCBE Hifadhi</button>
+          <button class="btn btn-sm btn-ghost" id="cancel-narrative-btn" type="button" style="display:none;">\u2716\uFE0F Ghairi</button>
+        </span>
+      </div>
+      <div id="print-area"><div class="preview-doc" id="narrative-content">${r.narrativeOverride != null ? r.narrativeOverride : doc}</div></div>
     </div>
 
     <div class="card">
@@ -1312,7 +1319,67 @@ $("#audit-log").innerHTML = log.length
 ? log.sort((a, b) => b.at.localeCompare(a.at)).map((l) => `<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;">${escapeHtml(l.action)} \u2014 <span class="muted">${escapeHtml(fmtDateTime(l.at))}</span></div>`).join("")
 : '<div class="muted">Hakuna historia.</div>';
 }
+function getNarrativeContent(r, doc, asText) {
+const html = r.narrativeOverride != null ? r.narrativeOverride : doc;
+if (!asText)
+return html;
+if (r.narrativeOverride == null)
+return RescueExport.buildNarrativeText(r);
+const tmp = document.createElement("div");
+tmp.innerHTML = r.narrativeOverride;
+return (tmp.textContent || tmp.innerText || "").trim();
+}
+function bindNarrativeEditing(r) {
+const narrativeEl = $("#narrative-content");
+const editBtn = $("#edit-narrative-btn");
+const saveBtn = $("#save-narrative-btn");
+const cancelBtn = $("#cancel-narrative-btn");
+if (!narrativeEl || !editBtn || !saveBtn || !cancelBtn)
+return;
+let backupHtml = narrativeEl.innerHTML;
+const enterEdit = () => {
+backupHtml = narrativeEl.innerHTML;
+narrativeEl.contentEditable = "true";
+narrativeEl.style.outline = "2px dashed var(--accent, #2563eb)";
+narrativeEl.style.borderRadius = "8px";
+narrativeEl.style.padding = "8px";
+narrativeEl.focus();
+editBtn.style.display = "none";
+saveBtn.style.display = "";
+cancelBtn.style.display = "";
+toast("Unaweza kuhariri sasa. Bonyeza Hifadhi baada ya kukamilisha.", "ok");
+};
+const exitEdit = () => {
+narrativeEl.contentEditable = "false";
+narrativeEl.style.outline = "";
+narrativeEl.style.padding = "";
+editBtn.style.display = "";
+saveBtn.style.display = "none";
+cancelBtn.style.display = "none";
+};
+editBtn.addEventListener("click", enterEdit);
+cancelBtn.addEventListener("click", () => {
+narrativeEl.innerHTML = backupHtml;
+exitEdit();
+});
+saveBtn.addEventListener("click", async () => {
+try {
+r.narrativeOverride = narrativeEl.innerHTML;
+r.updatedAt = nowIso();
+await RescueDB.putReport(r);
+await RescueDB.logAction(r.incidentId, "Edited taarifa kamili ya tukio");
+backupHtml = narrativeEl.innerHTML;
+exitEdit();
+toast("Mabadiliko yamehifadhiwa", "ok");
+}
+catch (e) {
+console.error(e);
+toast("Imeshindikana kuhifadhi mabadiliko", "err");
+}
+});
+}
 function bindReportActions(r, doc) {
+bindNarrativeEditing(r);
 $("#act-view").addEventListener("click", () => {
 $("#view-report-card").scrollIntoView({ behavior: "smooth", block: "start" });
 });
@@ -1344,7 +1411,7 @@ window.print();
 await RescueDB.logAction(r.incidentId, "Printed report");
 });
 $("#act-copy").addEventListener("click", async () => {
-const ok = await RescueExport.copyText(RescueExport.buildNarrativeText(r));
+const ok = await RescueExport.copyText(getNarrativeContent(r, doc, true));
 if (ok) {
 toast("Ripoti nzima imenakiliwa (copied)", "ok");
 await RescueDB.logAction(r.incidentId, "Copied report text");
@@ -1353,7 +1420,7 @@ else
 toast("Imeshindikana kunakili", "err");
 });
 $("#whatsapp-quick-btn").addEventListener("click", async () => {
-RescueExport.whatsappShare(RescueExport.buildNarrativeText(r));
+RescueExport.whatsappShare(getNarrativeContent(r, doc, true));
 await RescueDB.logAction(r.incidentId, "Shared via WhatsApp");
 showShareConfirmation(r, {});
 });
