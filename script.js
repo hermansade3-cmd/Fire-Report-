@@ -1267,7 +1267,8 @@ async function renderReportActions(r) {
 var _a, _b;
 const photos = await RescueDB.getPhotosForIncident(r.incidentId);
 computeDerived(r);
-const doc = RescueExport.buildNarrativeHtml(r, photos);
+const narrativeText = RescueExport.getEffectiveNarrativeText(r);
+const photosHtml = RescueExport.buildPhotosHtml(photos);
 setMain(`
     <div class="card">
       <div class="top-row" style="display:flex;justify-content:space-between;align-items:center;">
@@ -1297,8 +1298,21 @@ setMain(`
     </div>
 
     <div class="card" id="view-report-card">
-      <div class="card-title">Taarifa Kamili ya Tukio</div>
-      <div id="print-area"><div class="preview-doc">${doc}</div></div>
+      <div class="card-title" style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span>Taarifa Kamili ya Tukio</span>
+        <span class="muted" id="narrative-edit-status" style="font-size:11px;"></span>
+      </div>
+      <p class="muted" style="font-size:12px;margin:2px 0 8px 0;">Gusa maandishi hapa chini kuedit na kujaza sehemu unazoona zinafaa.</p>
+      <div id="print-area">
+        <div class="preview-doc">
+          <div id="narrative-editor" class="narrative-body" contenteditable="true" spellcheck="false" style="outline:none;border:1px dashed var(--line,#ccc);border-radius:6px;padding:10px;min-height:80px;"></div>
+          <div id="narrative-photos">${photosHtml}</div>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:10px;gap:8px;">
+        <button class="btn btn-primary" id="act-save-narrative">\uD83D\uDCBE Hifadhi Mabadiliko</button>
+        <button class="btn btn-ghost" id="act-reset-narrative">\u21A9\uFE0F Rudisha Asili</button>
+      </div>
     </div>
 
     <div class="card">
@@ -1306,20 +1320,22 @@ setMain(`
       <div id="audit-log" class="muted">Inapakia...</div>
     </div>
   `, "Report Actions: " + friendlyReportTitle(r));
-bindReportActions(r, doc);
+$("#narrative-editor").textContent = narrativeText;
+bindReportActions(r);
+bindNarrativeEditor(r);
 const log = await RescueDB.getAuditLog(r.incidentId);
 $("#audit-log").innerHTML = log.length
 ? log.sort((a, b) => b.at.localeCompare(a.at)).map((l) => `<div style="padding:6px 0;border-bottom:1px solid var(--line);font-size:13px;">${escapeHtml(l.action)} \u2014 <span class="muted">${escapeHtml(fmtDateTime(l.at))}</span></div>`).join("")
 : '<div class="muted">Hakuna historia.</div>';
 }
-function bindReportActions(r, doc) {
+function bindReportActions(r) {
 $("#act-view").addEventListener("click", () => {
 $("#view-report-card").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 $("#act-edit").addEventListener("click", () => navigate("#/report/" + r.incidentId));
 $("#act-pdf").addEventListener("click", async () => {
 try {
-RescueExport.downloadReportPdf(r);
+RescueExport.downloadReportPdf(r, $("#narrative-editor").innerText);
 await RescueDB.logAction(r.incidentId, "Exported PDF");
 showShareConfirmation(r, { pdfReady: true });
 }
@@ -1330,7 +1346,7 @@ toast("Imeshindikana kutengeneza PDF", "err");
 });
 $("#act-download").addEventListener("click", async () => {
 try {
-RescueExport.downloadReportPdf(r);
+RescueExport.downloadReportPdf(r, $("#narrative-editor").innerText);
 await RescueDB.logAction(r.incidentId, "Downloaded report file");
 toast("Ripoti imehifadhiwa kwenye kifaa (PDF)", "ok");
 }
@@ -1344,7 +1360,7 @@ window.print();
 await RescueDB.logAction(r.incidentId, "Printed report");
 });
 $("#act-copy").addEventListener("click", async () => {
-const ok = await RescueExport.copyText(RescueExport.buildNarrativeText(r));
+const ok = await RescueExport.copyText($("#narrative-editor").innerText);
 if (ok) {
 toast("Ripoti nzima imenakiliwa (copied)", "ok");
 await RescueDB.logAction(r.incidentId, "Copied report text");
@@ -1353,7 +1369,7 @@ else
 toast("Imeshindikana kunakili", "err");
 });
 $("#whatsapp-quick-btn").addEventListener("click", async () => {
-RescueExport.whatsappShare(RescueExport.buildNarrativeText(r));
+RescueExport.whatsappShare($("#narrative-editor").innerText);
 await RescueDB.logAction(r.incidentId, "Shared via WhatsApp");
 showShareConfirmation(r, {});
 });
@@ -1374,6 +1390,51 @@ toast("Imewekwa Archive", "ok");
 navigate("#/dashboard");
 });
 $("#act-delete").addEventListener("click", () => confirmDeleteModal(r));
+}
+function bindNarrativeEditor(r) {
+  const editor = $("#narrative-editor");
+  const statusEl = $("#narrative-edit-status");
+  if (!editor) return;
+  const savedBaseline = () => (typeof r.editedNarrative === "string" && r.editedNarrative.trim() !== "")
+    ? r.editedNarrative
+    : RescueExport.buildNarrativeText(r);
+  function setStatus(text, kind) {
+    if (!statusEl) return;
+    statusEl.textContent = text || "";
+    statusEl.style.color = kind === "err" ? "#c0392b" : kind === "ok" ? "#1a7f37" : "var(--muted, #888)";
+  }
+  function markDirtyIfChanged() {
+    const current = editor.innerText.replace(/\u00A0/g, " ");
+    if (current !== savedBaseline()) setStatus("Kuna mabadiliko ambayo hayajahifadhiwa", "err");
+    else setStatus("");
+  }
+  async function persist(showToast) {
+    r.editedNarrative = editor.innerText;
+    await RescueDB.putReport(r);
+    await RescueDB.logAction(r.incidentId, "Edited narrative text");
+    setStatus("Imehifadhiwa \u2713", "ok");
+    if (showToast) toast("Mabadiliko ya taarifa yamehifadhiwa", "ok");
+    setTimeout(() => {
+      if (statusEl && statusEl.textContent.indexOf("Imehifadhiwa") === 0) setStatus("");
+    }, 2500);
+  }
+  editor.addEventListener("input", markDirtyIfChanged);
+  // Auto-save mtumiaji anapoacha kuandika (blur) ili kuedit na kujaza iwe rahisi
+  // bila kulazimika kubofya kitufe kila mara.
+  editor.addEventListener("blur", () => { persist(false); });
+  const saveBtn = $("#act-save-narrative");
+  const resetBtn = $("#act-reset-narrative");
+  if (saveBtn) saveBtn.addEventListener("click", () => persist(true));
+  if (resetBtn) resetBtn.addEventListener("click", async () => {
+    const ok = window.confirm("Una uhakika unataka kurudisha maandishi ya awali (yaliyotengenezwa kiotomatiki)? Mabadiliko yako ya sasa yatapotea.");
+    if (!ok) return;
+    delete r.editedNarrative;
+    await RescueDB.putReport(r);
+    await RescueDB.logAction(r.incidentId, "Reset narrative text to default");
+    editor.textContent = RescueExport.buildNarrativeText(r);
+    setStatus("");
+    toast("Imerudishwa kwenye maandishi ya awali", "ok");
+  });
 }
 function showShareSheet(r) {
 let mode = "full"; // "full" | "summary"
@@ -1405,7 +1466,7 @@ $$("[data-mode]", backdrop).forEach((chip) => chip.addEventListener("click", () 
 mode = chip.dataset.mode;
 $$("[data-mode]", backdrop).forEach((c) => c.classList.toggle("selected", c === chip));
 }));
-const getText = () => (mode === "summary" ? RescueExport.buildSummaryText(r) : RescueExport.buildNarrativeText(r));
+const getText = () => (mode === "summary" ? RescueExport.buildSummaryText(r) : ($("#narrative-editor") ? $("#narrative-editor").innerText : RescueExport.getEffectiveNarrativeText(r)));
 backdrop.addEventListener("click", async (e) => {
 const act = e.target.dataset.act;
 if (e.target.id === "share-sheet-close") {
@@ -1433,7 +1494,7 @@ backdrop.remove();
 showShareConfirmation(r, {});
 }
 else if (act === "pdf" || act === "download") {
-RescueExport.downloadReportPdf(r);
+RescueExport.downloadReportPdf(r, getText());
 await RescueDB.logAction(r.incidentId, "Exported PDF");
 backdrop.remove();
 showShareConfirmation(r, { pdfReady: true });
@@ -1456,7 +1517,7 @@ await RescueDB.logAction(r.incidentId, "Shared via Email");
 backdrop.remove();
 }
 else if (act === "bluetooth" || act === "drive") {
-const res = await RescueExport.sharePdfFile(r);
+const res = await RescueExport.sharePdfFile(r, getText());
 await RescueDB.logAction(r.incidentId, act === "bluetooth" ? "Shared via Bluetooth/Quick Share" : "Shared to Drive (via share sheet)");
 backdrop.remove();
 if (res.cancelled)
@@ -1766,7 +1827,22 @@ refresh();
 });
 });
 }
+function injectNarrativeEditorStyles() {
+  if (document.getElementById("narrative-editor-styles")) return;
+  const style = document.createElement("style");
+  style.id = "narrative-editor-styles";
+  style.textContent = `
+    #narrative-editor{white-space:pre-wrap;line-height:1.5;font-size:13.5px;}
+    #narrative-editor:focus{border-color:var(--accent,#2563eb) !important;border-style:solid !important;}
+    @media print{
+      #narrative-editor{border:none !important;padding:0 !important;}
+      #narrative-edit-status,#act-save-narrative,#act-reset-narrative{display:none !important;}
+    }
+  `;
+  document.head.appendChild(style);
+}
 async function boot() {
+injectNarrativeEditorStyles();
 buildShell();
 try {
 State.settings = await RescueDB.getAllSettings();
