@@ -514,6 +514,35 @@ main {
 .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 260px; margin: 0 auto; }
 .pin-pad button { padding: 16px; font-size: 20px; border-radius: var(--radius); border: 1px solid var(--line); background: var(--bg-raised-2); color: var(--text); }
 
+/* Link ya SadeBooks — ionekane kama sehemu ya kawaida ya app, isikere jicho.
+   Maandishi "SadeBooks" tu ndiyo yaonekane; ile subtitle ("Soma vitabu...")
+   inafichwa hapa (display:none) badala ya kuibadilisha ndani ya script.js. */
+.books-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--text-faint);
+  opacity: .72;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 12px;
+  transition: opacity .15s ease, color .15s ease;
+}
+.books-link .ic { font-size: 14px; opacity: .85; }
+.books-link small { display: none; }
+.books-link:active,
+.books-link:hover {
+  opacity: 1;
+  color: var(--accent);
+}
+.bottom-nav .books-link {
+  justify-content: center;
+  padding: 4px 0;
+  font-size: 11px;
+  border-bottom: 1px solid var(--line);
+}
+
 /* Sidebar inaonekana kwenye kompyuta tu; simu inatumia bar ya chini */
 .sidebar { display: none; }
 
