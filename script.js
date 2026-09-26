@@ -77,41 +77,8 @@ el.textContent = msg;
 host.appendChild(el);
 setTimeout(() => el.remove(), 2600);
 }
-/* ---------------- APK Download / Share ---------------- */
+/* ---------------- APK Download ---------------- */
 const APK_FILE = "Fire_Report__v0.6_1789911909111.apk";
-async function downloadApkFile() {
-const a = document.createElement("a");
-a.href = APK_FILE;
-a.download = APK_FILE;
-document.body.appendChild(a);
-a.click();
-a.remove();
-}
-async function shareApk() {
-// Tunashare FAILI la APK moja kwa moja (files:[...]) — TUSIWEKE "url" wala
-// link ya website popote hapa, ili mtu anayepokea asifikie/kuona chanzo
-// (source code) cha tovuti; aone tu jina la app na faili la kupakua.
-try {
-const res = await fetch(APK_FILE);
-if (!res.ok)
-throw new Error("Imeshindikana kupata faili la APK");
-const blob = await res.blob();
-const file = new File([blob], APK_FILE, { type: "application/vnd.android.package-archive" });
-if (navigator.canShare && navigator.canShare({ files: [file] })) {
-await navigator.share({ files: [file], title: "Fire Report App" });
-return;
-}
-}
-catch (e) {
-if (e && e.name === "AbortError")
-return;
-console.error("shareApk:", e);
-}
-// Fallback: kivinjari hiki hakiwezi ku-share faili moja kwa moja,
-// hivyo tunapakua APK badala ya kutoa link ya website.
-await downloadApkFile();
-toast("Kivinjari hiki hakiwezi ku-share faili moja kwa moja \u2014 APK imepakuliwa badala yake", "ok");
-}
 const State = {
 settings: {},
 currentReport: null, // report object being edited
@@ -582,7 +549,6 @@ setMain(`
       <p class="muted">Pakua programu hii kama APK ya Android, au itume kwa wenzako.</p>
       <div class="btn-row">
         <a class="btn btn-block" id="download-apk-btn" href="${APK_FILE}" download>\u2B07\uFE0F Pakua APK</a>
-        <button class="btn btn-block" id="share-apk-btn" type="button">\u2197 Share APK</button>
       </div>
     </div>
   `, "Settings");
@@ -623,9 +589,6 @@ changePinBtn.addEventListener("click", openPinSetupModal);
 const deletePasswordBtn = $("#delete-password-btn");
 if (deletePasswordBtn)
 deletePasswordBtn.addEventListener("click", openDeletePasswordModal);
-const shareApkBtn = $("#share-apk-btn");
-if (shareApkBtn)
-shareApkBtn.addEventListener("click", shareApk);
 const downloadApkBtn = $("#download-apk-btn");
 if (downloadApkBtn)
 downloadApkBtn.addEventListener("click", () => toast("Inapakua APK\u2026", "ok"));
