@@ -687,13 +687,15 @@
 
   /* ---------------- Share / Copy ---------------- */
   async function shareAnnouncement(p) {
-    const link = safeLinkUrl(p.external_url) || location.href;
-    const text = `${p.title}\n\n${getExcerpt(p)}`;
+    // KUMBUKA: kwa makusudi HAKUNA link/url inayowekwa hapa (wala kwenye
+    // navigator.share wala kwenye maandishi ya fallback) ili mtu
+    // anayeshirikiwa asione link ya tovuti/Supabase.
+    const text = `${p.title}\n\n${getBody(p)}`;
     if (navigator.share) {
-      try { await navigator.share({ title: p.title, text, url: link }); return; }
+      try { await navigator.share({ title: p.title, text }); return; }
       catch (e) { if (e && e.name === "AbortError") return; }
     }
-    await copyToClipboard(`${p.title}\n\n${getBody(p)}\n${link}`);
+    await copyToClipboard(text);
     annToast("\u2713 Imenakiliwa (Share haipo kwenye kivinjari hiki)");
   }
   async function copyToClipboard(text) {
@@ -707,8 +709,8 @@
     }
   }
   async function copyAnnouncement(p) {
-    const link = safeLinkUrl(p.external_url) || "";
-    const text = `${p.title}\n\n${getBody(p)}${link ? "\n" + link : ""}`;
+    // Vilevile hapa: hakuna link inayoambatanishwa kwenye copy.
+    const text = `${p.title}\n\n${getBody(p)}`;
     const ok = await copyToClipboard(text);
     annToast(ok ? "\u2713 Imenakiliwa" : "Imeshindikana kunakili");
   }
