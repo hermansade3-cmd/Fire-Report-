@@ -470,6 +470,15 @@ main {
 .preview-doc td { padding: 3px 4px; vertical-align: top; font-size: 12.5px; }
 .preview-doc td.k { color: #555; width: 42%; }
 .preview-doc .person-block { border: 1px solid #ddd; border-radius: 6px; padding: 8px; margin-bottom: 6px; }
+/* FIX: buildNarrativeHtml() huweka maandishi ya ripoti ndani ya
+   <div class="narrative-body">...</div> — bila hii, mistari mipya (\n)
+   na mistari mitupu huwa haikuonekana kwenye preview/WhatsApp/PDF view. */
+.preview-doc .narrative-body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font);
+  color: #111;
+}
 
 @media print {
   body * { visibility: hidden; }
@@ -675,53 +684,3 @@ input, select, textarea {
 .field input:focus, .field select:focus, .field textarea:focus {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
 }
-@media (max-width: 390px) {
-  .bottom-nav button { font-size: 9px; }
-  .bottom-nav button .ic { font-size: 18px; }
-  main { padding-left: 10px; padding-right: 10px; }
-  .stat-grid { gap: 7px; }
-  .stat-box { padding: 10px 6px; }
-  .stat-box .num { font-size: 20px; }
-}
-@media (min-width: 760px) {
-  .content-col { background: transparent; }
-  main { max-width: 920px; }
-  .report-list-item:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-soft);
-    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
-  }
-  .dash-actions { grid-template-columns: repeat(4, 1fr); }
-  .stat-grid { grid-template-columns: repeat(4, 1fr); }
-}
-
-/* ---------- SadeBooks link (juu ya Archive / Trash / Settings) ---------- */
-.books-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: var(--books-h);
-  flex-shrink: 0;
-  padding: 0 12px;
-  text-decoration: none;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 10%, var(--bg-raised));
-  border-bottom: 1px solid var(--line);
-  white-space: nowrap;
-}
-.books-link .ic { font-size: 16px; }
-.books-link small { font-weight: 500; color: var(--text-dim); font-size: 11px; }
-.books-link:active { background: color-mix(in srgb, var(--accent) 20%, var(--bg-raised)); }
-.sidebar .books-link {
-  height: auto;
-  padding: 11px 12px;
-  margin: 2px 0 8px 0;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  justify-content: flex-start;
-  font-size: 14px;
-}
-.sidebar .books-link small { display: none; }
