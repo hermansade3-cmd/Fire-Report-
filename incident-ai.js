@@ -15,6 +15,12 @@
  *     jibu bora kati ya hifadhi hizo mbili.
  *  5) Kwa swali lolote, hutafuta ulinganifu bora kati ya maneno ya swali na (1)+(2)+(4) hapo
  *     juu, kwa "keyword/overlap scoring" ya ndani ya kivinjari — si generative AI ya nje.
+ *  6) Ana injini ya HESABU za fire science (fire flow, friction loss, muda wa maji
+ *     kwenye tanki, occupant load, LEL/UEL, NFPA 704) — kutoka FireSafetyKB.calculate().
+ *  7) Anaweza KULINGANISHA dhana mbili ("tofauti ya X na Y") kwa kuchukua jibu bora la kila
+ *     upande kutoka kwenye maarifa yaliyopo na kuyapanga pamoja — halibuni tofauti.
+ *  8) Anapokosa taarifa ya kutosha, husema hivyo wazi (badala ya kubuni jibu) na
+ *     kupendekeza namna ya kuuliza vizuri zaidi, au kupiga simu Zimamoto kama ni dharura.
  *
  * Created for Herman Sade's Fire Report app.
  */
@@ -221,17 +227,65 @@
   }
 
   // ============================================================
+  // 4b) Comparison handler ("tofauti ya X na Y", "linganisha X na Y")
+  // ============================================================
+  // Hutenganisha swali kuwa dhana mbili, hutafuta jibu bora la kila moja
+  // kwenye FIRE_KB/APP_FAQ (na FireSafetyKB ikiwepo), kisha huchanganya
+  // katika muundo mmoja wa kulinganisha. Halibuni tofauti — likikosa
+  // jibu la upande mmoja, husema hivyo wazi badala ya kukisia.
+  const COMPARE_RE = /(?:tofauti\s+(?:ya|kati\s+ya)|linganisha|kulinganisha|difference\s+between|compare)\s+(.+?)\s+(?:na|and|vs\.?|kwa|with)\s+(.+)/i;
+
+  function lookupSingleTerm(term) {
+    term = term.replace(/[?!.]+$/g, "").trim();
+    if (!term) return null;
+    let fsk = null;
+    if (typeof window !== "undefined" && window.FireSafetyKB && typeof window.FireSafetyKB.getAnswer === "function") {
+      try {
+        const r = window.FireSafetyKB.getAnswer(term);
+        if (r && r.answer && r.confidence !== "low") fsk = r.answer;
+      } catch (e) { fsk = null; }
+    }
+    const kb = findBestAnswer(term);
+    if (kb) return kb.text;
+    if (fsk) return fsk;
+    return null;
+  }
+
+  function tryCompare(query) {
+    const m = query.match(COMPARE_RE);
+    if (!m) return null;
+    const termA = m[1], termB = m[2];
+    const ansA = lookupSingleTerm(termA);
+    const ansB = lookupSingleTerm(termB);
+    if (!ansA && !ansB) return null; // hakuna hata upande mmoja wenye taarifa — acha ipite kwenye fallback
+    const parts = [`**Ulinganisho: "${termA.trim()}" dhidi ya "${termB.trim()}"**`];
+    parts.push(`🔹 ${termA.trim()}:\n${ansA || "Sina taarifa ya kutosha kuhusu hili kwenye maarifa yangu."}`);
+    parts.push(`🔹 ${termB.trim()}:\n${ansB || "Sina taarifa ya kutosha kuhusu hili kwenye maarifa yangu."}`);
+    if (!ansA || !ansB) {
+      parts.push("⚠️ Niliweza kupata taarifa ya upande mmoja tu — jibu la tofauti kamili linaweza kuwa halijakamilika. Jaribu kuuliza kila dhana peke yake kwa maelezo zaidi.");
+    }
+    return { text: parts.join("\n\n") };
+  }
+
+  // ============================================================
   // 5) Answer dispatcher
   // ============================================================
   // Priority order:
   //   a) Own-report statistics — ONLY when the question is clearly about
   //      the user's own saved reports (avoids generic words like "vifo"
   //      or "majeruhi" hijacking a fire-science question).
-  //   b) External Fire Safety Knowledge Base (window.FireSafetyKB, loaded
+  //   b) Fire-science calculations (fire flow, friction loss, water
+  //      supply duration, occupant load, LEL/UEL, NFPA 704) via the
+  //      external FireSafetyKB calculation engine, when the question is
+  //      clearly asking for a computed number rather than an explanation.
+  //   c) Comparison of two concepts ("tofauti ya X na Y").
+  //   d) External Fire Safety Knowledge Base (window.FireSafetyKB, loaded
   //      from fire-safety-knowledge.js) — richer records with safety
   //      warnings and recommended actions.
-  //   c) Built-in APP_FAQ + FIRE_KB (this file's own knowledge).
-  //   d) Fallback "sijapata jibu" message.
+  //   e) Built-in APP_FAQ + FIRE_KB (this file's own knowledge).
+  //   f) Fallback "sijapata jibu" message — states plainly that the
+  //      knowledge base does not have enough to answer, instead of
+  //      guessing or inventing a plausible-sounding answer.
   async function answerQuestion(query) {
     // (a) own-report stats — intents below are now scoped to report context
     for (const intent of DATA_INTENTS) {
@@ -241,7 +295,21 @@
       }
     }
 
-    // (b) external Fire Safety Knowledge Base, if fire-safety-knowledge.js
+    // (b) fire-science calculations
+    if (typeof window !== "undefined" && window.FireSafetyKB && typeof window.FireSafetyKB.calculate === "function") {
+      try {
+        const calc = window.FireSafetyKB.calculate(query);
+        if (calc && calc.answer) return { text: calc.answer };
+      } catch (e) {
+        // calculation engine failed — fall through silently to normal KB lookup
+      }
+    }
+
+    // (c) comparison of two concepts
+    const compareResult = tryCompare(query);
+    if (compareResult) return compareResult;
+
+    // (d) external Fire Safety Knowledge Base, if fire-safety-knowledge.js
     // was loaded before this script (see header comment / <script> order)
     let fskResult = null;
     if (typeof window !== "undefined" && window.FireSafetyKB && typeof window.FireSafetyKB.getAnswer === "function") {
@@ -256,7 +324,7 @@
       }
     }
 
-    // (c) built-in FAQ + fire-science book
+    // (e) built-in FAQ + fire-science book
     const kbAnswer = findBestAnswer(query);
 
     // Prefer whichever source matched with higher confidence. The external
@@ -269,8 +337,9 @@
     if (kbAnswer) return kbAnswer;
     if (fskResult) return fskResult;
 
+    // (f) honest "I don't know" — never invent a plausible-sounding answer
     return {
-      text: "Samahani, sijapata jibu sahihi la hilo. Unaweza kuniuliza kuhusu: jinsi ya kutumia app hii (ripoti mpya, backup, archive, trash, settings), takwimu za ripoti zako (mfano: \"ripoti ngapi mwezi huu\"), au maswali ya Sayansi ya Moto (mfano: \"PASS technique ni nini\", \"tofauti ya Class A na B\").",
+      text: "Sina taarifa ya kutosha kwenye maarifa yangu kujibu hili kwa usahihi kamili. Ili nikusaidie vizuri zaidi, jaribu kuuliza kwa maneno tofauti au mahususi zaidi. Ninaweza kukusaidia na: jinsi ya kutumia app hii (ripoti mpya, backup, archive, trash, settings), takwimu za ripoti zako (mfano: \"ripoti ngapi mwezi huu\"), maswali ya Sayansi ya Moto/Hazmat/Uokoaji/ICS (mfano: \"PASS technique ni nini\", \"tofauti ya Class A na B\", \"HazMat zones ni zipi\"), au hesabu za fire science (mfano: \"fire flow kwa jengo 20m x 15m\", \"friction loss 400 L/dak hose 65mm urefu 60m\"). Kama hii ni dharura halisi, piga simu Zimamoto/Fire & Rescue sasa hivi badala ya kusubiri jibu langu.",
     };
   }
 
@@ -281,7 +350,9 @@
     "Ripoti ngapi mwezi huu?",
     "Ninawezaje kuunda ripoti mpya?",
     "PASS Technique ni nini?",
-    "Tofauti ya Class A na Class B ni nini?",
+    "Tofauti ya Flashover na Backdraft ni nini?",
+    "HazMat zones (Hot/Warm/Cold) ni zipi?",
+    "Fire flow kwa jengo 20m x 15m ni lita ngapi?",
   ];
 
   function escapeHtml(s) {
