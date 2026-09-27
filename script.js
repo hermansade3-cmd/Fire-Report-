@@ -1769,6 +1769,15 @@ app.innerHTML = `
         <button class="back-btn" id="back-btn" aria-label="Back">\u2190</button>
         <h1 id="page-title">Dashboard</h1>
         <span class="save-indicator" id="save-indicator" style="display:none;"></span>
+        <button class="fire-science-btn" id="fire-science-btn" type="button" title="Fire Science" aria-label="Fire Science" style="background:transparent;border:none;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;margin-left:auto;transition:background .15s;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2c-1.5 3-4 4.5-4 8a4 4 0 108 0c0-1-0.3-1.8-0.8-2.5.1 1-0.4 2-1.2 2 .3-2-0.6-4-2-5.5z" fill="#e2481e" stroke="#e2481e" stroke-width="0.5"/>
+            <path d="M4 21v-9a1 1 0 011-1h5v10H4z" fill="#f4f1ea" stroke="#5c1f1a" stroke-width="1"/>
+            <path d="M10 11h9a1 1 0 011 1v9h-10V11z" fill="#fffefb" stroke="#5c1f1a" stroke-width="1"/>
+            <line x1="10" y1="14" x2="20" y2="14" stroke="#b9ae91" stroke-width="0.7"/>
+            <line x1="10" y1="17" x2="20" y2="17" stroke="#b9ae91" stroke-width="0.7"/>
+          </svg>
+        </button>
       </div>
       <main id="main"></main>
       <div class="footer-note">Created by Herman Sade</div>
@@ -1777,6 +1786,10 @@ app.innerHTML = `
     <div id="toast-host"></div>
   `;
 $("#back-btn").addEventListener("click", () => { flushSave(); history.back(); });
+const fireBtn = $("#fire-science-btn");
+fireBtn.addEventListener("mouseenter", () => { fireBtn.style.background = "rgba(0,0,0,0.08)"; });
+fireBtn.addEventListener("mouseleave", () => { fireBtn.style.background = "transparent"; });
+fireBtn.addEventListener("click", () => { flushSave(); window.location.href = "fire_education.html"; });
 updateOfflineBanner();
 window.addEventListener("online", updateOfflineBanner);
 window.addEventListener("offline", updateOfflineBanner);
