@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sayansi ya Moto — Kitabu cha Kiada cha Elimu ya Uzimaji Moto na Uokoaji</title>
+<style>
+  :root{
+    --paper:#fffefb; --page-bg:#f4f1ea; --ink:#242119; --muted:#5a5346;
+    --border:#ddd6c5; --rule:#b9ae91; --maroon:#5c1f1a; --gold:#8a6d3b;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; font-family:Georgia,"Times New Roman",serif;
+    background:var(--page-bg); color:var(--ink); line-height:1.75;
+  }
+  /* ===== SIDEBAR / TOC ===== */
+  .layout{display:flex; max-width:1300px; margin:0 auto; align-items:flex-start;}
+  nav#toc{
+    width:270px; flex-shrink:0; background:var(--paper);
+    border-right:1px solid var(--border); padding:20px 16px;
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+  }
+  nav#toc h2{
+    font-size:.78em; text-transform:uppercase; letter-spacing:1.5px; color:var(--gold);
+    margin:4px 0 12px; border-bottom:1px solid var(--border); padding-bottom:8px;
+  }
+  nav#toc a{
+    display:block; padding:7px 8px; font-size:.88em; color:var(--ink);
+    text-decoration:none; border-radius:4px; margin-bottom:1px; border-left:3px solid transparent;
+  }
+  nav#toc a:hover{background:#f1ece0;}
+  nav#toc a.active{background:#f1ece0; border-left-color:var(--maroon); color:var(--maroon); font-weight:600;}
+  #search{
+    width:100%; padding:8px 10px; margin-bottom:12px; border:1px solid var(--border);
+    border-radius:4px; font-size:.85em; font-family:inherit; background:#fff;
+  }
+  .menu-toggle{display:none;}
+
+  /* ===== MAIN / "PAGES" ===== */
+  main{flex:1; padding:40px 24px 100px; min-width:0;}
+
+  .book-page{
+    background:var(--paper); max-width:760px; margin:0 auto 34px;
+    padding:56px 64px; box-shadow:0 1px 3px rgba(60,50,20,.12), 0 10px 30px rgba(60,50,20,.10);
+    border:1px solid #eae3d2; position:relative;
+  }
+  .book-page::before{
+    content:""; position:absolute; inset:14px; border:1px solid #ece6d6; pointer-events:none;
+  }
+
+  /* Cover page */
+  .cover{
+    text-align:center; padding:110px 50px 90px; display:flex; flex-direction:column;
+    justify-content:center; min-height:640px;
+  }
+  .cover .flame{font-size:3.2em; margin-bottom:10px;}
+  .cover h1{
+    font-size:2.1em; margin:0 0 6px; letter-spacing:.5px; color:var(--maroon);
+    font-weight:normal; border:none;
+  }
+  .cover .rule{width:90px; height:2px; background:var(--gold); margin:18px auto;}
+  .cover h2{font-size:1.05em; font-weight:normal; color:var(--muted); margin:6px 0 40px; letter-spacing:1px;}
+  .cover .meta{font-size:.92em; color:var(--muted); margin-top:60px; font-style:italic;}
+  .cover .publisher{margin-top:6px; font-size:.85em; letter-spacing:1px; text-transform:uppercase; color:var(--gold);}
+
+  /* Preface */
+  .preface p{text-align:justify;}
+  .preface h2{border:none; margin-bottom:6px;}
+
+  /* Chapters */
+  section.chapter h2{
+    color:var(--maroon); font-size:1.5em; font-weight:normal;
+    border-bottom:2px solid var(--gold); padding-bottom:10px; margin:0 0 20px;
+  }
+  .chapter-number{
+    display:block; font-family:"Segoe UI",Tahoma,sans-serif; font-size:.7em;
+    letter-spacing:2px; text-transform:uppercase; color:var(--gold); margin-bottom:4px;
+  }
+  .intro{
+    font-style:italic; color:var(--muted); border-left:3px solid var(--gold);
+    padding:4px 0 4px 16px; margin:0 0 26px; font-size:.98em;
+  }
+  .topic{margin:0 0 22px; padding-bottom:18px; border-bottom:1px dotted var(--border);}
+  .topic:last-child{border-bottom:none;}
+  .topic h3{
+    margin:0 0 6px; font-size:1.08em; color:var(--ink);
+    font-family:"Segoe UI",Tahoma,sans-serif; font-weight:600;
+  }
+  .topic p{margin:0; color:#3c372c; text-align:justify; font-size:.99em;}
+
+  .page-footer{
+    margin-top:38px; padding-top:14px; border-top:1px solid var(--border);
+    display:flex; justify-content:space-between; font-family:"Segoe UI",Tahoma,sans-serif;
+    font-size:.75em; color:var(--muted); letter-spacing:.5px;
+  }
+
+  .hidden{display:none !important;}
+
+  footer.book-end{text-align:center; padding:20px; color:var(--muted); font-size:.8em; font-family:"Segoe UI",Tahoma,sans-serif;}
+
+  /* ===== SCROLL-TO-TOP BUTTON ===== */
+  #toTop{
+    position:fixed; right:26px; bottom:26px; width:50px; height:50px; border-radius:50%;
+    background:var(--maroon); color:#fdf8ec; border:none; font-size:1.3em; cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,.25); display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden; transform:translateY(12px);
+    transition:opacity .25s, transform .25s, visibility .25s; z-index:200;
+  }
+  #toTop.show{opacity:1; visibility:visible; transform:translateY(0);}
+  #toTop:hover{background:#7a2a22;}
+
+  @media(max-width:860px){
+    .layout{flex-direction:column;}
+    nav#toc{
+      width:auto; height:auto; position:relative; border-right:none;
+      border-bottom:1px solid var(--border); max-height:56px; overflow:hidden; transition:max-height .25s;
+    }
+    nav#toc.open{max-height:2000px;}
+    .menu-toggle{
+      display:block; width:100%; padding:10px; background:var(--maroon); color:#fff;
+      border:none; font-size:1em; cursor:pointer; margin-bottom:10px; border-radius:4px;
+      font-family:"Segoe UI",Tahoma,sans-serif;
+    }
+    .book-page{padding:34px 22px;}
+    main{padding:20px 12px 100px;}
+    #toTop{right:16px; bottom:16px; width:44px; height:44px;}
+  }
+  @media print{
+    nav#toc, .menu-toggle, #search, #toTop{display:none;}
+    .book-page{box-shadow:none; border:none; break-after:page;}
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <nav id="toc">
+    <button class="menu-toggle" onclick="document.getElementById('toc').classList.toggle('open')">☰ Yaliyomo</button>
+    <h2>Yaliyomo</h2>
+    <input type="text" id="search" placeholder="Tafuta mada...">
+    <div id="toc-links"></div>
+  </nav>
+
+  <main id="content">
+
+    <div class="book-page cover">
+      <div class="flame">🔥</div>
+      <h1>SAYANSI YA MOTO</h1>
+      <div class="rule"></div>
+      <h2>KITABU CHA KIADA CHA ELIMU NA MAFUNZO YA UZIMAJI MOTO NA UOKOAJI</h2>
+      <div class="meta">Kimeandaliwa kwa ajili ya mafunzo ya kina — kuanzia msingi hadi ngazi ya juu — kwa wanafunzi, wanachama wa jeshi la zimamoto, na jamii kwa ujumla.</div>
+      <div class="publisher">SadeBooks</div>
+    </div>
+
+    <div class="book-page preface">
+      <h2><span class="chapter-number">Utangulizi</span>Kuhusu Kitabu Hiki</h2>
+      <p>Moto ni jambo linaloweza kuleta faida kubwa kwa binadamu — kwa kupikia, kuzalisha nishati, na viwanda — lakini pia unaweza kusababisha maafa makubwa endapo hautadhibitiwa. Kitabu hiki kimeandaliwa kwa lengo la kutoa elimu kamili na iliyopangwa kwa mpangilio, kuanzia misingi ya sayansi ya moto hadi mbinu za kitaalamu za uzimaji, uokoaji, na usimamizi wa matukio ya dharura.</p>
+      <p>Mada zilizomo zimepangwa kwa mfuatano wa kimantiki: kuanzia kuelewa "moto ni nini" kisayansi, aina za moto na jinsi ya kuzitambua, vifaa vya kuzimia na kujikinga, mbinu za uokoaji katika mazingira mbalimbali, hadi usimamizi wa uongozi wa matukio makubwa na uandishi wa taarifa rasmi. Kila sura imeandaliwa kwa lugha nyepesi na fasaha, ikilenga kumjengea msomaji uelewa wa kina badala ya kukariri tu.</p>
+      <p>Kitabu hiki kinafaa kwa wanafunzi wanaojiandaa kuingia jeshi la zimamoto, wanachama walioko kazini wanaotaka kuimarisha ujuzi wao, walimu wa mafunzo ya usalama, na wananchi wa kawaida wanaotaka kujilinda wenyewe na familia zao dhidi ya hatari za moto. Tumia menyu ya "Yaliyomo" upande wa kushoto (au juu kwenye simu) kuruka moja kwa moja hadi sura unayotaka, au tumia sehemu ya "Tafuta" kupata mada mahususi haraka.</p>
+    </div>
+
+    <section class="chapter book-page" id="c1">
+      <h2><span class="chapter-number">Sura ya 1</span>Moto ni Nini? — Misingi ya Sayansi ya Moto</h2>
+      <div class="intro">Moto ni mmenyuko wa kikemikali unaoitwa "combustion" (mwako), ambapo dutu inayoweza kuungua (fuel) huchanganyika na oksijeni kwa uwepo wa joto la kutosha, na kutoa mwanga, joto, na gesi kama matokeo. Kuelewa jinsi mmenyuko huu unavyoanza na kukua ndio msingi wa taaluma nzima ya uzimaji moto.</div>
+
+      <div class="topic"><h3>Fire Triangle (Pembetatu ya Moto)</h3><p>Moto huhitaji vitu vitatu ili uwepo na kuendelea kuwaka: joto (heat) linaloanzisha mwako, oksijeni (oxygen) inayolisha mwako, na mafuta (fuel) yanayoungua. Ukiondoa kimoja kati ya vitatu hivi, moto hauwezi kuendelea — kanuni hii ndiyo msingi wa njia zote za uzimaji moto zilizopo duniani.</p></div>
+
+      <div class="topic"><h3>Fire Tetrahedron</h3><p>Ni maendeleo ya kisayansi ya Fire Triangle yanayoongeza kipengele cha nne: mmenyuko wa mnyororo wa kemikali (chemical chain reaction) unaotokea wakati molekuli za mafuta zinapovunjwa na joto na kuungana na oksijeni kwa kasi. Vizima moto vya aina ya dry chemical hufanya kazi kwa kuvunja mnyororo huu badala ya kuondoa joto au oksijeni pekee.</p></div>
+
+      <div class="topic"><h3>Joto, Oksijeni na Fuel</h3><p>Joto huanzisha mwako kwa kufikisha mafuta kwenye joto lake la kuwaka (ignition temperature). Hewa ya kawaida ina asilimia 21 ya oksijeni; mwako huanza kupungua kasi oksijeni ikipungua chini ya asilimia 16. Fuel ni dutu yoyote inayoweza kuungua — iwe ngumu (mbao, karatasi), kimiminika (petroli, mafuta), au gesi (propane, methane).</p></div>
+
+      <div class="topic"><h3>Conduction, Convection na Radiation</h3><p>Joto husafiri kwa njia tatu kuu. <b>Conduction</b> ni usafirishaji wa joto kupitia mguso wa moja kwa moja kati ya vitu, kama chuma kinachopashwa moto na kusambaza joto hilo. <b>Convection</b> ni usafirishaji wa joto kupitia mzunguko wa hewa au maji moto — ndiyo sababu moshi na hewa ya moto huelekea juu kila wakati. <b>Radiation</b> ni joto linalosafiri kwa njia ya mawimbi bila kuhitaji njia ya kimwili (kama vile jua linavyopasha dunia joto), na huweza kusababisha vitu vya karibu kuungua bila hata kugusana na moto wenyewe.</p></div>
+
+      <div class="topic"><h3>Ignition Temperature (Joto la Kuwasha)</h3><p>Ni kiwango cha chini kabisa cha joto ambapo dutu huanza kuwaka lenyewe na kuendelea kuungua bila kuhitaji chanzo cha ziada cha moto. Kila dutu ina joto lake maalum la kuwaka — kwa mfano, karatasi huwaka takriban katika nyuzi joto 233°C, huku petroli ikihitaji joto la chini zaidi kufikia hatua hiyo.</p></div>
+
+      <div class="topic"><h3>Flash Point na Fire Point</h3><p>Flash point ni joto la chini kabisa ambapo mvuke wa kimiminika unaweza kuwaka kwa muda mfupi ukiwa na chanzo cha moto, kisha kuzima wenyewe. Fire point ni joto la juu kidogo kuliko flash point, ambapo mwako unaendelea kwa kudumu hata baada ya chanzo cha moto kuondolewa. Vimiminika vyenye flash point ya chini (kama petroli, ambayo ina flash point chini sana ya joto la kawaida) ni hatari zaidi kwa sababu vinaweza kuwaka kwa urahisi.</p></div>
+
+      <div class="topic"><h3>Heat Transfer (Usafirishaji wa Joto) Ndani ya Jengo</h3><p>Kuelewa jinsi joto linavyosafiri kupitia kuta, sakafu, na dari za jengo humsaidia mzima moto kutabiri kwa usahihi wapi moto utaenea kwa haraka zaidi, na kuchagua mahali pazuri pa kuweka vizuizi vya kuzuia kuenea kwake.</p></div>
+
+      <div class="topic"><h3>Hatua za Ukuaji wa Moto (Fire Growth Stages)</h3><p>Moto hupitia hatua nne za msingi: <b>Incipient</b> — hatua ya mwanzo ambapo moto ni mdogo na unaweza kuzimwa kwa urahisi; <b>Growth</b> — moshi na joto huanza kuongezeka haraka; <b>Fully Developed</b> — moto mkubwa unaotumia karibu mafuta yote yaliyopo chumbani; na <b>Decay</b> — moto huanza kupungua mafuta yanapoisha au oksijeni inapopungua.</p></div>
+
+      <div class="topic"><h3>Flashover</h3><p>Ni tukio la hatari kubwa sana ambapo vitu vyote ndani ya chumba huwaka kwa wakati mmoja kutokana na mkusanyiko wa joto kali juu ya chumba (kawaida zaidi ya nyuzi joto 500°C). Flashover hutokea kwa ghafla na inaweza kuua ndani ya sekunde chache — dalili zake ni pamoja na moshi mzito unaoshuka chini polepole, joto linaloongezeka kwa ghafla, na kuonekana kwa "rollover" (miali midogo inayosonga juu ya dari).</p></div>
+
+      <div class="topic"><h3>Backdraft</h3><p>Hutokea pale moto unapokosa oksijeni ya kutosha ndani ya chumba kilichofungwa vizuri, na kujaa gesi za moto zilizokuwa zikisubiri oksijeni mpya. Mlango au dirisha likifunguliwa ghafla, oksijeni mpya huingia kwa kasi na kusababisha mlipuko mkubwa. Dalili za onyo ni: madirisha yenye tabaka la rangi ya njano au kahawia, moshi unaotoka kwa mapigo (pulsing smoke) badala ya mtiririko wa kawaida, na sauti ya kuzomea inayotoka ndani ya jengo.</p></div>
+
+      <div class="topic"><h3>Smoke Behaviour (Tabia ya Moshi)</h3><p>Moshi mara nyingi ni hatari zaidi ya moto wenyewe, kwa sababu una gesi za sumu (kama carbon monoxide na hydrogen cyanide) zinazoweza kuua kabla hata moto haujafika. Moshi huinuka juu kwanza kisha hujaza chumba kutoka juu kwenda chini — ndiyo maana wazima moto na wakazi wanashauriwa kutambaa chini wakati wa moshi mzito, kwani hewa safi zaidi hupatikana karibu na sakafu.</p></div>
+
+      <div class="page-footer"><span>Sayansi ya Moto</span><span>Ukurasa 1</span></div>
+    </section>
+
+    <section class="chapter book-page" id="c3">
+      <h2><span class="chapter-number">Sura ya 3</span>Aina na Madaraja ya Moto (Fire Classes)</h2>
+      <div class="intro">Kila aina ya moto huhitaji njia maalum ya kuzimwa. Kutumia kizima moto kisichofaa kunaweza kuzidisha hatari badala ya kuipunguza — ndiyo maana kutambua daraja la moto ni hatua ya kwanza kabla ya kuchukua hatua yoyote.</div>
+
+      <div class="topic"><h3>Class A</h3><p>Moto wa vitu vigumu vya kawaida vinavyoacha majivu: mbao, karatasi, nguo, na plastiki nyingi. Huzimwa vizuri kwa maji, povu (foam), au dry chemical.</p></div>
+      <div class="topic"><h3>Class B</h3><p>Moto wa vimiminika vinavyoweza kuwaka: petroli, mafuta ya taa, rangi, na solvent. KAMWE usitumie maji kwenye moto wa aina hii — maji husambaza mafuta yanayowaka na kufanya moto kuenea zaidi. Njia sahihi ni foam, CO₂, au dry powder.</p></div>
+      <div class="topic"><h3>Class C</h3><p>Moto unaohusisha gesi zinazoweza kuwaka: propane, butane, na gesi asilia. Njia bora zaidi ni kuzima chanzo cha gesi kwanza kabla ya kujaribu kuzima moto wenyewe, kwani moto unaweza kurudi mara moja gesi ikiendelea kutoka.</p></div>
+      <div class="topic"><h3>Class D</h3><p>Moto wa metali zinazoweza kuwaka: magnesium, titanium, na sodium. Huhitaji dry powder maalum ya metali (special powder) — maji au CO₂ ya kawaida vinaweza kusababisha mlipuko mkubwa zaidi vikigusana na metali hizi zinazowaka.</p></div>
+      <div class="topic"><h3>Class F/K</h3><p>Moto wa mafuta ya kupikia na mafuta ya wanyama jikoni, hasa kwenye friji za kukaangia. Huzimwa kwa wet chemical extinguisher iliyoundwa mahususi kwa jiko — hupoza haraka na kuunda safu ya sabuni juu ya mafuta inayozuia moto kurudi tena.</p></div>
+      <div class="topic"><h3>Moto wa Umeme (Electrical Fires)</h3><p>Hutokea kwenye vifaa vya umeme vilivyo hai (live equipment). KAMWE usitumie maji kwani umeme unaweza kusafiri kupitia maji na kukuua kwa mshtuko wa umeme. Zima chanzo cha umeme kwanza kama inawezekana, kisha tumia CO₂ au dry powder isiyoongoza umeme.</p></div>
+      <div class="topic"><h3>Kutambua Aina ya Moto Kabla ya Kuchukua Hatua</h3><p>Kabla ya kuzima moto wowote, jiulize: Ni kitu gani hasa kinawaka? Kuna umeme unaohusika karibu? Kuna gesi au mafuta yanayoweza kuongeza hatari? Utambuzi sahihi wa haraka ndio unaoamua uchaguzi wa kizima moto na mbinu salama ya kuchukua.</p></div>
+      <div class="topic"><h3>Kuchagua Extinguishing Agent Inayofaa</h3><p>Kila kizima moto huwa na lebo inayoonyesha madaraja ya moto linalofaa kuzima (kwa mfano "ABC" humaanisha kinafaa kwa Class A, B, na C). Kutumia kizima moto kisichofaa daraja husika ni hatari kubwa — kwa mfano maji kwenye moto wa umeme au mafuta yanaweza kuongeza hatari badala ya kuipunguza.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c4">
+      <h2><span class="chapter-number">Sura ya 4</span>Fire Extinguishers (Vizima Moto)</h2>
+      <div class="intro">Kujua aina za vizima moto na jinsi ya kuvitumia kwa usahihi ni ujuzi wa msingi unaostahili kufundishwa kwa kila mtu, siyo wazima moto pekee — kwani sekunde za kwanza za moto mdogo ndizo huamua kama utadhibitiwa au kuenea.</div>
+
+      <div class="topic"><h3>Water Extinguisher</h3><p>Hutumika kwa moto wa Class A pekee. Hupoza (cools) vitu vinavyowaka kwa kuondoa joto haraka. Haifai kabisa kwa umeme au mafuta yanayowaka.</p></div>
+      <div class="topic"><h3>Foam Extinguisher</h3><p>Hufunika juu ya mafuta yanayowaka na kuzuia oksijeni kufika kwenye mafuta hayo, hivyo inafaa kwa Class A na B. Haifai kwa umeme kwa sababu foam ina maji ndani yake.</p></div>
+      <div class="topic"><h3>Dry Powder</h3><p>Huvunja mnyororo wa mmenyuko wa kikemikali (chain reaction) unaoendesha mwako. Inafaa kwa Class A, B, C, na wakati mwingine D (kwa powder maalum ya metali). Haifai sana kutumika ndani ya nyumba kwa sababu huacha vumbi jingi linaloweza kuathiri kupumua.</p></div>
+      <div class="topic"><h3>CO₂ (Carbon Dioxide) Extinguisher</h3><p>Huondoa oksijeni kutoka eneo la moto kwa kuibadilisha na gesi ya CO₂. Inafaa vizuri kwa moto wa umeme na Class B kwa sababu haiachi mabaki yoyote baada ya matumizi. Haifai kutumika kwenye sehemu ndogo zilizofungwa bila hewa ya kutosha kwa binadamu, kwa sababu inaweza kupunguza oksijeni hadi kiwango hatari kwa mtumiaji mwenyewe.</p></div>
+      <div class="topic"><h3>Wet Chemical</h3><p>Imeundwa mahususi kwa moto wa mafuta ya jikoni (Class F/K). Hupoza haraka na kuunda safu ya sabuni juu ya mafuta inayozuia oksijeni kufika na kuzuia moto kurudi tena baada ya kuzimwa.</p></div>
+      <div class="topic"><h3>Matumizi Sahihi</h3><p>Simama umbali salama (angalau mita moja hadi mbili), elekeza kwenye msingi wa moto (siyo juu ya miali), na hakikisha una njia ya kutoroka nyuma yako kabla ya kuanza kuzima.</p></div>
+      <div class="topic"><h3>PASS Technique</h3><p><b>P</b>ull — vuta pini ya usalama iliyopo juu ya kizima moto. <b>A</b>im — elekeza bomba/nozzle chini kuelekea msingi wa moto, siyo juu ya miali. <b>S</b>queeze — bonyeza kishikizo taratibu kutoa dawa. <b>S</b>weep — sogeza mkono kwa mtindo wa kufagia kutoka upande mmoja kwenda mwingine hadi moto uzimike.</p></div>
+      <div class="topic"><h3>Ukaguzi na Matengenezo</h3><p>Vizima moto vinapaswa kukaguliwa kila mwezi kuangalia kiwango cha shinikizo (pressure gauge), na kuhudumiwa kitaalamu angalau mara moja kwa mwaka. Kizima moto chochote kilichotumika hata kidogo lazima kijazwe upya au kubadilishwa kabla ya kutumika tena.</p></div>
+      <div class="topic"><h3>Makosa ya Kawaida Wakati wa Kutumia Extinguisher</h3><p>Kutumia kizima moto kisichofaa kwa aina ya moto uliopo, kutosimama umbali salama, kuelekeza juu ya miali badala ya msingi wa moto, na kutokuwa na njia wazi ya kutoroka ni miongoni mwa makosa hatari zaidi yanayoweza kugharimu maisha.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c5">
+      <h2><span class="chapter-number">Sura ya 5</span>Firefighting Equipment (Vifaa vya Kuzimia Moto)</h2>
+      <div class="topic"><h3>Hose (Bomba la Maji)</h3><p>Hutumika kusafirisha maji kutoka chanzo (hydrant au pump) hadi mahali pa moto. Kuna hose kubwa za kusambaza maji (supply line) na ndogo za shambulizi (attack line), kila moja ikiwa na matumizi yake mahususi.</p></div>
+      <div class="topic"><h3>Nozzle</h3><p>Kifaa cha mwisho cha bomba kinachodhibiti mtiririko na muundo wa maji — kinaweza kutoa mkondo wa moja kwa moja (straight stream) au mvua ya matone (fog pattern) kulingana na hitaji.</p></div>
+      <div class="topic"><h3>Branch Pipe</h3><p>Kipande cha chuma kinachounganisha hose na nozzle, huruhusu msukumo na uelekezaji bora wa maji wakati wa shambulizi la moja kwa moja.</p></div>
+      <div class="topic"><h3>Hydrant</h3><p>Chanzo cha maji cha kudumu kilichowekwa mtaani au ndani ya eneo la jengo kwa matumizi ya haraka wakati wa dharura ya moto.</p></div>
+      <div class="topic"><h3>Pump</h3><p>Huongeza shinikizo la maji kutoka chanzo hadi kwenye hose ili kufikisha maji umbali mrefu au kwenye sakafu za juu za majengo marefu.</p></div>
+      <div class="topic"><h3>Ladder (Ngazi)</h3><p>Hutumika kufikia sakafu za juu za majengo kwa ajili ya uokoaji au shambulizi la moto. Kuna ngazi za mkono zinazobebwa na wazima moto, na aerial ladder kubwa zinazobebwa na gari maalum.</p></div>
+      <div class="topic"><h3>Breathing Apparatus</h3><p>Vifaa vinavyompatia mzima moto hewa safi ya kupumua akiwa ndani ya moshi mzito au mazingira yenye gesi za sumu — ni muhimu sana kwa usalama wa maisha wakati wa operesheni.</p></div>
+      <div class="topic"><h3>Thermal Imaging Camera</h3><p>Kamera maalum inayoona joto badala ya mwanga wa kawaida — husaidia kutambua vyanzo vya moto vilivyofichika ndani ya kuta au dari, na kutafuta watu ndani ya moshi mzito wenye ugumu wa kuona.</p></div>
+      <div class="topic"><h3>Halligan Bar na Zana Nyingine</h3><p>Zana za chuma zenye ncha maalum zinazotumika kuvunja milango, madirisha, na kuta kwa ajili ya kuingia haraka jengoni au kutoa njia ya moshi kutoka.</p></div>
+      <div class="topic"><h3>Axes na Rescue Tools</h3><p>Hutumika kukata, kuvunja, na kuondoa vizuizi mbalimbali wakati wa operesheni za uokoaji au kufungua njia za uingizaji hewa.</p></div>
+      <div class="topic"><h3>PPE (Vifaa vya Kujikinga)</h3><p>Mavazi na vifaa vyote vinavyomkinga mzima moto dhidi ya joto, moshi, na hatari nyingine — vimeelezwa kwa undani zaidi katika sura inayofuata.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c6">
+      <h2><span class="chapter-number">Sura ya 6</span>Vifaa vya Kujikinga (PPE)</h2>
+      <div class="topic"><h3>Helmet</h3><p>Hulinda kichwa dhidi ya vitu vinavyoanguka na joto kali. Baadhi ya helmeti za kisasa zina taa na kinga ya uso zilizoambatanishwa.</p></div>
+      <div class="topic"><h3>Fire-Resistant Clothing</h3><p>Nguo maalum zenye tabaka nyingi zilizotengenezwa kustahimili joto kali na mguso wa moja kwa moja na moto kwa muda mfupi bila kuungua.</p></div>
+      <div class="topic"><h3>Gloves</h3><p>Hulinda mikono dhidi ya joto, moto, na vitu vikali wakati wa kazi za uokoaji na uzimaji moto.</p></div>
+      <div class="topic"><h3>Boots</h3><p>Viatu maalum vyenye chuma sehemu ya mbele na chini kuzuia kuungua na majeraha ya miguu yanayotokana na vitu vinavyodondoka au ncha kali.</p></div>
+      <div class="topic"><h3>Hood</h3><p>Kifuniko cha shingo na uso kinachozuia joto na cheche kufika kwenye ngozi isiyofunikwa na helmeti au mask ya kupumua.</p></div>
+      <div class="topic"><h3>Eye Protection</h3><p>Miwani au visor maalum vinavyolinda macho dhidi ya moshi, vumbi, na cheche zinazoweza kuruka wakati wa moto.</p></div>
+      <div class="topic"><h3>Hearing Protection</h3><p>Hutumika kupunguza kelele kali kutoka kwa injini za magari, pump, na vifaa vingine wakati wa operesheni ndefu za dharura.</p></div>
+      <div class="topic"><h3>SCBA (Self-Contained Breathing Apparatus)</h3><p>Mfumo kamili wa kupumua unaobebwa mgongoni ukiwa na silinda ya hewa safi, regulator, na mask — hutumika ndani ya moshi mzito au sehemu zenye gesi hatari ambapo hewa ya nje haifai kuvutwa.</p></div>
+      <div class="topic"><h3>Ukaguzi wa PPE</h3><p>PPE lazima ikaguliwe kabla na baada ya kila operesheni kuangalia uharibifu, uchafu, au sehemu zilizochakaa zinazohitaji kubadilishwa mara moja.</p></div>
+      <div class="topic"><h3>Matengenezo na Matumizi Salama</h3><p>PPE inapaswa kusafishwa baada ya kila matumizi, kuhifadhiwa mahali pakavu na safi, na kubadilishwa kulingana na muda wa matumizi uliopendekezwa na mtengenezaji wake.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c7">
+      <h2><span class="chapter-number">Sura ya 7</span>SCBA na Ulinzi wa Upumuaji</h2>
+      <div class="topic"><h3>SCBA ni Nini?</h3><p>Ni mfumo unaompatia mzima moto hewa safi ya kupumua akiwa katika mazingira yenye moshi mzito, gesi za sumu, au upungufu wa oksijeni ambao ungeweza kumdhuru bila kifaa hiki.</p></div>
+      <div class="topic"><h3>Vipengele vya SCBA — Cylinder</h3><p>Silinda inayohifadhi hewa iliyoshinikizwa, kawaida hudumu kati ya dakika 30 hadi 60 kutegemea kasi ya kupumua na jitihada ya mtumiaji wakati wa operesheni.</p></div>
+      <div class="topic"><h3>Regulator</h3><p>Kifaa kinachopunguza shinikizo la hewa kutoka silinda hadi kiwango salama cha kupumua kabla hewa haijafika kwenye mask.</p></div>
+      <div class="topic"><h3>Face Mask</h3><p>Hufunika uso mzima na kuhakikisha hewa safi tu ndiyo inayovutwa, huku ikizuia moshi na gesi za nje kuingia kwenye njia ya hewa.</p></div>
+      <div class="topic"><h3>Pressure Gauge</h3><p>Huonyesha kiasi cha hewa kilichobaki ndani ya silinda — mzima moto lazima aifuatilie mara kwa mara wakati wa operesheni ili kupanga muda wa kurudi salama.</p></div>
+      <div class="topic"><h3>Air Management</h3><p>Ni mpango wa kutumia hewa kwa busara ili kuhakikisha kunabaki hewa ya kutosha kwa ajili ya safari ya kurudi nje salama, siyo tu kufikia lengo la ndani.</p></div>
+      <div class="topic"><h3>Low-Air Alarm</h3><p>Kengele maalum inayolia hewa inapopungua chini ya kiwango cha usalama, ikimwonya mtumiaji kuanza kutoka mara moja.</p></div>
+      <div class="topic"><h3>Emergency Procedures</h3><p>Taratibu maalum za dharura zinazofuatwa endapo SCBA itashindwa kufanya kazi vizuri, ikiwemo matumizi ya mfumo mbadala wa hewa au kutoka haraka kwa msaada wa timu.</p></div>
+      <div class="topic"><h3>Mayday Procedures</h3><p>Endapo mzima moto anajikuta katika hatari kubwa — amekwama, amepotea njia, au hewa inaisha — hutumia neno "Mayday" mara tatu kwenye radio kuomba msaada wa haraka kutoka kwa timu nzima.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c8">
+      <h2><span class="chapter-number">Sura ya 8</span>Mbinu za Kuzima Moto (Fire Suppression Techniques)</h2>
+      <div class="topic"><h3>Direct Attack</h3><p>Shambulizi la moja kwa moja kwa kuelekeza maji au dawa moja kwa moja kwenye msingi wa moto — hutumika kwa moto mdogo hadi wa kati ambapo hali ni salama kuingia karibu.</p></div>
+      <div class="topic"><h3>Indirect Attack</h3><p>Kutumia mvuke unaozalishwa na maji kupoza chumba kizima bila kuelekeza moja kwa moja kwenye moto — hutumika hasa kwa moto mkubwa ndani ya nafasi iliyofungwa ambapo kuingia karibu ni hatari.</p></div>
+      <div class="topic"><h3>Combination Attack</h3><p>Mchanganyiko wa mbinu za moja kwa moja na zisizo za moja kwa moja, unaobadilika kulingana na hali ya moto inavyoendelea kubadilika wakati wa operesheni.</p></div>
+      <div class="topic"><h3>Offensive vs Defensive Operations</h3><p>Katika mkakati wa <b>Offensive</b>, timu huingia ndani ya jengo kupambana na moto moja kwa moja. Katika mkakati wa <b>Defensive</b>, timu hubaki nje na kudhibiti moto kutoka nje pale hali ikiwa hatari mno kuingia ndani.</p></div>
+      <div class="topic"><h3>Water Application</h3><p>Namna maji yanavyotumika hutofautiana — jeti kali kwa umbali mrefu, au dawa nyembamba (fog) kwa kupoza eneo pana kwa haraka.</p></div>
+      <div class="topic"><h3>Hose Management</h3><p>Ujuzi wa kubeba, kunyoosha, na kudhibiti hose bila kuipinda au kuzuia mtiririko wa maji, hasa wakati wa kupanda ngazi au kupita katika njia finyu.</p></div>
+      <div class="topic"><h3>Nozzle Patterns</h3><p>Mifumo tofauti ya utoaji maji: straight stream (mkondo mmoja wenye nguvu), fog (mvua nyembamba ya kupoza), na broken stream — kila mfumo una matumizi yake mahususi kulingana na hali ya moto.</p></div>
+      <div class="topic"><h3>Ventilation</h3><p>Kuondoa moshi na joto kutoka jengoni kwa kufungua njia za hewa kwa makusudi ili kuboresha mwonekano na kupunguza hatari ya flashover.</p></div>
+      <div class="topic"><h3>Cooling</h3><p>Kupunguza joto la eneo kwa makusudi ili kuzuia moto kuenea au kurudi tena baada ya kuonekana kuzimwa.</p></div>
+      <div class="topic"><h3>Containment</h3><p>Kuzuia moto usienee kwenye maeneo mengine ya jengo lile lile au majengo jirani kwa kutumia vizuizi vya asili au vya kuweka makusudi.</p></div>
+      <div class="topic"><h3>Overhaul</h3><p>Hatua ya mwisho ya kuhakikisha hakuna sehemu zinazoendelea kuwaka polepole (hot spots) baada ya moto mkuu kudhibitiwa na kuonekana umezimwa.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c9">
+      <h2><span class="chapter-number">Sura ya 9</span>Uzimaji Moto wa Majengo (Structural Firefighting)</h2>
+      <div class="topic"><h3>Moto wa Makazi (Residential)</h3><p>Hutokea majumbani — hatari kubwa zaidi ni watu waliolala au wasiojua njia sahihi za kutoka, hivyo utafutaji wa haraka wa watu huwa kipaumbele cha kwanza.</p></div>
+      <div class="topic"><h3>Moto wa Kibiashara (Commercial)</h3><p>Majengo ya biashara mara nyingi huwa na muundo mgumu zaidi na bidhaa nyingi zinazoweza kuungua kwa haraka, hivyo kuhitaji tathmini makini ya haraka.</p></div>
+      <div class="topic"><h3>Moto wa Viwandani (Industrial)</h3><p>Huweza kuhusisha kemikali hatari, mashine kubwa, na hatari za mlipuko — huhitaji tahadhari maalum na taarifa za awali kuhusu vifaa vilivyopo kwenye eneo husika.</p></div>
+      <div class="topic"><h3>Moto wa Paa</h3><p>Huhitaji tahadhari kubwa ya kuporomoka kwa muundo, hasa kwenye paa za mbao au zenye uzito mkubwa wa vifaa vilivyowekwa juu yake.</p></div>
+      <div class="topic"><h3>Moto wa Chini ya Ardhi (Basement)</h3><p>Ni hatari zaidi kwa sababu ya njia chache za kutoka na mkusanyiko wa moshi na joto kwa haraka zaidi katika nafasi ndogo iliyofungwa.</p></div>
+      <div class="topic"><h3>Moto wa Majengo Marefu (High-Rise)</h3><p>Huhitaji mikakati maalum ya uokoaji kwa sababu ngazi za kawaida na lifti haziwezi kutumika kwa usalama, na maji lazima yasukumwe juu kwa msaada wa pump maalum.</p></div>
+      <div class="topic"><h3>Moto wa Vyumba Vilivyofungwa (Compartment Fires)</h3><p>Vyumba vidogo vilivyofungwa vizuri hukusanya joto haraka zaidi, na hivyo huongeza hatari ya flashover kutokea ghafla.</p></div>
+      <div class="topic"><h3>Building Construction (Ujenzi wa Majengo)</h3><p>Kuelewa vifaa vilivyotumika kujenga (zege, mbao, chuma) husaidia kutabiri jinsi jengo litakavyoshindana na moto, na wakati gani muundo unaweza kuanza kuporomoka.</p></div>
+      <div class="topic"><h3>Fire Spread (Kuenea kwa Moto)</h3><p>Moto huenea kupitia njia za hewa, mabomba, na nyufa za ukuta zisizoonekana kwa urahisi — kujua njia hizi husaidia kuzuia kuenea mapema kabla halijawa kubwa.</p></div>
+      <div class="topic"><h3>Structural Collapse</h3><p>Hatari ya jengo kuanguka inayotokana na joto kudhoofisha vifaa vya ujenzi — wazima moto lazima wafuatilie dalili za kuporomoka wakati wote wa operesheni.</p></div>
+      <div class="topic"><h3>Search and Rescue</h3><p>Utafutaji wa watu ndani ya jengo linaloungua ni kipaumbele cha juu, kinachofanyika sambamba na operesheni za uzimaji moto, siyo baada yake.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c10">
+      <h2><span class="chapter-number">Sura ya 10</span>Utafutaji na Uokoaji (Search & Rescue)</h2>
+      <div class="topic"><h3>Primary Search</h3><p>Utafutaji wa haraka wa awali unaolenga kutafuta watu walio hatarini zaidi, unaofanyika wakati moto bado unaendelea kuwaka.</p></div>
+      <div class="topic"><h3>Secondary Search</h3><p>Utafutaji wa kina zaidi unaofanyika baada ya moto kudhibitiwa, kuhakikisha hakuna aliyeachwa nyuma katika sehemu zilizoruka wakati wa search ya kwanza.</p></div>
+      <div class="topic"><h3>Victim Identification</h3><p>Njia za kutambua na kuripoti idadi na hali ya waathirika waliopatikana ili timu ya matibabu iweze kujiandaa mapema.</p></div>
+      <div class="topic"><h3>Rescue Carries</h3><p>Mbinu mbalimbali za kubeba mtu aliyejeruhiwa au asiye na fahamu kutoka eneo la hatari, zinazochaguliwa kulingana na uzito wa mtu na mazingira ya eneo husika.</p></div>
+      <div class="topic"><h3>Drag Techniques</h3><p>Njia za kumvuta mtu chini bila kumdhuru zaidi, muhimu pale kubeba haiwezekani kwa sababu ya nafasi finyu au uzito mkubwa wa mtu.</p></div>
+      <div class="topic"><h3>Ropes (Kamba)</h3><p>Hutumika kwa uokoaji wa kimo, kufunga vifaa vizito, au kujiunganisha wenyewe na wenzao wakati wa operesheni hatari.</p></div>
+      <div class="topic"><h3>Confined-Space Rescue</h3><p>Uokoaji katika maeneo finyu kama mitaro, matangi, au vichuguu — huhitaji vifaa maalum vya hewa na mafunzo ya ziada kwa sababu ya hatari ya gesi na upungufu wa oksijeni katika maeneo hayo.</p></div>
+      <div class="topic"><h3>Vehicle Rescue</h3><p>Uokoaji wa watu waliokwama ndani ya magari, mara nyingi baada ya ajali za barabarani zilizosababisha uharibifu mkubwa.</p></div>
+      <div class="topic"><h3>Water Rescue</h3><p>Uokoaji wa watu wanaozama au waliokwama majini, unaohitaji mafunzo maalum ya kuogelea na vifaa vya kuelea vilivyothibitishwa.</p></div>
+      <div class="topic"><h3>Height Rescue</h3><p>Uokoaji wa watu walio juu — kwenye majengo marefu au miamba — kwa kutumia kamba na vifaa maalum vya kimo.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c11">
+      <h2><span class="chapter-number">Sura ya 11</span>Uokoaji wa Ajali za Barabarani (RTC Rescue)</h2>
+      <div class="topic"><h3>Scene Assessment</h3><p>Tathmini ya haraka ya eneo la ajali kutambua hatari zilizopo — mafuta yanayovuja, waya za umeme, au magari yanayotetereka — kabla ya kuanza kazi ya uokoaji.</p></div>
+      <div class="topic"><h3>Traffic Safety</h3><p>Kudhibiti mwendo wa magari mengine yanayozunguka eneo la ajali ili kulinda timu ya uokoaji na waathirika dhidi ya ajali za pili.</p></div>
+      <div class="topic"><h3>Vehicle Stabilization</h3><p>Kuhakikisha gari haliwezi kusonga au kuanguka wakati wa operesheni ya uokoaji, kwa kutumia vizuizi maalum (stabilizers) vinavyowekwa pembeni ya gari.</p></div>
+      <div class="topic"><h3>Extrication</h3><p>Mchakato wa kumtoa mtu aliyekwama ndani ya gari lililobonyea kwa kutumia zana maalum za kukata na kubana chuma cha gari.</p></div>
+      <div class="topic"><h3>Hydraulic Rescue Tools</h3><p>Vifaa vyenye nguvu kubwa (maarufu kama "jaws of life") vinavyotumika kukata au kubana chuma cha gari kwa haraka na usalama wakati wa uokoaji.</p></div>
+      <div class="topic"><h3>Glass Management</h3><p>Njia salama za kuondoa vioo vya gari bila kumdhuru mgonjwa aliyeko ndani au wazima moto wanaofanya kazi karibu.</p></div>
+      <div class="topic"><h3>Door Removal</h3><p>Kuondoa mlango wa gari kabisa ili kupata nafasi kubwa zaidi ya kumtoa mgonjwa kwa usalama zaidi.</p></div>
+      <div class="topic"><h3>Roof Removal</h3><p>Kuondoa paa la gari kuunda nafasi ya wazi kwa ajili ya kumtoa mgonjwa mwenye majeraha makubwa ya mgongo bila kumsogeza sana.</p></div>
+      <div class="topic"><h3>Patient Protection</h3><p>Kumkinga mgonjwa dhidi ya vioo vilivyovunjika, moshi, na hatari nyingine wakati wote wa operesheni ya kumtoa ndani ya gari.</p></div>
+      <div class="topic"><h3>Handover kwa Timu ya Matibabu</h3><p>Kutoa taarifa kamili kwa timu ya afya kuhusu hali ya mgonjwa na jinsi ajali ilivyotokea, ili kuwasaidia kutoa matibabu sahihi na ya haraka.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c12">
+      <h2><span class="chapter-number">Sura ya 12</span>Vitu Hatari (HazMat)</h2>
+      <div class="topic"><h3>Maana ya HazMat</h3><p>Ni vitu vyovyote vinavyoweza kudhuru afya ya binadamu, mali, au mazingira — vikiwemo kemikali, gesi, mionzi, au vitu vinavyoweza kulipuka kwa urahisi.</p></div>
+      <div class="topic"><h3>Identification (Utambuzi)</h3><p>Kutambua HazMat kwa kutumia lebo, placards, na hati za usafirishaji kabla hata ya kukaribia eneo lenye hatari.</p></div>
+      <div class="topic"><h3>Chemical Hazards</h3><p>Kemikali zinazoweza kusababisha kuungua, sumu, au athari za muda mrefu kiafya endapo zitaguswa au kuvutwa bila kinga.</p></div>
+      <div class="topic"><h3>Toxic Gases</h3><p>Gesi za sumu zinazoweza kusababisha kifo kwa haraka zikivutwa — huhitaji vifaa maalum vya kupumua na ufuatiliaji wa kiasi cha gesi hewani.</p></div>
+      <div class="topic"><h3>Flammable Liquids</h3><p>Vimiminika vinavyoweza kuwaka kwa urahisi sana — huhitaji tahadhari maalum ya kuzuia chanzo chochote cha moto kuwa karibu navyo.</p></div>
+      <div class="topic"><h3>Corrosive Substances</h3><p>Kemikali zinazoweza kuunguza ngozi au kuharibu vifaa mara tu zikigusana navyo — huhitaji PPE maalum inayozuia kupenya kwa kemikali hizo.</p></div>
+      <div class="topic"><h3>PPE kwa HazMat</h3><p>Mavazi maalum yanayolinda dhidi ya kemikali, tofauti kabisa na PPE ya kawaida inayotumika kwa moto wa kawaida.</p></div>
+      <div class="topic"><h3>Isolation (Kutenga Eneo)</h3><p>Kutenga eneo lililoathirika kwa mkanda maalum au vizuizi ili kuzuia watu wasio na mafunzo au vifaa sahihi kuingia.</p></div>
+      <div class="topic"><h3>Decontamination</h3><p>Mchakato wa kusafisha wazima moto, waathirika, na vifaa baada ya kugusana na vitu hatari, ili kuzuia sumu kuenea zaidi.</p></div>
+      <div class="topic"><h3>Emergency Response kwa HazMat</h3><p>Taratibu maalum za dharura zinazofuatwa kulingana na aina ya kemikali husika na miongozo ya kitaifa au kimataifa iliyopo.</p></div>
+      <div class="topic"><h3>HazMat Signs/Placards</h3><p>Alama za kimataifa zinazowekwa kwenye magari na mizigo kuonyesha aina ya hatari iliyopo ndani, hata bila kufungua mzigo.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c13">
+      <h2><span class="chapter-number">Sura ya 13</span>Huduma ya Kwanza ya Dharura (Emergency Medical Response)</h2>
+      <div class="topic"><h3>Scene Safety</h3><p>Kuhakikisha eneo ni salama kwa mwokoaji mwenyewe kabla ya kumkaribia mgonjwa — usalama wa mwokoaji ndiyo kipaumbele cha kwanza kabla ya kumsaidia mwingine.</p></div>
+      <div class="topic"><h3>Patient Assessment</h3><p>Tathmini ya haraka ya hali ya mgonjwa, ikianzia na kupumua, mzunguko wa damu, na kiwango cha fahamu alichonacho.</p></div>
+      <div class="topic"><h3>Primary Survey</h3><p>Ukaguzi wa haraka wa mambo yanayohatarisha maisha moja kwa moja: njia ya hewa (Airway), kupumua (Breathing), na mzunguko wa damu (Circulation).</p></div>
+      <div class="topic"><h3>CPR (Ufufuaji wa Moyo na Mapafu)</h3><p>Mbinu ya kumfufua mtu ambaye moyo wake umesimama, kwa kubonyeza kifua kwa mdundo maalum pamoja na kutoa pumzi za msaada.</p></div>
+      <div class="topic"><h3>AED (Kifaa cha Kurejesha Mdundo wa Moyo)</h3><p>Kifaa cha kielektroniki kinachotoa mshtuko wa umeme uliopimwa kwa lengo la kurekebisha mdundo wa moyo uliovurugika.</p></div>
+      <div class="topic"><h3>Bleeding Control</h3><p>Njia za kuzuia damu kutoka kwa kubonyeza moja kwa moja jeraha, kufunga jeraha vizuri, au kutumia tourniquet kwa majeraha makubwa yanayotoa damu nyingi.</p></div>
+      <div class="topic"><h3>Burns (Kuungua)</h3><p>Kuungua hugawanywa katika madaraja matatu: la kwanza (ngozi tu), la pili (ngozi na tishu za ndani kidogo), na la tatu (kina kirefu). Huduma ya kwanza ni kupoza jeraha kwa maji safi na kulifunika bila kupaka mafuta.</p></div>
+      <div class="topic"><h3>Shock</h3><p>Hali hatari inayotokea mwili unapokosa mzunguko wa damu wa kutosha kufikia viungo muhimu — dalili ni ngozi baridi na yenye jasho, mapigo ya haraka, na kuchanganyikiwa kiakili.</p></div>
+      <div class="topic"><h3>Fractures (Kuvunjika kwa Mifupa)</h3><p>Jinsi ya kutambua kiungo kilichovunjika na kukiweka katika hali thabiti (splinting) kabla ya kumpeleka mgonjwa hospitalini kupunguza maumivu na madhara zaidi.</p></div>
+      <div class="topic"><h3>Spinal Injuries</h3><p>Majeraha ya uti wa mgongo huhitaji tahadhari kubwa sana — mgonjwa hatakiwi kusogezwa isipokuwa ni lazima kabisa, na akiwa ameshikiliwa vizuri ili kuepuka ulemavu wa kudumu.</p></div>
+      <div class="topic"><h3>Casualty Transport</h3><p>Njia salama za kusafirisha mgonjwa kutoka eneo la tukio hadi kituo cha afya bila kuongeza madhara ya ziada kwenye jeraha lake.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c14">
+      <h2><span class="chapter-number">Sura ya 14</span>Kuzuia Moto (Fire Prevention)</h2>
+      <div class="topic"><h3>Fire Risk Assessment</h3><p>Tathmini ya hatari za moto katika jengo au eneo ili kubaini maeneo hatarishi mapema na kuweka mikakati sahihi ya kuzuia kabla haijatokea.</p></div>
+      <div class="topic"><h3>Fire Hazards</h3><p>Vitu au hali zinazoongeza uwezekano wa moto kutokea — kama nyaya chakavu za umeme, uhifadhi mbaya wa mafuta, au uzembe wa jumla.</p></div>
+      <div class="topic"><h3>Electrical Safety</h3><p>Kuepuka kuzidisha vifaa vingi kwenye soketi moja, kutumia nyaya bora zenye ubora, na kukagua mfumo wa umeme mara kwa mara.</p></div>
+      <div class="topic"><h3>Gas Safety</h3><p>Kuhifadhi mitungi ya gesi mahali salama na penye hewa ya kutosha, kukagua uvujaji mara kwa mara, na kutumia vifaa vinavyokidhi viwango vya usalama.</p></div>
+      <div class="topic"><h3>Kitchen Safety</h3><p>Kutosahau mafuta yanayochemka jikoni, kuweka vitu vinavyoweza kuwaka mbali na jiko, na kuwa na kizima moto cha jikoni kilicho karibu wakati wote.</p></div>
+      <div class="topic"><h3>Industrial Safety</h3><p>Taratibu maalum za kuzuia moto viwandani zinazohusisha uhifadhi salama wa kemikali na mafunzo endelevu kwa wafanyakazi wote.</p></div>
+      <div class="topic"><h3>Workplace Fire Prevention</h3><p>Sera na taratibu za ofisi au eneo la kazi zinazopunguza hatari ya moto, zikiwemo mazoezi ya mara kwa mara ya kutoka haraka.</p></div>
+      <div class="topic"><h3>House Fire Prevention</h3><p>Hatua rahisi za nyumbani: kuzima mishumaa kabla ya kulala, kukagua nyaya za umeme mara kwa mara, na kuwa na smoke alarm inayofanya kazi vizuri.</p></div>
+      <div class="topic"><h3>Fire Drills</h3><p>Mazoezi ya mara kwa mara ya kutoka jengoni haraka na kwa usalama endapo moto halisi utatokea, ili kila mtu ajue njia sahihi ya kutoka.</p></div>
+      <div class="topic"><h3>Emergency Exits</h3><p>Njia za kutokea za dharura lazima ziwe wazi wakati wote, zenye alama zilizo wazi kuonekana, na zisiwe zimefungwa kwa kufuli au vizuizi.</p></div>
+      <div class="topic"><h3>Fire Safety Inspection</h3><p>Ukaguzi rasmi wa mara kwa mara wa majengo kuhakikisha vinakidhi viwango vyote vya usalama wa moto vilivyowekwa kisheria.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c15">
+      <h2><span class="chapter-number">Sura ya 15</span>Mfumo wa Uongozi wa Tukio (Incident Command System)</h2>
+      <div class="topic"><h3>Incident Commander</h3><p>Kiongozi mkuu wa operesheni anayefanya maamuzi yote makubwa na kuratibu timu zote zilizopo katika eneo la tukio.</p></div>
+      <div class="topic"><h3>Command Structure</h3><p>Mpangilio wa madaraka na majukumu unaohakikisha kila mtu anajua wa kuripoti kwa nani na jukumu lake mahususi ni lipi wakati wa operesheni.</p></div>
+      <div class="topic"><h3>Operations</h3><p>Idara inayosimamia utekelezaji halisi wa kazi za uzimaji moto na uokoaji katika eneo la tukio moja kwa moja.</p></div>
+      <div class="topic"><h3>Safety Officer</h3><p>Afisa anayefuatilia hatari zinazoweza kuwadhuru wazima moto, akiwa na mamlaka ya kusimamisha operesheni yoyote inayoonekana hatari kupita kiasi.</p></div>
+      <div class="topic"><h3>Communications</h3><p>Mfumo wa mawasiliano kati ya timu mbalimbali eneo la tukio na kituo kikuu cha uratibu wa operesheni.</p></div>
+      <div class="topic"><h3>Accountability</h3><p>Mfumo wa kufuatilia wapi kila mzima moto yupo wakati wowote wa operesheni ili kuhakikisha hakuna anayepotea au kuachwa nyuma.</p></div>
+      <div class="topic"><h3>Sector/Group Assignments</h3><p>Kugawa eneo la tukio katika sehemu ndogo ndogo (sectors), kila moja ikiwa na kiongozi wake wa moja kwa moja anayeripoti kwa Incident Commander.</p></div>
+      <div class="topic"><h3>Incident Objectives</h3><p>Malengo mahususi yanayowekwa mwanzoni mwa operesheni, mfano kuokoa watu kwanza, kisha kuzuia moto kuenea, kisha kuzima kabisa.</p></div>
+      <div class="topic"><h3>Resource Management</h3><p>Usimamizi wa magari, vifaa, na wafanyakazi ili kuhakikisha vinatumika kwa ufanisi mkubwa bila upotevu wa muda au rasilimali.</p></div>
+      <div class="topic"><h3>Emergency Evacuation</h3><p>Amri ya haraka ya kuwaondoa wazima moto wote eneo la ndani endapo hali inakuwa hatari sana, kwa mfano jengo linapokaribia kuanguka.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c16">
+      <h2><span class="chapter-number">Sura ya 16</span>Operesheni za Eneo la Moto (Fireground Operations)</h2>
+      <div class="topic"><h3>Size-Up</h3><p>Tathmini ya haraka ya hali ya moto mara tu ufikapo eneo la tukio — aina ya jengo, ukubwa wa moto, na hatari zilizopo zinazoonekana.</p></div>
+      <div class="topic"><h3>Risk Assessment</h3><p>Kupima hatari dhidi ya faida ya kuingia ndani ya jengo kabla ya kuamua mkakati sahihi wa operesheni utakaotumika.</p></div>
+      <div class="topic"><h3>Establishing Command</h3><p>Kuweka kiongozi wa tukio mara moja anapofika ili kuratibu operesheni nzima kwa mpangilio na uwazi.</p></div>
+      <div class="topic"><h3>Water Supply</h3><p>Kuhakikisha chanzo cha kutosha cha maji kinapatikana na kinaendelea kupatikana kwa muda wote wa operesheni.</p></div>
+      <div class="topic"><h3>Hose Deployment</h3><p>Kunyoosha na kuweka hose kwa mpangilio sahihi ili kufikia eneo la moto kwa haraka bila vikwazo.</p></div>
+      <div class="topic"><h3>Search (Utafutaji)</h3><p>Kutafuta watu waliopo ndani ya jengo sambamba na operesheni ya uzimaji, siyo baada yake kukamilika.</p></div>
+      <div class="topic"><h3>Ventilation</h3><p>Kutoa moshi na joto kutoka jengoni ili kuboresha mwonekano na kupunguza hatari za ziada kwa timu iliyoko ndani.</p></div>
+      <div class="topic"><h3>Suppression</h3><p>Uzimaji halisi wa moto kwa kutumia maji au dawa nyingine zinazofaa kwa aina ya moto uliopo.</p></div>
+      <div class="topic"><h3>Rescue</h3><p>Kutoa watu waliokwama au wasiojiweza kutoka eneo la hatari kwa haraka na kwa usalama iwezekanavyo.</p></div>
+      <div class="topic"><h3>Exposure Protection</h3><p>Kulinda majengo au vitu vya karibu visiathiriwe na moto unaoendelea kuwaka katika eneo la tukio.</p></div>
+      <div class="topic"><h3>Overhaul</h3><p>Hatua ya mwisho ya kuhakikisha hakuna sehemu zinazoendelea kuwaka polepole baada ya moto mkuu kudhibitiwa kikamilifu.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c17">
+      <h2><span class="chapter-number">Sura ya 17</span>Uchunguzi wa Moto (Fire Investigation)</h2>
+      <div class="topic"><h3>Scene Preservation</h3><p>Kutunza eneo la moto bila kubadilishwa au kuguswa ili kuruhusu uchunguzi sahihi wa chanzo halisi cha moto.</p></div>
+      <div class="topic"><h3>Fire Origin</h3><p>Kutambua mahali hasa moto ulipoanzia kwa kuchunguza mifumo ya uchomaji na kiwango cha uharibifu katika maeneo tofauti.</p></div>
+      <div class="topic"><h3>Fire Cause</h3><p>Kubaini sababu halisi ya moto — iwe ni ajali, uzembe, hitilafu ya kiufundi, au uchomaji wa makusudi.</p></div>
+      <div class="topic"><h3>Evidence (Ushahidi)</h3><p>Kukusanya na kuhifadhi vitu vinavyoweza kusaidia kubaini chanzo na sababu ya moto kwa usahihi wa hali ya juu.</p></div>
+      <div class="topic"><h3>Burn Patterns</h3><p>Mifumo ya uchomaji juu ya kuta na sakafu inayosaidia mchunguzi kutambua mwelekeo na chanzo cha moto kilipoanzia.</p></div>
+      <div class="topic"><h3>Witness Information</h3><p>Taarifa kutoka kwa watu waliojionea tukio moja kwa moja, zinazosaidia kujenga picha kamili ya jinsi tukio lilivyotokea.</p></div>
+      <div class="topic"><h3>Photography</h3><p>Kupiga picha za eneo zima kabla ya kuguswa kwa ajili ya kumbukumbu ya kudumu na ushahidi wa kisheria.</p></div>
+      <div class="topic"><h3>Documentation</h3><p>Kuandika taarifa zote za uchunguzi kwa mpangilio na usahihi mkubwa kwa matumizi ya baadaye ya kisheria au kielimu.</p></div>
+      <div class="topic"><h3>Chain of Custody</h3><p>Kufuatilia ni nani aliyeshika ushahidi na lini, ili kuhakikisha uadilifu wake unabaki salama endapo tukio litafika mahakamani.</p></div>
+      <div class="topic"><h3>Fire Investigation Report</h3><p>Ripoti rasmi ya mwisho inayoeleza matokeo yote ya uchunguzi kuhusu chanzo na sababu halisi ya moto uliotokea.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c18">
+      <h2><span class="chapter-number">Sura ya 18</span>Mawasiliano ya Dharura (Emergency Communication)</h2>
+      <div class="topic"><h3>Radio Procedures</h3><p>Taratibu sahihi za kutumia redio wakati wa operesheni ili kuepuka mkanganyiko na kuokoa muda muhimu wa dharura.</p></div>
+      <div class="topic"><h3>Standard Terminology</h3><p>Msamiati maalum wa kiufundi unaotumika kuhakikisha kila mtu eneo la tukio anaelewana kwa haraka na kwa uwazi bila utata.</p></div>
+      <div class="topic"><h3>Mayday</h3><p>Neno maalum linaloashiria dharura kubwa inayohatarisha maisha ya mzima moto mwenyewe, linalotolewa kipaumbele cha juu kabisa kwenye redio.</p></div>
+      <div class="topic"><h3>Emergency Signals</h3><p>Ishara maalum za sauti au mwanga zinazotumika kuwasiliana katika mazingira yenye kelele nyingi ambapo redio pekee haitoshi.</p></div>
+      <div class="topic"><h3>Dispatch</h3><p>Kituo kinachopokea taarifa za dharura kutoka kwa wananchi na kutuma timu husika haraka kuelekea eneo la tukio.</p></div>
+      <div class="topic"><h3>Situation Reports</h3><p>Taarifa za mara kwa mara zinazotolewa na kiongozi wa tukio kuhusu maendeleo ya operesheni kwa kituo kikuu.</p></div>
+      <div class="topic"><h3>Mawasiliano Kati ya Timu</h3><p>Uratibu wa karibu kati ya timu tofauti — uzimaji, uokoaji, na matibabu — ili kuepusha mgongano wa kazi eneo moja.</p></div>
+      <div class="topic"><h3>Mawasiliano Wakati wa Matukio Makubwa</h3><p>Mikakati maalum ya mawasiliano inapohitajika kuratibu timu nyingi kutoka vituo tofauti wakati wa maafa makubwa.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c19">
+      <h2><span class="chapter-number">Sura ya 19</span>Afya na Usalama Kazini (Occupational Health & Safety)</h2>
+      <div class="topic"><h3>Firefighter Injuries</h3><p>Majeraha ya kawaida yanayowapata wazima moto kazini — kuungua, kuvunjika kwa mifupa, na majeraha ya mgongo kutokana na kubeba uzito mkubwa.</p></div>
+      <div class="topic"><h3>Heat Stress</h3><p>Hali hatari inayotokana na joto kali la PPE pamoja na mazingira ya moto, inayoweza kusababisha kizunguzungu, uchovu wa haraka, au hata kuzirai.</p></div>
+      <div class="topic"><h3>Dehydration</h3><p>Upungufu wa maji mwilini unaotokana na jasho jingi wakati wa operesheni ndefu — huhitaji unywaji wa maji wa mara kwa mara kabla na baada ya kazi.</p></div>
+      <div class="topic"><h3>Smoke Exposure</h3><p>Madhara ya kuvuta moshi kwa muda mrefu, yakiwemo athari za mapafu na hatari ya sumu ya carbon monoxide mwilini.</p></div>
+      <div class="topic"><h3>PPE Safety</h3><p>Umuhimu wa kutumia PPE kwa usahihi kila wakati ili kuepuka majeraha yasiyo ya lazima yanayoweza kuzuilika.</p></div>
+      <div class="topic"><h3>SCBA Safety</h3><p>Taratibu za usalama za kutumia SCBA kwa usahihi ili kuepuka upungufu wa hewa ghafla wakati wa operesheni ndani ya moshi.</p></div>
+      <div class="topic"><h3>Rehabilitation</h3><p>Muda wa mapumziko unaopatiwa mzima moto pamoja na maji na chakula baada ya operesheni ndefu ili mwili wake upone haraka.</p></div>
+      <div class="topic"><h3>Mental Wellbeing</h3><p>Afya ya akili ya wazima moto baada ya kushuhudia matukio magumu — msaada wa kisaikolojia ni sehemu muhimu ya huduma kwa wafanyakazi hawa.</p></div>
+      <div class="topic"><h3>Fatigue Management</h3><p>Kudhibiti uchovu wa wazima moto kwa kuhakikisha zamu na mapumziko ya kutosha yanapangwa vizuri.</p></div>
+      <div class="topic"><h3>Post-Incident Procedures</h3><p>Taratibu za baada ya tukio zikiwemo kuripoti, kusafisha vifaa vilivyotumika, na kupitia tukio kwa lengo la mafunzo zaidi.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c20">
+      <h2><span class="chapter-number">Sura ya 20</span>Uripoti na Uandishi wa Nyaraka (Incident Reporting)</h2>
+      <div class="topic"><h3>Incident Report</h3><p>Ripoti kuu inayoeleza tukio zima kuanzia lilipoanzia, hatua zilizochukuliwa, hadi lilivyomalizika.</p></div>
+      <div class="topic"><h3>Fire Report</h3><p>Ripoti mahususi kuhusu moto wenyewe — chanzo, ukubwa, muda uliotumika kuuzima, na kiwango cha uharibifu uliotokea.</p></div>
+      <div class="topic"><h3>Rescue Report</h3><p>Ripoti ya operesheni za uokoaji zilizofanyika na matokeo yaliyopatikana kwa waathirika.</p></div>
+      <div class="topic"><h3>Accident Report</h3><p>Ripoti ya ajali zilizotokea wakati wa operesheni, ikiwemo majeraha kwa wazima moto wenyewe.</p></div>
+      <div class="topic"><h3>Casualty Report</h3><p>Taarifa kuhusu waathirika wote — idadi, hali zao za kiafya, na matibabu waliyopewa eneo la tukio.</p></div>
+      <div class="topic"><h3>Equipment Report</h3><p>Taarifa ya vifaa vilivyotumika, vilivyoharibika, au vinavyohitaji matengenezo baada ya operesheni kukamilika.</p></div>
+      <div class="topic"><h3>Damage Assessment</h3><p>Tathmini ya kiwango cha uharibifu uliosababishwa na moto kwa mali na miundombinu iliyoathirika.</p></div>
+      <div class="topic"><h3>Witness Statements</h3><p>Maelezo rasmi yaliyoandikwa kutoka kwa mashahidi wa tukio kwa ajili ya kumbukumbu na uchunguzi zaidi.</p></div>
+      <div class="topic"><h3>Incident Timeline</h3><p>Mpangilio wa matukio kwa mfuatano wa muda, tangu taarifa ya awali ilipopokelewa hadi operesheni kukamilika kabisa.</p></div>
+      <div class="topic"><h3>Lessons Learned</h3><p>Mapitio ya tukio zima kubaini ni nini kilifanya kazi vizuri na ni nini kinahitaji kuboreshwa kwa matukio ya siku zijazo.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c21">
+      <h2><span class="chapter-number">Sura ya 21</span>Magari ya Zimamoto (Fire Service Vehicles)</h2>
+      <div class="topic"><h3>Fire Engine</h3><p>Gari kuu la zimamoto lenye pump, hose, na hifadhi ya maji kwa ajili ya uzimaji wa moto wa haraka.</p></div>
+      <div class="topic"><h3>Water Tender</h3><p>Gari lenye uwezo wa kubeba kiasi kikubwa cha maji kwa ajili ya maeneo yasiyo na hydrant za kutosha karibu.</p></div>
+      <div class="topic"><h3>Rescue Vehicle</h3><p>Gari lenye vifaa maalum vya uokoaji kama zana za kukata chuma na vifaa vya operesheni za kimo.</p></div>
+      <div class="topic"><h3>Aerial Ladder</h3><p>Gari lenye ngazi ndefu maalum inayoweza kufikia sakafu za juu za majengo marefu kwa uokoaji au shambulizi la moto.</p></div>
+      <div class="topic"><h3>HazMat Vehicle</h3><p>Gari lenye vifaa maalum vya kukabiliana na vitu hatari na kemikali mbalimbali kwa usalama.</p></div>
+      <div class="topic"><h3>Ambulance</h3><p>Gari la huduma ya kwanza linalotoa matibabu ya dharura mahala pa tukio na kusafirisha wagonjwa hospitalini.</p></div>
+      <div class="topic"><h3>Pump Operation</h3><p>Ujuzi wa kuendesha pump kwa usahihi kuhakikisha shinikizo sahihi la maji linafikishwa kwenye hose bila kupungua au kuzidi.</p></div>
+      <div class="topic"><h3>Vehicle Checks</h3><p>Ukaguzi wa kila siku wa magari kuhakikisha yako tayari kabisa kwa dharura wakati wowote bila kuchelewesha operesheni.</p></div>
+      <div class="topic"><h3>Equipment Inventory</h3><p>Orodha kamili ya vifaa vilivyopo kwenye gari kuhakikisha hakuna kinachokosekana kabla ya kuondoka kuelekea tukio.</p></div>
+      <div class="topic"><h3>Usalama wa Uendeshaji wa Dharura</h3><p>Taratibu za kuendesha gari kwa kasi salama wakati wa dharura bila kuhatarisha maisha ya watumiaji wengine wa barabara.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c22">
+      <h2><span class="chapter-number">Sura ya 22</span>Upatikanaji wa Maji na Hydraulics</h2>
+      <div class="topic"><h3>Hydrants</h3><p>Vituo vya maji vilivyowekwa mitaani kwa ajili ya matumizi ya haraka wakati wa dharura ya moto.</p></div>
+      <div class="topic"><h3>Water Sources</h3><p>Vyanzo mbalimbali vya maji kama mabwawa, mito, na matangi ya kuhifadhi kwa ajili ya operesheni pale hydrant hazipo karibu.</p></div>
+      <div class="topic"><h3>Pump Operations</h3><p>Uendeshaji sahihi wa pump kuhakikisha maji yanasukumwa kwa shinikizo linalofaa kufikia eneo la moto kwa ufanisi.</p></div>
+      <div class="topic"><h3>Pressure (Shinikizo)</h3><p>Kiasi cha nguvu kinachosukuma maji kupitia hose — shinikizo la chini sana au la juu mno huathiri ufanisi wa uzimaji moto.</p></div>
+      <div class="topic"><h3>Flow Rate</h3><p>Kiasi cha maji kinachopita kwa dakika — muhimu kwa kupanga ni hose na nozzle zipi zinazofaa kutumika kwa hali fulani.</p></div>
+      <div class="topic"><h3>Friction Loss</h3><p>Upotevu wa shinikizo unaotokana na msuguano wa maji ndani ya hose, unaoongezeka kadri urefu wa hose unavyoongezeka.</p></div>
+      <div class="topic"><h3>Hose Diameter</h3><p>Ukubwa wa kipenyo cha hose huathiri moja kwa moja kiasi cha maji kinachoweza kupita na shinikizo linalobaki mwishoni.</p></div>
+      <div class="topic"><h3>Relay Pumping</h3><p>Kutumia pump kadhaa kwa mfuatano kusukuma maji umbali mrefu zaidi pale chanzo kimoja hakitoshi peke yake.</p></div>
+      <div class="topic"><h3>Water Shuttle</h3><p>Kusafirisha maji kwa magari ya tanker kutoka chanzo hadi eneo la moto pale hydrant hazipatikani karibu na tukio.</p></div>
+      <div class="topic"><h3>Tank Operations</h3><p>Matumizi ya matangi ya maji yaliyobebwa na gari kwa ajili ya uzimaji wa haraka kabla ya chanzo kingine cha maji kupatikana.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c23">
+      <h2><span class="chapter-number">Sura ya 23</span>Dharura Maalum (Special Emergencies)</h2>
+      <div class="topic"><h3>Wildland/Forest Fires</h3><p>Moto wa misitu unaoenea kwa haraka sana kwa msaada wa upepo na mimea kavu — huhitaji mikakati tofauti kabisa na moto wa majengo.</p></div>
+      <div class="topic"><h3>Electrical Fires</h3><p>Moto unaotokana na hitilafu za umeme, huhitaji kuzimwa kwa vifaa visivyoongoza umeme ili kuepuka mshtuko.</p></div>
+      <div class="topic"><h3>Gas Explosions</h3><p>Milipuko inayotokana na uvujaji wa gesi — huhitaji tahadhari kubwa sana ya kuzuia chanzo chochote cha moto kuwa karibu.</p></div>
+      <div class="topic"><h3>Chemical Incidents</h3><p>Matukio yanayohusisha uvujaji au mlipuko wa kemikali hatari, yanayohitaji timu maalum ya HazMat kushughulikia.</p></div>
+      <div class="topic"><h3>Flood Rescue</h3><p>Uokoaji wa watu walioathiriwa na mafuriko, unaohitaji mashua maalum na vifaa vya kuelea vilivyoidhinishwa.</p></div>
+      <div class="topic"><h3>Building Collapse</h3><p>Uokoaji wa watu waliozikwa chini ya jengo lililoanguka, unaohitaji vifaa maalum vya kutafuta na kuchimbua kwa uangalifu mkubwa.</p></div>
+      <div class="topic"><h3>Aircraft Incidents</h3><p>Dharura zinazohusisha ndege — huhitaji timu maalum na vifaa vya uzimaji vya haraka sana kwa sababu ya kiasi kikubwa cha mafuta.</p></div>
+      <div class="topic"><h3>Industrial Emergencies</h3><p>Dharura viwandani zinazoweza kuhusisha mchanganyiko wa moto, kemikali, na mashine hatari kwa wakati mmoja.</p></div>
+      <div class="topic"><h3>Tunnel Fires</h3><p>Moto ndani ya vichuguu ni hatari zaidi kwa sababu ya nafasi finyu na moshi kujaa haraka bila njia rahisi ya kutoka.</p></div>
+      <div class="topic"><h3>High-Rise Emergencies</h3><p>Dharura za majengo marefu zinazohitaji mikakati maalum ya uokoaji na usafirishaji wa maji kwenda ghorofa za juu.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c24">
+      <h2><span class="chapter-number">Sura ya 24</span>Mafunzo ya Vitendo (Practical Training)</h2>
+      <div class="intro">Sehemu hii haifundishwi kwa nadharia pekee — inahitaji mazoezi ya mara kwa mara ya vitendo chini ya usimamizi wa wakufunzi wenye ujuzi wa kutosha.</div>
+      <div class="topic"><h3>Hose Drills</h3><p>Mazoezi ya kunyoosha, kubeba, na kutumia hose kwa haraka na usahihi wa hali ya juu.</p></div>
+      <div class="topic"><h3>Ladder Drills</h3><p>Mazoezi ya kupandisha na kutumia ngazi kwa usalama katika hali mbalimbali za kimo.</p></div>
+      <div class="topic"><h3>Search Drills</h3><p>Mazoezi ya kutafuta watu ndani ya moshi bandia au giza kwa kutumia mbinu sahihi za utafutaji.</p></div>
+      <div class="topic"><h3>SCBA Drills</h3><p>Mazoezi ya kuvaa na kutumia SCBA haraka na kwa usahihi hata chini ya shinikizo la muda mfupi.</p></div>
+      <div class="topic"><h3>Extinguisher Drills</h3><p>Mazoezi ya matumizi sahihi ya vizima moto kwa aina mbalimbali za moto zilizoelezwa awali.</p></div>
+      <div class="topic"><h3>Rescue Drills</h3><p>Mazoezi ya mbinu za kubeba na kuvuta watu kutoka maeneo ya hatari kwa usalama.</p></div>
+      <div class="topic"><h3>CPR Drills</h3><p>Mazoezi ya mara kwa mara ya ufufuaji wa moyo na mapafu kwa kutumia vifaa maalum vya mazoezi.</p></div>
+      <div class="topic"><h3>Vehicle Extrication</h3><p>Mazoezi ya kutumia zana za kukata na kubana chuma kwenye magari halisi ya mazoezi.</p></div>
+      <div class="topic"><h3>Pump Operations</h3><p>Mazoezi ya kuendesha pump na kudhibiti shinikizo la maji kwa usahihi wa hali ya juu.</p></div>
+      <div class="topic"><h3>Fireground Simulations</h3><p>Mazoezi kamili yanayoiga hali halisi ya moto ili kujenga uzoefu na kujiamini kabla ya kukabili tukio halisi.</p></div>
+    </section>
+
+    <section class="chapter book-page" id="c25">
+      <h2><span class="chapter-number">Sura ya 25</span>Mitihani na Mazoezi</h2>
+      <div class="intro">Sehemu hii ni mwongozo wa jinsi mfumo mkubwa wa mitihani unavyoweza kupangwa kwa ajili ya mafunzo endelevu ya wanachama na wanafunzi.</div>
+      <div class="topic"><h3>Muundo wa Jumla</h3><p>Mfumo kamili unaweza kuwa na maswali zaidi ya 1,000 yaliyogawanywa katika ngazi tatu: Beginner (Mwanzo), Intermediate (Kati), na Advanced (Juu), ili kila mwanafunzi aendelee hatua kwa hatua kulingana na uwezo wake.</p></div>
+      <div class="topic"><h3>Multiple Choice Questions</h3><p>Maswali ya kuchagua jibu sahihi kati ya chaguo kadhaa — hutumika kupima uelewa wa haraka wa dhana mbalimbali zilizofundishwa.</p></div>
+      <div class="topic"><h3>True/False</h3><p>Maswali ya Kweli/Uongo yanayopima uelewa wa haraka wa taarifa mahususi za kiufundi bila kutoa chaguo nyingi.</p></div>
+      <div class="topic"><h3>Scenario-Based Questions</h3><p>Maswali yanayoweka mwanafunzi katika hali halisi ya tukio na kumhitaji aamue hatua sahihi za kuchukua kwa wakati huo.</p></div>
+      <div class="topic"><h3>Practical Assessment</h3><p>Tathmini ya vitendo inayopima uwezo wa kutumia vifaa na mbinu halisi, siyo maarifa ya kinadharia pekee.</p></div>
+      <div class="topic"><h3>Flashcards</h3><p>Kadi fupi za kukariri istilahi na dhana muhimu kwa haraka wakati wa marudio.</p></div>
+      <div class="topic"><h3>Mock Exams</h3><p>Mitihani ya majaribio inayofanana kabisa na mtihani halisi kumjenga mwanafunzi kiakili na kimuda kabla ya siku halisi.</p></div>
+      <div class="topic"><h3>Answer Explanations</h3><p>Maelezo ya kina kwa kila jibu ili mwanafunzi aelewe sababu ya jibu sahihi, siyo kukariri tu bila uelewa.</p></div>
+      <div class="topic"><h3>Progress Tracking</h3><p>Ufuatiliaji wa maendeleo ya mwanafunzi kutoka ngazi ya Beginner hadi Advanced kwa kipindi cha muda fulani.</p></div>
+    </section>
+
+    <footer class="book-end">— Mwisho wa Kitabu — Sayansi ya Moto | SadeBooks | Kinafanya kazi bila mtandao (offline) —</footer>
+
+  </main>
+</div>
+
+<button id="toTop" title="Rudi juu" aria-label="Rudi juu">↑</button>
+
+<script>
+  // Auto-build TOC from chapters (excluding cover & preface, but include preface link)
+  const tocLinks = document.getElementById('toc-links');
+  document.querySelectorAll('.book-page.preface').forEach(p=>{
+    const a=document.createElement('a'); a.href='#'; a.textContent='Utangulizi';
+    a.onclick=(e)=>{e.preventDefault(); p.scrollIntoView({behavior:'smooth'}); document.getElementById('toc').classList.remove('open');};
+    tocLinks.appendChild(a);
+  });
+  const chapters = document.querySelectorAll('section.chapter');
+  chapters.forEach(ch => {
+    const h2 = ch.querySelector('h2');
+    const a = document.createElement('a');
+    a.href = '#' + ch.id;
+    a.textContent = h2.textContent;
+    a.onclick = () => document.getElementById('toc').classList.remove('open');
+    tocLinks.appendChild(a);
+  });
+
+  // Simple search filter across topics
+  document.getElementById('search').addEventListener('input', function(e){
+    const q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('.topic').forEach(t => {
+      const text = t.textContent.toLowerCase();
+      t.classList.toggle('hidden', q.length > 0 && !text.includes(q));
+    });
+    document.querySelectorAll('section.chapter').forEach(ch => {
+      const anyVisible = [...ch.querySelectorAll('.topic')].some(t => !t.classList.contains('hidden'));
+      ch.classList.toggle('hidden', q.length > 0 && !anyVisible);
+    });
+  });
+
+  // Highlight active TOC link on scroll
+  const sections = document.querySelectorAll('section.chapter');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 100) current = s.id;
+    });
+    document.querySelectorAll('#toc-links a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+
+    // Scroll-to-top button visibility
+    const btn = document.getElementById('toTop');
+    if (window.scrollY > 400) btn.classList.add('show');
+    else btn.classList.remove('show');
+  });
+
+  document.getElementById('toTop').addEventListener('click', () => {
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+</script>
+
+</body>
+</html>
