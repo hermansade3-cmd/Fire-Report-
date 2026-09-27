@@ -145,7 +145,7 @@
   // ============================================================
   // 4) Matching engine (local keyword/overlap scoring — no network)
   // ============================================================
-  const STOP = new Set(["na","ya","wa","la","kwa","ni","je","kwenye","katika","hii","hiyo","huu","huo","zangu","yangu","wangu","hili","hilo","zake","yake","kama","au","si","tafadhali","naomba","nataka","ninataka","ningependa","the","is","a","an","of","to","in","on","and","for","how","what","do","does","can","i","you","me","my","please","tell","about"]);
+  const STOP = new Set(["na","ya","wa","la","kwa","ni","je","nini","gani","vipi","namna","maana","kwenye","katika","hii","hiyo","huu","huo","zangu","yangu","wangu","hili","hilo","zake","yake","kama","au","si","tafadhali","naomba","nataka","ninataka","ningependa","the","is","a","an","of","to","in","on","and","for","how","what","do","does","can","i","you","me","my","please","tell","about"]);
 
   function normalize(str) {
     return (str || "")
@@ -161,13 +161,14 @@
     APP_FAQ.forEach((item) => {
       const tokens = new Set();
       normalize(item.keys.join(" ")).forEach((t) => tokens.add(t));
-      corpus.push({ type: "faq", tokens, raw: item.keys.join(" ").toLowerCase(), item });
+      corpus.push({ type: "faq", tokens, titleTokens: new Set(), raw: item.keys.join(" ").toLowerCase(), item });
     });
     FIRE_KB.forEach((item) => {
       const tokens = new Set();
-      normalize(item.title + " " + item.chapter).forEach((t) => tokens.add(t));
+      const titleTokens = new Set();
+      normalize(item.title + " " + item.chapter).forEach((t) => { tokens.add(t); titleTokens.add(t); });
       normalize(item.text).forEach((t) => tokens.add(t));
-      corpus.push({ type: "kb", tokens, raw: (item.title + " " + item.text).toLowerCase(), item });
+      corpus.push({ type: "kb", tokens, titleTokens, raw: (item.title + " " + item.text).toLowerCase(), item });
     });
     // Document-frequency map so generic words that appear almost everywhere
     // ("kabisa", "moto", "ripoti"...) count for less than rare, specific words
@@ -186,7 +187,15 @@
     queryTokens.forEach((qt) => {
       if (entry.tokens.has(qt)) {
         const freq = df[qt] || total;
-        score += Math.log(1 + total / freq); // rarer token => higher weight
+        let weight = Math.log(1 + total / freq); // rarer token => higher weight
+        // A query word naming the actual topic/section title (e.g. "moto" in
+        // "Fire Triangle (Pembetatu ya Moto)") is a much stronger signal than
+        // the same word appearing once in the middle of unrelated body text
+        // (e.g. an incidental "...ndiyo maana..." aside) — weight it higher
+        // so short, generic questions ("Moto ni nini?") land on the entry
+        // that is actually ABOUT that word, not just one that mentions it.
+        if (entry.titleTokens.has(qt)) weight *= 2;
+        score += weight;
       }
     });
     if (queryRaw.length >= 4 && entry.raw.includes(queryRaw)) score += 3;
