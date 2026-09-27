@@ -1,0 +1,75 @@
+MAELEKEZO — Kuongeza Incident AI + Offline (PWA) kwenye website uliyonayo
+==========================================================================
+
+HATUA 1 — Pakia faili hizi 5 kwenye folda moja na index.html yako
+------------------------------------------------------------------
+  - incident-ai.js
+  - manifest.json
+  - sw.js
+  - icon-192.png
+  - icon-512.png
+
+(Usiguse index.html, style.css, script.js, core.js, sync.js, announcements.js,
+au APK yako — zote zinabaki kama zilivyo.)
+
+
+HATUA 2 — Fungua index.html yako, ongeza mstari 1 ndani ya <head>
+------------------------------------------------------------------
+Tafuta mstari wenye:
+  <link rel="stylesheet" href="style.css...">
+
+Kabla yake (au baada yake), ongeza mstari huu:
+  <link rel="manifest" href="manifest.json">
+
+
+HATUA 3 — Ongeza mistari hii kabla ya </body>, BAADA ya script zako zote
+--------------------------------------------------------------------------
+Karibu na mwisho wa index.html, pale ambapo umeweka <script src="announcements.js">
+au script ya mwisho, ongeza mistari hii MARA MOJA TU (usiirudie):
+
+  <script src="incident-ai.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+  </script>
+
+Kisha </body></html> kama kawaida.
+
+
+HATUA 4 (SI LAZIMA) — fire_education.html yako
+------------------------------------------------
+Kama unataka ukurasa huo nao ufanye kazi bila internet baada ya kufunguliwa
+mara moja, ongeza mistari hii kabla ya </script> ya mwisho ya faili hiyo:
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+
+Hii si ya lazima kwa Incident AI kufanya kazi — ni kwa ajili ya offline-caching
+tu ya ukurasa huo maalum.
+
+
+HATUA 5 — Angalia sw.js yako mpya (SI LAZIMA kuihariri)
+----------------------------------------------------------
+Ndani ya sw.js kuna orodha ya majina ya faili (APP_SHELL) inayotarajia majina
+yafuatayo: index.html, style.css?v=3, core.js?v=5, script.js?v=6, sync.js?v=1,
+announcements.js?v=3. Kama majina/version (?v=) ya faili zako ni tofauti kidogo,
+fungua sw.js na urekebishe orodha hiyo ili yalingane na majina halisi ya faili
+zako (au uache tu — faili moja kutokuwepo haizuii nyingine kuhifadhiwa, service
+worker itaruka tu ile isiyopatikana).
+
+
+HATUA 6 — Jaribu
+-------------------
+1. Pakia faili zote kwenye hosting yako (GitHub Pages).
+2. Fungua website kwenye kivinjari — utaona kitufe cha 🧠 chini-kulia.
+3. Bonyeza, uliza swali kama "PASS Technique ni nini" au "ripoti ngapi mwezi
+   huu" — utaona majibu bila internet.
+
+Hilo ndilo lote linalohitajika. Incident AI haihitaji mabadiliko yoyote
+kwenye script.js, core.js, sync.js, wala announcements.js zako.
