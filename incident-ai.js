@@ -350,8 +350,8 @@
     "Ripoti ngapi mwezi huu?",
     "Ninawezaje kuunda ripoti mpya?",
     "PASS Technique ni nini?",
-    "Tofauti ya Flashover na Backdraft ni nini?",
-    "HazMat zones (Hot/Warm/Cold) ni zipi?",
+    "Elezea Flashover?",
+    "Maana ya Moto?",
     "Fire flow kwa jengo 20m x 15m ni lita ngapi?",
   ];
 
