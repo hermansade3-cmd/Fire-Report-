@@ -1171,13 +1171,263 @@ ${incidentRecordsText || "(hakuna)"}
 SWALI LA MTUMIAJI: ${userQuestion}`;
   }
 
+  // ---- 7. HAZMAT REFERENCE DATA (LEL/UEL/Flash point, NFPA 704) --------
+  // Takwimu za kawaida za kumbukumbu (reference values) zinazofanana na
+  // zile zinazochapishwa kwenye SDS/NIOSH Pocket Guide na vitabu vya
+  // mafunzo ya HazMat. Bidhaa halisi hutofautiana kidogo kulingana na
+  // muundo/mchanganyiko — hizi ni MAKADIRIO ya kufundishia/uelewa wa
+  // haraka, si mbadala wa SDS halisi ya bidhaa husika.
+  const HAZMAT_FUELS = {
+    "petroli": { en: "gasoline/petrol", flash_c: -43, lel: 1.4, uel: 7.6 },
+    "gasolini": { en: "gasoline/petrol", flash_c: -43, lel: 1.4, uel: 7.6 },
+    "dizeli": { en: "diesel", flash_c: "52–96", lel: 0.6, uel: 7.5 },
+    "mafuta ya taa": { en: "kerosene", flash_c: "38–72", lel: 0.7, uel: 5 },
+    "lpg": { en: "LPG (propane/butane)", flash_c: -104, lel: 1.8, uel: 9.5 },
+    "gesi": { en: "LPG (propane/butane)", flash_c: -104, lel: 1.8, uel: 9.5 },
+    "methane": { en: "methane / natural gas", flash_c: -188, lel: 5, uel: 15 },
+    "spiriti": { en: "ethanol", flash_c: 13, lel: 3.3, uel: 19 },
+    "ethanol": { en: "ethanol", flash_c: 13, lel: 3.3, uel: 19 },
+    "asetoni": { en: "acetone", flash_c: -20, lel: 2.5, uel: 12.8 },
+  };
+
+  function hazmatFuelLookup(query) {
+    const q = normalize(query);
+    for (const key of Object.keys(HAZMAT_FUELS)) {
+      if (q.includes(key)) {
+        const f = HAZMAT_FUELS[key];
+        return {
+          answer:
+            `Takwimu za kumbukumbu za ${key} (${f.en}):\n` +
+            `• Flash point (joto la chini kabisa linalotoa mvuke wa kutosha kuwaka): ${f.flash_c}°C\n` +
+            `• LEL (Lower Explosive/Flammable Limit): ~${f.lel}%\n` +
+            `• UEL (Upper Explosive/Flammable Limit): ~${f.uel}%\n\n` +
+            `Maana yake: mvuke wa dutu hii unaweza kulipuka/kuwaka pale mkusanyiko wake hewani uko KATI ya LEL na UEL. Chini ya LEL, mchanganyiko ni "mwepesi sana" (too lean); juu ya UEL ni "mzito sana" (too rich) kuwaka — lakini bado ni hatari kiafya na unaweza kuwaka ukichanganyika na hewa zaidi.\n\n` +
+            `⚠️ Haya ni makadirio ya jumla ya kumbukumbu pekee. Bidhaa halisi (mchanganyiko, uchafu, joto la mazingira) yanaweza kutofautiana — daima tumia SDS (Safety Data Sheet) rasmi ya bidhaa husika kwa maamuzi ya uendeshaji au usalama kazini.`,
+          confidence: "high",
+        };
+      }
+    }
+    return null;
+  }
+
+  function nfpa704Explain(h, f, r, special) {
+    const HEALTH = ["Hakuna hatari maalum zaidi ya moto wa kawaida", "Hatari kidogo — inaweza kuwasha ngozi/macho tu", "Hatari ya wastani — inaweza kusababisha kupoteza fahamu kwa muda", "Hatari kubwa — jeraha kubwa linawezekana bila matibabu ya haraka", "Hatari kali sana — inaweza kuua kwa mfiduo mfupi"];
+    const FLAM = ["Haiwaki", "Inahitaji joto kubwa la awali (preheating) kuwaka", "Inahitaji joto la wastani kuwaka", "Inaweza kuwaka kwenye halijoto nyingi za kawaida", "Inawaka kwa urahisi sana / gesi zinazoweza kuwaka sana / tete sana"];
+    const REACT = ["Imara/thabiti, si tendaji", "Isiyo thabiti ikipashwa joto au kubanwa", "Mabadiliko makali ya kikemikali yanawezekana", "Inaweza kulipuka ikisukumwa na chanzo dhabiti (strong initiator)", "Inaweza kulipuka kwa urahisi hali ya kawaida"];
+    const clamp = (v) => Math.max(0, Math.min(4, Number(v) || 0));
+    h = clamp(h); f = clamp(f); r = clamp(r);
+    let lines = [
+      `NFPA 704 "Fire Diamond": Afya(bluu)=${h}, Uwakaji(nyekundu)=${f}, Utendaji/Mlipuko(njano)=${r}${special ? ", Maalum(nyeupe)=" + special : ""}`,
+      `🔵 Afya (${h}): ${HEALTH[h]}`,
+      `🔴 Uwakaji (${f}): ${FLAM[f]}`,
+      `🟡 Utendaji/Mlipuko (${r}): ${REACT[r]}`,
+    ];
+    if (special) {
+      const sp = String(special).toUpperCase();
+      const map = { OX: "Oxidizer — huongeza kasi ya mwako wa vitu vingine", W: "Usitumie maji — humenyuka hatari na maji", SA: "Gesi ya kuzuia hewa tu (simple asphyxiant)", COR: "Kutu/corrosive", ACID: "Asidi", ALK: "Alkali" };
+      lines.push(`⚪ Alama maalum (${sp}): ${map[sp] || "angalia kanuni ya eneo lako kwa maana kamili ya alama hii"}`);
+    }
+    lines.push("Kumbuka: namba za juu (3-4) zinaonyesha hatari kubwa zaidi. Diamond hii ni muhtasari wa haraka wa hatari — si mbadala wa SDS kamili.");
+    return { answer: lines.join("\n"), confidence: "high" };
+  }
+
+  // ---- 8. CALCULATION ENGINE (Hesabu za Fire Science) -------------------
+  // Fomula zinazotumika sana kwenye mafunzo ya kimataifa ya zimamoto
+  // (mfano National Fire Academy Fire Flow Formula, IFSTA-style friction
+  // loss coefficients). Hizi ni MAKADIRIO ya mafunzo/upangaji wa awali —
+  // si hesabu kamili za kihandisi za mfumo wa maji wala uamuzi wa
+  // mwisho wa uendeshaji. Thibitisha kila mara na Afisa Uzimaji na
+  // taratibu za eneo lako kabla ya kutumia kwenye tukio halisi.
+  const FT2_PER_M2 = 10.7639;
+  const GPM_PER_LPM = 0.264172;
+  const LPM_PER_GPM = 3.78541;
+
+  // Fire Flow (National Fire Academy formula): NFF(gpm) = (L_ft x W_ft) / 3
+  // NFF hiyo hurekebishwa kwa asilimia ya jengo inayowaka na idadi ya
+  // ghorofa zinazohusika.
+  function calcFireFlow({ lengthM, widthM, percentInvolved = 100, floorsInvolved = 1 }) {
+    if (!lengthM || !widthM) return null;
+    const areaM2 = lengthM * widthM;
+    const areaFt2 = areaM2 * FT2_PER_M2;
+    let nffGpm = areaFt2 / 3;
+    nffGpm *= (percentInvolved / 100);
+    nffGpm *= floorsInvolved;
+    const nffLpm = nffGpm * LPM_PER_GPM;
+    return {
+      areaM2: Math.round(areaM2),
+      nffGpm: Math.round(nffGpm),
+      nffLpm: Math.round(nffLpm),
+      answer:
+        `Kwa jengo/chumba chenye eneo la sakafu ${lengthM}m x ${widthM}m (≈ ${Math.round(areaM2)} m²), ` +
+        `ikiwa ${percentInvolved}% ya eneo linahusika na ghorofa ${floorsInvolved} zinazowaka:\n\n` +
+        `Mtiririko wa maji unaohitajika (Needed Fire Flow, fomula ya National Fire Academy: (Urefu_ft x Upana_ft) / 3):\n` +
+        `≈ ${Math.round(nffLpm)} lita/dakika (≈ ${Math.round(nffGpm)} GPM)\n\n` +
+        `⚠️ Hii ni fomula ya makadirio ya mafunzo kwa jengo la kawaida (light/ordinary hazard). Majengo yenye hatari kubwa ` +
+        `zaidi (maghala ya kemikali, hifadhi ya mafuta n.k.) yanahitaji hesabu tofauti na mtaalamu wa fire protection engineering.`,
+      confidence: "high",
+    };
+  }
+
+  // Friction loss kwenye hose: FL (psi kwa futi 100) = C x Q^2 (Q kwa mamia ya GPM)
+  const HOSE_C_BY_MM = [
+    { mm: 38, inch: "1.5\"", c: 24 },
+    { mm: 45, inch: "1.75\"", c: 15.5 },
+    { mm: 50, inch: "2\"", c: 8 },
+    { mm: 65, inch: "2.5\"", c: 2 },
+    { mm: 77, inch: "3\"", c: 0.8 },
+    { mm: 100, inch: "4\"", c: 0.2 },
+    { mm: 125, inch: "5\"", c: 0.08 },
+  ];
+  function nearestHose(mm) {
+    return HOSE_C_BY_MM.reduce((best, h) => (Math.abs(h.mm - mm) < Math.abs(best.mm - mm) ? h : best));
+  }
+  function calcFrictionLoss({ flowLpm, hoseDiameterMm, lengthM }) {
+    if (!flowLpm || !hoseDiameterMm || !lengthM) return null;
+    const hose = nearestHose(hoseDiameterMm);
+    const flowGpm = flowLpm * GPM_PER_LPM;
+    const Q = flowGpm / 100; // mamia ya GPM
+    const lengthFt = lengthM * 3.28084;
+    const flPer100ft = hose.c * Q * Q;
+    const flTotalPsi = flPer100ft * (lengthFt / 100);
+    const flTotalBar = flTotalPsi * 0.0689476;
+    return {
+      hose,
+      flTotalPsi: Math.round(flTotalPsi * 10) / 10,
+      flTotalBar: Math.round(flTotalBar * 100) / 100,
+      answer:
+        `Kwa hose ya karibu ${hose.inch} (≈${hose.mm}mm, coefficient C≈${hose.c}), urefu ${lengthM}m, mtiririko ${flowLpm} L/dak (≈${Math.round(flowGpm)} GPM):\n\n` +
+        `Upotevu wa shinikizo kwa msuguano (friction loss) ≈ ${Math.round(flTotalPsi * 10) / 10} psi (≈ ${Math.round(flTotalBar * 100) / 100} bar)\n\n` +
+        `⚠️ Hii ni fomula ya kawaida ya mafunzo ya IFSTA-style (FL = C x Q² x urefu/100ft). Haijumuishi upotevu wa vifaa (appliance loss), ` +
+        `tofauti ya urefu (elevation), au aina maalum ya hose ya kampuni yako — thibitisha na jedwali/SOG ya kituo chako.`,
+      confidence: "high",
+    };
+  }
+
+  function calcWaterDuration({ tankLiters, flowLpm }) {
+    if (!tankLiters || !flowLpm) return null;
+    const minutes = tankLiters / flowLpm;
+    return {
+      minutes: Math.round(minutes * 10) / 10,
+      answer:
+        `Tanki ya lita ${tankLiters} ikitoa lita ${flowLpm}/dakika itaisha baada ya takriban dakika ${Math.round(minutes * 10) / 10} ` +
+        `(≈ ${Math.round((minutes / 60) * 10) / 10} saa). Panga chanzo cha pili cha maji (hydrant, tanker nyingine) kabla ya muda huo kuisha.`,
+      confidence: "high",
+    };
+  }
+
+  function calcOccupantLoad({ areaM2, factorM2PerPerson }) {
+    if (!areaM2 || !factorM2PerPerson) return null;
+    const occupants = Math.floor(areaM2 / factorM2PerPerson);
+    return {
+      occupants,
+      answer:
+        `Eneo la m² ${areaM2} likigawanywa kwa kigezo cha m² ${factorM2PerPerson} kwa kila mtu (occupant load factor) ` +
+        `linatoa makadirio ya watu wapatao ${occupants}.\n\n` +
+        `Vigezo vya kawaida vya kumbukumbu (NFPA 101-style, hutofautiana kwa kanuni ya eneo lako): ofisi ≈9.3 m²/mtu, ` +
+        `maduka ≈5.6 m²/mtu, kumbi za mikusanyiko (watu wamesimama) ≈0.65 m²/mtu, madarasa ≈1.9 m²/mtu.\n\n` +
+        `⚠️ Hii ni makadirio ya upangaji wa awali tu — matumizi rasmi (idhini ya jengo, mpango wa uokoaji) yanahitaji ` +
+        `hesabu kamili kulingana na kanuni za ujenzi za eneo lako.`,
+      confidence: "high",
+    };
+  }
+
+  // Kigunduzi cha aina ya hesabu inayoombwa + namba zilizomo kwenye swali
+  function parseNumbers(text) {
+    const matches = (text.match(/\d+(\.\d+)?/g) || []).map(Number);
+    return matches;
+  }
+
+  const CALC_PATTERNS = [
+    { type: "fire_flow", re: /(fire ?flow|mtiririko wa maji unaohitajika|needed fire flow|nff)\b/i },
+    { type: "friction_loss", re: /(friction loss|upotevu wa shinikizo|msuguano.*hose|hose.*msuguano)\b/i },
+    { type: "water_duration", re: /(tanki.*(itaisha|muda)|muda.*maji.*(yataisha|itaisha)|water supply duration|how long.*tank)/i },
+    { type: "occupant_load", re: /(occupant load|idadi ya watu.*eneo|watu wangapi.*eneo|watu wangapi.*jengo)/i },
+    { type: "hazmat_fuel", re: /(flash point|lel|uel|kiwango cha kuwaka|mvuke.*(kuwaka|lipuka))/i },
+    { type: "nfpa704", re: /(nfpa ?704|fire diamond|almasi ya moto)/i },
+  ];
+
+  function detectCalcType(query) {
+    for (const p of CALC_PATTERNS) if (p.re.test(query)) return p.type;
+    return null;
+  }
+
+  // Jaribio la ku-map namba zilizopatikana kwenye maswali ya kawaida ya
+  // maandishi huru (free text) kwenye vigezo vinavyohitajika. Kama namba
+  // hazitoshi, hurudisha ombi la taarifa zaidi badala ya kubuni namba.
+  function calculate(query) {
+    const type = detectCalcType(query);
+    if (!type) return null;
+    const nums = parseNumbers(query);
+
+    if (type === "hazmat_fuel") {
+      const r = hazmatFuelLookup(query);
+      if (r) return r;
+      return { answer: "Taja jina la dutu (mfano: petroli, dizeli, LPG, methane, spiriti) ili nikupe flash point/LEL/UEL yake.", confidence: "low" };
+    }
+
+    if (type === "nfpa704") {
+      // "704" yenyewe (kutoka "NFPA 704") isihesabiwe kama moja ya namba tatu
+      // za Afya/Uwakaji/Utendaji zinazotafutwa hapa.
+      const nfpaNums = parseNumbers(query.replace(/\b704\b/g, " "));
+      if (nfpaNums.length >= 3) return nfpa704Explain(nfpaNums[0], nfpaNums[1], nfpaNums[2], null);
+      return { answer: "Nipe namba tatu za NFPA 704 kwa mpangilio: Afya, Uwakaji, Utendaji/Mlipuko (mfano \"NFPA 704 2 3 0\").", confidence: "low" };
+    }
+
+    if (type === "fire_flow") {
+      if (nums.length >= 2) {
+        const [lengthM, widthM, percentInvolved, floorsInvolved] = nums;
+        const r = calcFireFlow({ lengthM, widthM, percentInvolved: percentInvolved || 100, floorsInvolved: floorsInvolved || 1 });
+        if (r) return r;
+      }
+      return { answer: "Nipe urefu na upana wa eneo la sakafu kwa mita (mfano \"fire flow kwa jengo 20m x 15m\"), na kama unataka, asilimia inayowaka na idadi ya ghorofa.", confidence: "low" };
+    }
+
+    if (type === "friction_loss") {
+      if (nums.length >= 3) {
+        const [flowLpm, hoseDiameterMm, lengthM] = nums;
+        const r = calcFrictionLoss({ flowLpm, hoseDiameterMm, lengthM });
+        if (r) return r;
+      }
+      return { answer: "Nipe mtiririko (L/dak), kipenyo cha hose (mm), na urefu wa hose (m) — mfano \"friction loss 400 L/dak hose 65mm urefu 60m\".", confidence: "low" };
+    }
+
+    if (type === "water_duration") {
+      if (nums.length >= 2) {
+        const [tankLiters, flowLpm] = nums;
+        const r = calcWaterDuration({ tankLiters, flowLpm });
+        if (r) return r;
+      }
+      return { answer: "Nipe ujazo wa tanki (lita) na mtiririko (L/dak) — mfano \"tanki ya lita 5000 ikitoa lita 400 kwa dakika itaisha lini\".", confidence: "low" };
+    }
+
+    if (type === "occupant_load") {
+      if (nums.length >= 2) {
+        const [areaM2, factorM2PerPerson] = nums;
+        const r = calcOccupantLoad({ areaM2, factorM2PerPerson });
+        if (r) return r;
+      }
+      return { answer: "Nipe eneo la sakafu (m²) na kigezo cha m² kwa kila mtu — mfano \"occupant load eneo 300 kigezo 9.3\".", confidence: "low" };
+    }
+
+    return null;
+  }
+
   global.FireSafetyKB = {
     records: RECORDS,
     search,
     safetyFilter,
     getAnswer,
     buildPrompt,
-    version: "1.0.0",
+    calculate,
+    calc: {
+      fireFlow: calcFireFlow,
+      frictionLoss: calcFrictionLoss,
+      waterDuration: calcWaterDuration,
+      occupantLoad: calcOccupantLoad,
+      hazmatFuelLookup,
+      nfpa704Explain,
+    },
+    version: "1.1.0",
     recordCount: RECORDS.length,
   };
 })(typeof window !== "undefined" ? window : globalThis);
