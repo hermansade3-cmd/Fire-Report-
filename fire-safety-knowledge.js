@@ -1007,7 +1007,7 @@
   const STOPWORDS = new Set([
     "the","a","an","is","are","do","does","did","can","could","should","i","my","me","to","of","in","on",
     "for","and","or","what","how","when","which","if","it","this","that","with","be","use",
-    "ni","na","kwa","je","nini","gani","au","ya","wa","la","kama","mimi","yangu"
+    "ni","na","kwa","je","nini","gani","vipi","namna","maana","au","ya","wa","la","kama","mimi","yangu"
   ]);
 
   function normalize(text) {
