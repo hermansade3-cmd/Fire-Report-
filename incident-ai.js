@@ -9,7 +9,11 @@
  *  3) Anasoma (read-only) data halisi ya ripoti kutoka RescueDB (IndexedDB) kujibu maswali
  *     kama "ripoti ngapi mwezi huu" kwa takwimu za kweli za kifaa hiki — hauandiki wala
  *     kubadilisha chochote kwenye data yako, na hatumi popote nje ya kifaa.
- *  4) Kwa swali lolote, hutafuta ulinganifu bora kati ya maneno ya swali na (1)+(2)+(3) hapo
+ *  4) Kama fire-safety-knowledge.js imepakiwa KABLA ya faili hili (window.FireSafetyKB),
+ *     Incident AI pia huuliza hifadhi hiyo ya nje — ambayo ina maelezo ya kina zaidi
+ *     (onyo la usalama, "usijaribu kama...", kitendo kinachopendekezwa) — na kuchagua
+ *     jibu bora kati ya hifadhi hizo mbili.
+ *  5) Kwa swali lolote, hutafuta ulinganifu bora kati ya maneno ya swali na (1)+(2)+(4) hapo
  *     juu, kwa "keyword/overlap scoring" ya ndani ya kivinjari — si generative AI ya nje.
  *
  * Created for Herman Sade's Fire Report app.
@@ -76,7 +80,7 @@
   // Each intent: a test regex + a function(stats) -> {text, action?}
   const DATA_INTENTS = [
     {
-      test: /(ripoti|report).*(ngapi|idadi|jumla)|jumla ya ripoti|idadi ya ripoti|total reports|how many reports/i,
+      test: /^(?!.*(vifo|wafariki|fatalit|majeruhi|casualt|waliojeruhiwa)).*((ripoti|report).*(ngapi|idadi|jumla)|jumla ya ripoti|idadi ya ripoti|total reports|how many reports)/i,
       run: (s) => ({ text: `Kwa sasa una jumla ya ${s.total} ripoti kwenye kifaa hiki: ${s.byStatus.DRAFT} Drafti, ${s.byStatus.IN_PROGRESS} zinazoendelea, ${s.byStatus.COMPLETED} zilizokamilika, na ${s.byStatus.ARCHIVED} zilizohifadhiwa (Archive). Kuna pia ${s.trashCount} kwenye Trash.` }),
     },
     {
@@ -108,15 +112,15 @@
       run: (s) => ({ text: `Umeandika ripoti ${s.monthCount} mwezi huu.` }),
     },
     {
-      test: /vifo|wafariki|fatality|fatalities|waliofariki/i,
+      test: /(ripoti|takwimu|report).*(vifo|wafariki|fatalit)|((vifo|wafariki|fatalit).*(ripoti|takwimu|zilizorekodiwa|kwenye))/i,
       run: (s) => ({ text: s.fatalities > 0 ? `Jumla ya vifo vilivyorekodiwa kwenye ripoti zote ni ${s.fatalities}.` : `Hakuna vifo vilivyorekodiwa kwenye ripoti zako kwa sasa.` }),
     },
     {
-      test: /majeruhi|casualt|waliojeruhiwa/i,
+      test: /(ripoti|takwimu|report).*(majeruhi|casualt)|((majeruhi|waliojeruhiwa|casualt).*(ripoti|takwimu|walioripotiwa|kwenye))/i,
       run: (s) => ({ text: s.casualties > 0 ? `Jumla ya majeruhi waliorekodiwa kwenye ripoti zote ni ${s.casualties}.` : `Hakuna majeruhi waliorekodiwa kwenye ripoti zako kwa sasa.` }),
     },
     {
-      test: /aina (ya|za) (matukio|tukio|ripoti)|aina gani ya matukio|incident type/i,
+      test: /aina (ya|za) (matukio|tukio|ripoti) (yangu|zangu|niliyoripoti)|takwimu (za|ya) aina za matukio|mgawanyo wa (aina za )?matukio/i,
       run: (s) => {
         if (!s.total) return { text: "Bado hakuna ripoti za kutosha kuonyesha aina za matukio." };
         const lines = Object.keys(s.byType).sort((a, b) => s.byType[b] - s.byType[a])
@@ -125,7 +129,7 @@
       },
     },
     {
-      test: /matukio (mengi zaidi|makubwa)|aina inayoongoza|top type|tukio linaloongoza/i,
+      test: /matukio (mengi zaidi|makubwa) (kwenye ripoti|niliyoripoti)|aina inayoongoza kwenye ripoti|tukio linaloongoza kwenye ripoti/i,
       run: (s) => ({ text: s.topType ? `Aina ya tukio inayojitokeza zaidi kwenye ripoti zako ni "${s.topType}" (mara ${s.topTypeCount}).` : "Bado hakuna ripoti za kutosha kubaini hilo." }),
     },
     {
@@ -204,21 +208,58 @@
     if (best.type === "faq") {
       return { text: best.item.a, action: best.item.action || null };
     }
-    return { text: `**${best.item.title}**\n\n${best.item.text}` };
+    return { text: `**${best.item.title}**\n\n${best.item.text}`, score: bestScore };
   }
 
   // ============================================================
   // 5) Answer dispatcher
   // ============================================================
+  // Priority order:
+  //   a) Own-report statistics — ONLY when the question is clearly about
+  //      the user's own saved reports (avoids generic words like "vifo"
+  //      or "majeruhi" hijacking a fire-science question).
+  //   b) External Fire Safety Knowledge Base (window.FireSafetyKB, loaded
+  //      from fire-safety-knowledge.js) — richer records with safety
+  //      warnings and recommended actions.
+  //   c) Built-in APP_FAQ + FIRE_KB (this file's own knowledge).
+  //   d) Fallback "sijapata jibu" message.
   async function answerQuestion(query) {
+    // (a) own-report stats — intents below are now scoped to report context
     for (const intent of DATA_INTENTS) {
       if (intent.test.test(query)) {
         const stats = await getStats();
         if (stats) return intent.run(stats);
       }
     }
+
+    // (b) external Fire Safety Knowledge Base, if fire-safety-knowledge.js
+    // was loaded before this script (see header comment / <script> order)
+    let fskResult = null;
+    if (typeof window !== "undefined" && window.FireSafetyKB && typeof window.FireSafetyKB.getAnswer === "function") {
+      try {
+        const r = window.FireSafetyKB.getAnswer(query);
+        if (r && r.answer && r.confidence !== "low") {
+          fskResult = { text: r.answer, confidence: r.confidence };
+        }
+      } catch (e) {
+        // FireSafetyKB failed for some reason — fall through silently to built-in KB
+        fskResult = null;
+      }
+    }
+
+    // (c) built-in FAQ + fire-science book
     const kbAnswer = findBestAnswer(query);
+
+    // Prefer whichever source matched with higher confidence. The external
+    // KB reports "high"/"medium"/"low"; the built-in KB reports a raw score.
+    // If the external KB matched with "high" confidence, prefer it (it has
+    // structured safety_warning / recommended_action fields the built-in
+    // FIRE_KB summaries don't carry). Otherwise prefer the built-in KB if it
+    // matched, and fall back to the external one.
+    if (fskResult && fskResult.confidence === "high") return fskResult;
     if (kbAnswer) return kbAnswer;
+    if (fskResult) return fskResult;
+
     return {
       text: "Samahani, sijapata jibu sahihi la hilo. Unaweza kuniuliza kuhusu: jinsi ya kutumia app hii (ripoti mpya, backup, archive, trash, settings), takwimu za ripoti zako (mfano: \"ripoti ngapi mwezi huu\"), au maswali ya Sayansi ya Moto (mfano: \"PASS technique ni nini\", \"tofauti ya Class A na B\").",
     };
