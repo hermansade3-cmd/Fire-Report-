@@ -131,19 +131,20 @@
     "category": "Water",
     "subcategory": "Water extinguishers",
     "topic": "What is a water fire extinguisher used for?",
-    "question": [
-      "water extinguisher",
-      "water fire extinguisher"
-    ],
+    "question": "water extinguisher, water fire extinguisher",
     "keywords_en": [
+      "water extinguisher",
+      "water fire extinguisher",
+      "class a extinguisher"
+    ],
+    "keywords_sw": [
       "kizima moto cha maji"
     ],
-    "keywords_sw": "Water extinguishers cool ordinary combustible materials (wood, paper, cloth, most plastics) below their ignition temperature. They work by removing heat.",
-    "answer": "Never use water on burning cooking oil/fat, on flammable liquid fires, or on live electrical equipment — it can cause violent splashing, spread the fire, or cause electrocution.",
-    "safety_warning": "Do not use on oil/grease fires, fuel fires, or any fire near live electricity.",
-    "when_not_to_attempt": "Use only on ordinary combustible material fires (wood, paper, textiles) where the area is not near live electrical equipment.",
-    "recommended_action": null,
-    "emergency_action": "high",
+    "answer": "Water extinguishers cool ordinary combustible materials (wood, paper, cloth, most plastics) below their ignition temperature. They work by removing heat.",
+    "safety_warning": "Do not use on oil/grease fires, flammable-liquid fires, or any fire near live electricity — it can cause violent splashing, spread the fire, or cause electrocution.",
+    "when_not_to_attempt": "Do not use on flammable-liquid fires, cooking-oil fires, or any fire near live electrical equipment.",
+    "recommended_action": "Use only on ordinary combustible material fires (wood, paper, textiles) where the area is not near live electrical equipment.",
+    "emergency_action": null,
     "source_name": "Fire & Rescue Force (Tanzania) general guidance / recognized international fire-safety practice (e.g. NFPA, ISO 3941 fire classification) — verify and replace with a specific citation before publishing",
     "source_url": null,
     "priority": "medium",
@@ -157,18 +158,19 @@
     "category": "Foam",
     "subcategory": "Foam extinguishers",
     "topic": "What is a foam fire extinguisher used for?",
-    "question": [
-      "foam extinguisher"
-    ],
+    "question": "foam extinguisher, afff extinguisher",
     "keywords_en": [
+      "foam extinguisher",
+      "afff extinguisher"
+    ],
+    "keywords_sw": [
       "kizima moto cha povu"
     ],
-    "keywords_sw": "Foam extinguishers smother the fire with a foam blanket, cutting off oxygen. They are effective on ordinary combustibles and on many flammable-liquid fires because the foam floats on the liquid surface and suppresses vapor.",
-    "answer": "Not generally suitable for fires involving live electrical equipment (foam contains water and conducts electricity) or for cooking-oil fires.",
-    "safety_warning": "Do not use on live electrical equipment or on hot cooking-oil fires.",
-    "when_not_to_attempt": "Apply in a sweeping motion at the base of the fire, letting the foam build up and cover the burning surface.",
-    "recommended_action": null,
-    "emergency_action": "medium",
+    "answer": "Foam extinguishers smother the fire with a foam blanket, cutting off oxygen. They are effective on ordinary combustibles and on many flammable-liquid fires because the foam floats on the liquid surface and suppresses vapor.",
+    "safety_warning": "Not generally suitable for fires involving live electrical equipment (foam contains water and conducts electricity) or for cooking-oil fires.",
+    "when_not_to_attempt": "Do not use on live electrical equipment or on hot cooking-oil fires.",
+    "recommended_action": "Apply in a sweeping motion at the base of the fire, letting the foam build up and cover the burning surface.",
+    "emergency_action": null,
     "source_name": "Fire & Rescue Force (Tanzania) general guidance / recognized international fire-safety practice (e.g. NFPA, ISO 3941 fire classification) — verify and replace with a specific citation before publishing",
     "source_url": null,
     "priority": "medium",
@@ -182,20 +184,20 @@
     "category": "Dry Powder",
     "subcategory": "Dry chemical / dry powder extinguishers",
     "topic": "What is a dry powder fire extinguisher used for?",
-    "question": [
+    "question": "dry powder extinguisher, dry chemical extinguisher, abc powder extinguisher",
+    "keywords_en": [
       "dry powder extinguisher",
       "dry chemical extinguisher",
       "abc powder extinguisher"
     ],
-    "keywords_en": [
+    "keywords_sw": [
       "kizima moto cha unga"
     ],
-    "keywords_sw": "Dry powder (dry chemical) extinguishers interrupt the chemical chain reaction and can also smother small areas of fuel. Multi-purpose (ABC) powder types can be used on ordinary combustibles, flammable liquids, and some electrical fires when de-energized.",
-    "answer": "Powder can obscure vision and is not ideal in small enclosed spaces or near sensitive electronics. It generally does not cool the fuel, so reignition is possible.",
-    "safety_warning": "Avoid prolonged use in small unventilated rooms; avoid on delicate electronics if alternatives exist.",
-    "when_not_to_attempt": "Aim at the base of the flames and sweep side to side; watch for reignition.",
-    "recommended_action": null,
-    "emergency_action": "medium",
+    "answer": "Dry powder (dry chemical) extinguishers interrupt the chemical chain reaction and can also smother small areas of fuel. Multi-purpose (ABC) powder types can be used on ordinary combustibles, flammable liquids, and some electrical fires when de-energized.",
+    "safety_warning": "Powder can obscure vision and is not ideal in small enclosed spaces or near sensitive electronics. It generally does not cool the fuel, so reignition is possible. Avoid prolonged use in small unventilated rooms; avoid on delicate electronics if alternatives exist.",
+    "when_not_to_attempt": "Avoid using in small, poorly ventilated spaces or near sensitive electronics if an alternative extinguisher is available.",
+    "recommended_action": "Aim at the base of the flames and sweep side to side; watch for reignition.",
+    "emergency_action": null,
     "source_name": "Fire & Rescue Force (Tanzania) general guidance / recognized international fire-safety practice (e.g. NFPA, ISO 3941 fire classification) — verify and replace with a specific citation before publishing",
     "source_url": null,
     "priority": "medium",
@@ -209,19 +211,19 @@
     "category": "CO2",
     "subcategory": "Carbon dioxide (CO2) extinguishers",
     "topic": "What is a CO2 fire extinguisher used for?",
-    "question": [
+    "question": "co2 extinguisher, carbon dioxide extinguisher",
+    "keywords_en": [
       "co2 extinguisher",
       "carbon dioxide extinguisher"
     ],
-    "keywords_en": [
+    "keywords_sw": [
       "kizima moto cha co2"
     ],
-    "keywords_sw": "CO2 extinguishers displace oxygen around the fire and are well suited to fires involving live electrical equipment because CO2 leaves no residue and does not conduct electricity.",
-    "answer": "CO2 can reduce breathable oxygen in the immediate area, especially in small enclosed spaces; the discharge horn also becomes extremely cold.",
-    "safety_warning": "Do not use in very small, poorly ventilated rooms without ensuring you can exit immediately; avoid direct skin contact with the discharge horn.",
-    "when_not_to_attempt": "Aim at the base of the fire and keep a clear route to exit; ventilate the area afterward.",
-    "recommended_action": null,
-    "emergency_action": "medium",
+    "answer": "CO2 extinguishers displace oxygen around the fire and are well suited to fires involving live electrical equipment because CO2 leaves no residue and does not conduct electricity.",
+    "safety_warning": "CO2 can reduce breathable oxygen in the immediate area, especially in small enclosed spaces; the discharge horn also becomes extremely cold. Do not use in very small, poorly ventilated rooms without ensuring you can exit immediately; avoid direct skin contact with the discharge horn.",
+    "when_not_to_attempt": "Avoid discharging in very small, poorly ventilated rooms unless you can exit immediately afterward.",
+    "recommended_action": "Aim at the base of the fire and keep a clear route to exit; ventilate the area afterward.",
+    "emergency_action": null,
     "source_name": "Fire & Rescue Force (Tanzania) general guidance / recognized international fire-safety practice (e.g. NFPA, ISO 3941 fire classification) — verify and replace with a specific citation before publishing",
     "source_url": null,
     "priority": "medium",
@@ -235,19 +237,19 @@
     "category": "Wet Chemical",
     "subcategory": "Wet chemical extinguishers for cooking fires",
     "topic": "What is a wet chemical fire extinguisher used for?",
-    "question": [
+    "question": "wet chemical extinguisher, kitchen extinguisher",
+    "keywords_en": [
       "wet chemical extinguisher",
       "kitchen extinguisher"
     ],
-    "keywords_en": [
+    "keywords_sw": [
       "kizima moto cha kemikali maji kwa jikoni"
     ],
-    "keywords_sw": "Wet chemical extinguishers are specifically designed for cooking-oil and fat fires. They create a soapy layer (saponification) over the burning oil that cools it and seals it from oxygen.",
-    "answer": "This is the recommended extinguisher type for deep-fat fryer and cooking-oil fires; other extinguisher types are less effective or dangerous on burning oil.",
+    "answer": "Wet chemical extinguishers are specifically designed for cooking-oil and fat fires. They create a soapy layer (saponification) over the burning oil that cools it and seals it from oxygen. This is the recommended extinguisher type for deep-fat fryer and cooking-oil fires; other extinguisher types are less effective or dangerous on burning oil.",
     "safety_warning": null,
-    "when_not_to_attempt": "Apply slowly and at a safe distance following the extinguisher's instructions, since oil fires can flare when first disturbed.",
-    "recommended_action": null,
-    "emergency_action": "high",
+    "when_not_to_attempt": null,
+    "recommended_action": "Apply slowly and at a safe distance following the extinguisher's instructions, since oil fires can flare when first disturbed.",
+    "emergency_action": null,
     "source_name": "Fire & Rescue Force (Tanzania) general guidance / recognized international fire-safety practice (e.g. NFPA, ISO 3941 fire classification) — verify and replace with a specific citation before publishing",
     "source_url": null,
     "priority": "medium",
