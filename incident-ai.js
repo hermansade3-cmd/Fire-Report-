@@ -249,24 +249,24 @@
     document.head.insertAdjacentHTML("beforeend", `
     <style>
       #iai-launcher {
-        position: fixed; right: 16px; bottom: calc(var(--nav-h, 64px) + 16px);
-        width: 52px; height: 52px; border-radius: 50%; border: none;
-        background: var(--accent, #e05a2f); color: #fff; font-size: 24px;
-        display: flex; align-items: center; justify-content: center;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.28); cursor: pointer; z-index: 999998;
-        transition: transform .2s ease;
+        position: fixed; right: 16px; bottom: calc(var(--nav-h, 64px) + 12px);
+        width: 32px; height: 32px; border-radius: 50%; border: none;
+        background: transparent; padding: 0; color: inherit; font-size: 22px;
+        line-height: 1; display: flex; align-items: center; justify-content: center;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.35));
+        cursor: pointer; z-index: 999998; transition: transform .15s ease;
       }
-      #iai-launcher:active { transform: scale(0.92); }
-      @media (min-width: 760px) { #iai-launcher { bottom: 20px; } }
+      #iai-launcher:active { transform: scale(0.88); }
+      @media (min-width: 760px) { #iai-launcher { bottom: 16px; } }
       #iai-panel {
-        position: fixed; right: 12px; left: 12px; bottom: calc(var(--nav-h, 64px) + 76px);
+        position: fixed; right: 12px; left: 12px; bottom: calc(var(--nav-h, 64px) + 52px);
         max-width: 400px; margin-left: auto; height: min(70vh, 560px);
         background: var(--bg-raised, #161f30); border: 1px solid var(--line, #2a3650);
         border-radius: var(--radius, 10px); box-shadow: 0 10px 40px rgba(0,0,0,0.35);
         display: none; flex-direction: column; overflow: hidden; z-index: 999999;
         font-family: var(--font, sans-serif);
       }
-      @media (min-width: 760px) { #iai-panel { bottom: 84px; } }
+      @media (min-width: 760px) { #iai-panel { bottom: 60px; } }
       #iai-panel.open { display: flex; }
       #iai-head {
         background: var(--accent, #e05a2f); color: #fff; padding: 12px 14px;
