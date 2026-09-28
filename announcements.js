@@ -19,6 +19,13 @@
  * alter table public.posts add column if not exists expires_at timestamptz;
  * alter table public.posts add column if not exists attachment_url text;
  * alter table public.posts add column if not exists external_url text;
+ * -- MEDIA (mpya): orodha ya viambatisho vyote (picha, video, audio, document).
+ * -- Muundo: [{"url":"https://...","type":"video","name":"Mafunzo.mp4"}, ...]
+ * -- "type" ni hiari: image | video | audio | document (ikikosekana, inatambuliwa kwa extension).
+ * -- Pia inakubali orodha ya URL za kawaida: ["https://.../a.mp4","https://.../b.pdf"]
+ * alter table public.posts add column if not exists media jsonb not null default '[]'::jsonb;
+ * -- Kwa "delete" laini (soft delete). Kama tayari ipo kwenye admin, hii haitaharibu kitu.
+ * alter table public.posts add column if not exists deleted_at timestamptz;
  * alter table public.posts add column if not exists author_id text;
  * alter table public.posts add column if not exists updated_at timestamptz not null default now();
  * 
@@ -174,7 +181,136 @@
     const d = new Date(p.expires_at);
     return !isNaN(d) && d.getTime() < Date.now();
   }
-  function getBody(p) { return p.content || p.body || p.excerpt || ""; }
+  function getRawBody(p) { return p.content || p.body || p.excerpt || ""; }
+
+  /* ---------------- Media helpers (picha / video / audio / document) ---------------- */
+  const MEDIA_EXT = {
+    image: ["jpg", "jpeg", "png", "gif", "webp", "avif", "bmp", "svg"],
+    video: ["mp4", "webm", "mov", "m4v", "ogv", "3gp", "mkv"],
+    audio: ["mp3", "wav", "ogg", "oga", "m4a", "aac", "opus", "flac", "amr"],
+    document: ["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv", "zip", "rar"],
+  };
+  const MEDIA_ORDER = { image: 0, video: 1, audio: 2, document: 3 };
+  const MEDIA_META = {
+    image: { ic: "\uD83D\uDDBC\uFE0F", label: "Picha" },
+    video: { ic: "\uD83C\uDFAC", label: "Video" },
+    audio: { ic: "\uD83C\uDFA7", label: "Audio" },
+    document: { ic: "\uD83D\uDCC4", label: "Document" },
+  };
+  function extOf(u) {
+    const clean = String(u || "").split("#")[0].split("?")[0];
+    const m = clean.match(/\.([a-z0-9]{2,5})$/i);
+    return m ? m[1].toLowerCase() : "";
+  }
+  function typeFromExt(ext) {
+    for (const t of Object.keys(MEDIA_EXT)) if (MEDIA_EXT[t].indexOf(ext) !== -1) return t;
+    return "";
+  }
+  function normalizeType(t) {
+    t = String(t || "").toLowerCase();
+    if (!t) return "";
+    if (t.indexOf("image") === 0 || t === "picha") return "image";
+    if (t.indexOf("video") === 0) return "video";
+    if (t.indexOf("audio") === 0 || t === "sauti") return "audio";
+    if (t === "document" || t === "doc" || t === "pdf" || t === "file" || t.indexOf("application/") === 0 || t.indexOf("text/") === 0) return "document";
+    return "";
+  }
+  function fileNameOf(u) {
+    try {
+      const last = String(u).split("#")[0].split("?")[0].split("/").pop() || "";
+      return decodeURIComponent(last) || "Faili";
+    } catch (e) { return "Faili"; }
+  }
+  function docIcon(ext) {
+    ext = String(ext || "").toLowerCase();
+    if (ext === "pdf") return "\uD83D\uDCD5";
+    if (ext === "doc" || ext === "docx") return "\uD83D\uDCD8";
+    if (ext === "xls" || ext === "xlsx" || ext === "csv") return "\uD83D\uDCD7";
+    if (ext === "ppt" || ext === "pptx") return "\uD83D\uDCD9";
+    if (ext === "zip" || ext === "rar") return "\uD83D\uDDDC\uFE0F";
+    return "\uD83D\uDCC4";
+  }
+  function toArray(v) {
+    if (v == null || v === "") return [];
+    if (Array.isArray(v)) return v;
+    if (typeof v === "string") {
+      const t = v.trim();
+      if (t[0] === "[" || t[0] === "{") {
+        try { const j = JSON.parse(t); return Array.isArray(j) ? j : [j]; } catch (e) { /* endelea */ }
+      }
+      return [t];
+    }
+    return [v];
+  }
+
+  // Inatoa URL za media zilizobandikwa ndani ya maandishi (link ya "Copy link" kutoka Media library,
+  // markdown ![](url), [jina](url.pdf)) na kuziondoa kwenye maandishi yanayoonyeshwa.
+  const bodyCache = new Map();
+  function parseBody(raw) {
+    raw = String(raw || "");
+    if (bodyCache.has(raw)) return bodyCache.get(raw);
+    const items = [];
+    let text = raw;
+    text = text.replace(/!\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/gi, (m, alt, url) => { items.push({ url, type: "image", name: alt }); return ""; });
+    text = text.replace(/\[([^\]]*)\]\((https?:\/\/[^)\s]+)\)/gi, (m, label, url) => {
+      const t = typeFromExt(extOf(url));
+      if (!t) return m;
+      items.push({ url, type: t, name: label });
+      return "";
+    });
+    text = text.replace(/https?:\/\/[^\s<>"')]+/gi, (full) => {
+      const tm = full.match(/[.,;:!?]+$/);
+      const trail = tm ? tm[0] : "";
+      const url = trail ? full.slice(0, -trail.length) : full;
+      const t = typeFromExt(extOf(url));
+      if (!t) return full;
+      items.push({ url, type: t });
+      return "";
+    });
+    text = text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+    const out = { text, items };
+    if (bodyCache.size > 300) bodyCache.clear();
+    bodyCache.set(raw, out);
+    return out;
+  }
+  function getBody(p) { return parseBody(getRawBody(p)).text; }
+
+  // Inakusanya media zote za tangazo: image/cover, media[], media_urls[], attachments[],
+  // video_url, audio_url, document_url, attachment_url, na zilizomo ndani ya maandishi.
+  function collectMedia(p) {
+    const out = [];
+    const seen = new Set();
+    function add(item, hint) {
+      if (!item) return;
+      let raw, type, name, mime;
+      if (typeof item === "string") raw = item;
+      else if (typeof item === "object") {
+        raw = item.url || item.file_url || item.public_url || item.src || item.href;
+        type = item.type || item.kind || item.media_type;
+        mime = item.mime_type || item.mime || item.content_type;
+        name = item.name || item.title || item.file_name || item.filename;
+      }
+      if (!raw) return;
+      const t0 = normalizeType(type) || normalizeType(mime) || hint || typeFromExt(extOf(raw)) || "document";
+      const url = safeLinkUrl(raw) || (t0 === "image" ? safeImgSrc(raw) : null);
+      if (!url || seen.has(url)) return;
+      seen.add(url);
+      out.push({ url, type: t0, name: name || fileNameOf(url) });
+    }
+    add(getImage(p), "image");
+    toArray(p.media).forEach((m) => add(m));
+    toArray(p.media_urls).forEach((m) => add(m));
+    toArray(p.attachments).forEach((m) => add(m));
+    add(p.video_url, "video");
+    add(p.audio_url, "audio");
+    add(p.document_url, "document");
+    add(p.attachment_url);
+    parseBody(getRawBody(p)).items.forEach((m) => add(m, m.type));
+    return out
+      .map((m, i) => ({ m, i }))
+      .sort((a, b) => (MEDIA_ORDER[a.m.type] - MEDIA_ORDER[b.m.type]) || (a.i - b.i))
+      .map((x) => x.m);
+  }
   function getExcerpt(p) {
     const src = p.excerpt || getBody(p);
     return src.length > 140 ? src.slice(0, 140).trim() + "\u2026" : src;
@@ -477,6 +613,58 @@
   font-size: 9px;
 }
 
+/* ---------- Media (picha / video / audio / document) ---------- */
+.ann-media { margin-bottom: 12px; }
+.ann-media-image .ann-detail-img { margin-bottom: 0; }
+.ann-media video {
+  width: 100%;
+  max-height: 60vh;
+  border-radius: 10px;
+  background: #000;
+  display: block;
+}
+.ann-media audio { width: 100%; display: block; }
+.ann-media-audio {
+  background: var(--bg-raised-2, #1c283d);
+  border: 1px solid var(--line, #232b3e);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.ann-media-cap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--text-dim, #9fb0c9);
+}
+.ann-media-cap span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ann-media-audio .ann-media-cap { margin: 0 0 8px; }
+.ann-media-missing {
+  background: var(--danger-bg, #3a1a16);
+  color: var(--warn, #e0a930);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.ann-media-missing a { color: var(--accent, #e05a2f); margin-left: 6px; }
+.ann-attachment.ann-missing { padding: 0; border: none; background: none; }
+.ann-doc-ic { font-size: 20px; }
+.ann-doc-name { flex: 1; min-width: 0; word-break: break-all; color: var(--text, #eef2f8); }
+.ann-ext {
+  font-style: normal;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-raised, #161c2b);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-left: 4px;
+  color: var(--text-dim, #9fb0c9);
+}
+.ann-media-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+
 /* ---------- Responsive ---------- */
 @media (min-width: 600px) {
   .ann-body { max-width: 640px; margin: 0 auto; }
@@ -500,14 +688,35 @@
       Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
     }, extra || {});
   }
-  async function fetchPage(offset, limit) {
-    const url = `${SUPABASE_URL}/rest/v1/${TABLE}?select=*&status=eq.published&deleted_at=is.null&order=published_at.desc&offset=${offset}&limit=${limit}`;
-    const res = await fetch(url, { headers: authHeaders() });
+  // Kama safu "deleted_at" haipo kwenye jedwali, tunajaribu tena bila hiyo (badala ya kushindwa kabisa).
+  let hasDeletedCol = true;
+  async function restGet(query) {
+    const build = () => `${SUPABASE_URL}/rest/v1/${TABLE}?${query}${hasDeletedCol ? "&deleted_at=is.null" : ""}`;
+    let res = await fetch(build(), { headers: authHeaders() });
+    if (res.status === 400 && hasDeletedCol) {
+      hasDeletedCol = false;
+      res = await fetch(build(), { headers: authHeaders() });
+    }
     if (!res.ok) {
       const t = await res.text().catch(() => "");
       throw new Error("HTTP " + res.status + " " + t.slice(0, 120));
     }
     return res.json();
+  }
+  function fetchPage(offset, limit) {
+    return restGet(`select=*&status=eq.published&order=published_at.desc&offset=${offset}&limit=${limit}`);
+  }
+  // Orodha ya id zote ambazo bado zipo "published" na hazijafutwa — inatumika kuondoa
+  // matangazo yaliyofutwa/kufichwa kwenye admin panel kutoka kwenye cache ya simu.
+  async function fetchLiveIds() {
+    const ids = new Set();
+    const step = 1000;
+    for (let off = 0; off < 20000; off += step) {
+      const rows = await restGet(`select=id&status=eq.published&order=published_at.desc&offset=${off}&limit=${step}`);
+      rows.forEach((r) => ids.add(r.id));
+      if (rows.length < step) break;
+    }
+    return ids;
   }
   async function fetchRemoteReadIds(userId) {
     try {
@@ -550,6 +759,8 @@
     loading: false,
     detailId: null,
     overlayEl: null,
+    lastMode: "list",   // list | detail (kwa kuhifadhi scroll)
+    listScroll: 0,
   };
 
   async function loadLocalReadState() {
@@ -564,7 +775,7 @@
     if (State.readIds.has(id)) return;
     State.readIds.add(id);
     await persistReadIds();
-    updateBadges();
+    updateBadges(true);
     try {
       await pushRead(id, State.userId);
     } catch (e) {
@@ -601,17 +812,29 @@
   }
 
   async function refreshFromNetwork(reset) {
-    if (State.loading) return;
+    if (State.loading) return { ok: true, skipped: true };
     State.loading = true;
     if (reset) State.offset = 0;
     try {
-      const page = await fetchPage(State.offset, PAGE_SIZE);
-      State.hasMore = page.length === PAGE_SIZE;
+      // Kwenye reset tunapakua upya kila kitu kilichopo kwenye cache (hadi 200) ili mabadiliko (edit) yaonekane.
+      const limit = reset ? Math.min(Math.max(State.all.length, PAGE_SIZE), 200) : PAGE_SIZE;
+      const page = await fetchPage(State.offset, limit);
+      State.hasMore = page.length === limit;
       const byId = new Map(State.all.map((p) => [p.id, p]));
       page.forEach((p) => byId.set(p.id, p));
       State.all = Array.from(byId.values());
       State.offset += page.length;
+
+      // Ondoa kilichofutwa/kuondolewa published kwenye admin panel.
+      try {
+        const live = await fetchLiveIds();
+        State.all = State.all.filter((p) => live.has(p.id));
+        State.readIds = new Set(Array.from(State.readIds).filter((id) => live.has(id)));
+      } catch (e) {
+        console.error("announcements: prune failed (cache haikusafishwa)", e);
+      }
       await saveCache();
+
       const remoteReadIds = await fetchRemoteReadIds(State.userId);
       remoteReadIds.forEach((id) => State.readIds.add(id));
       await persistReadIds();
@@ -624,6 +847,24 @@
       return { ok: false, error: e };
     } finally {
       State.loading = false;
+    }
+  }
+
+  // Sasisho la kimya kimya (kila dakika, tab ikirudi, mtandao ukirudi): huondoa yaliyofutwa bila kuvuruga video/scroll.
+  async function autoSync() {
+    if (!navigator.onLine || document.hidden) return;
+    const r = await refreshFromNetwork(true);
+    if (!r || r.skipped) return;
+    updateBadges(true);
+    if (!State.overlayEl) return;
+    if (State.detailId) {
+      if (!State.all.some((x) => x.id === State.detailId)) {
+        State.detailId = null;
+        annToast("Tangazo hili limeondolewa");
+        renderBody();
+      }
+    } else if (!(document.activeElement && document.activeElement.id === "ann-search")) {
+      renderBody();
     }
   }
 
@@ -647,10 +888,10 @@
       : "";
     return `<span class="ic">\uD83D\uDCE2</span><span>New${badge ? "" : ""}</span>${badge}`;
   }
-  function updateBadges() {
+  function updateBadges(noRender) {
     const unread = getUnreadCount();
     document.querySelectorAll(".ann-nav-btn").forEach((b) => { b.innerHTML = navButtonInnerHtml(unread); });
-    if (State.overlayEl) renderBody();
+    if (State.overlayEl && !noRender) renderBody();
   }
 
   function makeNavButton() {
@@ -723,13 +964,24 @@
       </button>`).join("");
   }
 
+  function mediaChipsHtml(media) {
+    const counts = {};
+    media.forEach((m) => { counts[m.type] = (counts[m.type] || 0) + 1; });
+    const parts = Object.keys(MEDIA_ORDER)
+      .filter((t) => counts[t] && (t !== "image" || counts[t] > 1))
+      .map((t) => `<span class="ann-flag">${MEDIA_META[t].ic} ${counts[t] > 1 ? counts[t] + " " : ""}${MEDIA_META[t].label}</span>`);
+    return parts.length ? `<div class="ann-media-chips">${parts.join("")}</div>` : "";
+  }
+
   function cardHtml(p) {
     const unread = !State.readIds.has(p.id);
     const pm = priorityMeta(p.priority);
-    const img = safeImgSrc(getImage(p));
+    const media = collectMedia(p);
+    const cover = media.find((m) => m.type === "image");
+    const img = cover ? cover.url : null;
     return `
       <div class="ann-card ${unread ? "unread" : ""} ${pm.cls}" data-open="${esc(p.id)}" role="button" tabindex="0" aria-label="${esc(p.title || "Tangazo")}">
-        ${img ? `<img class="ann-card-img" src="${esc(img)}" alt="">` : ""}
+        ${img ? `<img class="ann-card-img" src="${esc(img)}" alt="" loading="lazy">` : ""}
         <div class="ann-card-body">
           <div class="ann-card-flags">
             ${p.is_pinned ? `<span class="ann-flag pin">\uD83D\uDCCC Pinned</span>` : ""}
@@ -738,6 +990,7 @@
           </div>
           <div class="ann-card-title">${unread ? '<span class="ann-dot" aria-hidden="true"></span>' : ""}${esc(p.title || "Tangazo")}</div>
           <div class="ann-card-excerpt">${esc(getExcerpt(p))}</div>
+          ${mediaChipsHtml(media)}
           <div class="ann-card-meta">
             <span>${esc(fmtShort(getWhen(p)))}</span>
             <span class="ann-read-state">${unread ? "\uD83D\uDD34 Haijasomwa" : "\u2713 Imesomwa"}</span>
@@ -761,12 +1014,43 @@
     return list.map(cardHtml).join("") + more;
   }
 
+  function mediaHtml(items) {
+    return items.map((m) => {
+      const u = esc(m.url);
+      const n = esc(m.name || fileNameOf(m.url));
+      if (m.type === "image") {
+        return `<div class="ann-media ann-media-image"><img class="ann-detail-img" src="${u}" alt="${n}" loading="lazy" role="button" aria-label="Onyesha picha kubwa"></div>`;
+      }
+      if (m.type === "video") {
+        return `<div class="ann-media ann-media-video" data-url="${u}">
+          <video controls playsinline preload="metadata" src="${u}"></video>
+          <div class="ann-media-cap"><span>\uD83C\uDFAC ${n}</span><a class="ann-attachment-btn" href="${u}" download target="_blank" rel="noopener noreferrer">Pakua</a></div>
+        </div>`;
+      }
+      if (m.type === "audio") {
+        return `<div class="ann-media ann-media-audio" data-url="${u}">
+          <div class="ann-media-cap"><span>\uD83C\uDFA7 ${n}</span><a class="ann-attachment-btn" href="${u}" download target="_blank" rel="noopener noreferrer">Pakua</a></div>
+          <audio controls preload="none" src="${u}"></audio>
+        </div>`;
+      }
+      const ext = extOf(m.url);
+      return `<div class="ann-attachment" data-check-url="${u}">
+        <span class="ann-doc-ic">${docIcon(ext)}</span>
+        <span class="ann-doc-name">${n}${ext ? ` <em class="ann-ext">${esc(ext.toUpperCase())}</em>` : ""}</span>
+        <a class="ann-attachment-btn" href="${u}" target="_blank" rel="noopener noreferrer">Fungua</a>
+        <a class="ann-attachment-btn" href="${u}" download target="_blank" rel="noopener noreferrer">Pakua</a>
+      </div>`;
+    }).join("");
+  }
+
   function detailHtml(p) {
     const pm = priorityMeta(p.priority);
-    const img = safeImgSrc(getImage(p));
-    const attach = safeLinkUrl(p.attachment_url);
+    const media = collectMedia(p);
+    const visual = media.filter((m) => m.type === "image" || m.type === "video");
+    const files = media.filter((m) => m.type === "audio" || m.type === "document");
     const extUrl = safeLinkUrl(p.external_url);
     const unread = !State.readIds.has(p.id);
+    const body = getBody(p);
     return `
       <div class="ann-detail">
         <button class="ann-back" id="ann-detail-back" aria-label="Rudi nyuma">\u2190 Rudi</button>
@@ -781,11 +1065,9 @@
           <span>\u00B7 ${esc(p.author_id ? String(p.author_id) : "Uongozi")}</span>
           <span>\u00B7 ${unread ? "\uD83D\uDD34 Haijasomwa" : "\u2713 Imesomwa"}</span>
         </div>
-        ${img ? `<img class="ann-detail-img" id="ann-detail-img" src="${esc(img)}" alt="" role="button" aria-label="Onyesha picha kubwa">` : ""}
-        <div class="ann-detail-content">${esc(getBody(p))}</div>
-        ${attach ? `<div class="ann-attachment"><span>\uD83D\uDCCE ${esc((attach.split("/").pop() || "Kiambatisho").split("?")[0])}</span>
-            <a class="ann-attachment-btn" href="${esc(attach)}" target="_blank" rel="noopener noreferrer">Fungua</a>
-            <a class="ann-attachment-btn" href="${esc(attach)}" download target="_blank" rel="noopener noreferrer">Pakua</a></div>` : ""}
+        ${mediaHtml(visual)}
+        ${body ? `<div class="ann-detail-content">${esc(body)}</div>` : ""}
+        ${mediaHtml(files)}
         ${extUrl ? `<a class="ann-external-btn" href="${esc(extUrl)}" target="_blank" rel="noopener noreferrer">\uD83D\uDD17 Fungua Kiungo</a>` : ""}
         <div class="ann-detail-actions">
           <button class="ann-action-btn" id="ann-share">\u2197 Share</button>
@@ -812,15 +1094,46 @@
       </div>`;
   }
 
+  function markUnavailable(box, url, canOpen) {
+    if (!box || box.classList.contains("ann-missing")) return;
+    box.classList.add("ann-missing");
+    const link = canOpen && url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">Jaribu kufungua</a>` : "";
+    box.innerHTML = `<div class="ann-media-missing">\u26A0\uFE0F Faili hili halipatikani tena (huenda limefutwa) au haliwezi kuchezwa.${link}</div>`;
+  }
+
+  // Documents hazina tukio la "error", kwa hiyo tunaangalia kwa HEAD kama bado zipo.
+  async function verifyDocs(root) {
+    const els = Array.from(root.querySelectorAll("[data-check-url]"));
+    for (const el of els) {
+      const url = el.getAttribute("data-check-url");
+      try {
+        const r = await fetch(url, { method: "HEAD" });
+        if (!r.ok && (r.status === 400 || r.status === 404 || r.status === 410) && root.contains(el)) {
+          markUnavailable(el, url, false);
+        }
+      } catch (e) { /* offline/CORS — acha kiungo kama kilivyo */ }
+    }
+  }
+
+  function renderList() {
+    const listEl = State.overlayEl && State.overlayEl.querySelector("#ann-list");
+    if (listEl) listEl.innerHTML = listHtml();
+  }
+
   function renderBody() {
     const bodyEl = State.overlayEl && State.overlayEl.querySelector("#ann-body");
     if (!bodyEl) return;
+    const mode = State.detailId ? "detail" : "list";
+    const prevScroll = bodyEl.scrollTop;
     if (State.detailId) {
       const p = State.all.find((x) => x.id === State.detailId);
-      bodyEl.innerHTML = p ? detailHtml(p) : `<div class="ann-empty">Tangazo halikupatikana.</div>`;
+      bodyEl.innerHTML = p ? detailHtml(p) : `<div class="ann-empty">Tangazo halikupatikani (huenda limefutwa).</div>`;
+      if (p) verifyDocs(bodyEl);
     } else {
       bodyEl.innerHTML = headerHtml() + `<div class="ann-list" id="ann-list">${listHtml()}</div>`;
     }
+    bodyEl.scrollTop = mode === State.lastMode ? prevScroll : (mode === "list" ? State.listScroll : 0);
+    State.lastMode = mode;
   }
 
   /* ---------------- Pull-to-refresh (touch) ---------------- */
@@ -843,7 +1156,7 @@
     setErrorSlot("");
     annToast("\u21BB Inasasisha\u2026");
     const r = await refreshFromNetwork(true);
-    if (!r.ok) {
+    if (r && !r.ok) {
       setErrorSlot("\u26A0\uFE0F Imeshindikana kupata matangazo mapya. Inaonyesha matangazo yaliyohifadhiwa mwisho.");
       console.error(r.error);
     }
@@ -887,15 +1200,16 @@
       const copyBtn = e.target.closest("#ann-copy");
       if (copyBtn) { const p = State.all.find((x) => x.id === State.detailId); if (p) copyAnnouncement(p); return; }
 
-      const img = e.target.closest("#ann-detail-img");
+      const img = e.target.closest(".ann-detail-img");
       if (img) { openImageViewer(img.src); return; }
 
       const card = e.target.closest("[data-open]");
       if (card) {
         const id = card.dataset.open;
+        State.listScroll = bodyEl.scrollTop;
+        markRead(id);            // inaweka "imesomwa" mara moja, kabla ya kuchora detail
         State.detailId = id;
         renderBody();
-        markRead(id);
         return;
       }
     });
@@ -906,9 +1220,29 @@
       if (card) { e.preventDefault(); card.click(); }
     });
 
+    // Utafutaji: sasisha orodha tu (si input yenyewe) ili keyboard isifungwe kila unapoandika.
     bodyEl.addEventListener("input", debounce((e) => {
-      if (e.target.id === "ann-search") { State.query = e.target.value; renderBody(); }
+      if (e.target.id === "ann-search") { State.query = e.target.value; renderList(); }
     }, 250));
+
+    // Faili la media likifutwa (kwenye Media library) au haliwezi kupakiwa: onyesha ujumbe badala ya kiboksi tupu.
+    bodyEl.addEventListener("error", (e) => {
+      const t = e.target;
+      if (!t || !t.tagName) return;
+      const tag = t.tagName;
+      if (tag === "IMG") {
+        const box = t.closest(".ann-media");
+        if (box) markUnavailable(box, null, false); else t.style.display = "none";
+      } else if (tag === "VIDEO" || tag === "AUDIO") {
+        const box = t.closest(".ann-media");
+        if (box) markUnavailable(box, box.getAttribute("data-url"), true);
+      }
+    }, true);
+
+    // Media moja tu icheze kwa wakati mmoja.
+    bodyEl.addEventListener("play", (e) => {
+      bodyEl.querySelectorAll("video, audio").forEach((m) => { if (m !== e.target) m.pause(); });
+    }, true);
   }
 
   /* ---------------- Overlay open/close ---------------- */
@@ -937,10 +1271,11 @@
     (async () => {
       if (!State.all.length) await loadFromCache();
       renderBody();
-      const r = await refreshFromNetwork(State.all.length === 0);
-      if (!r.ok) setErrorSlot("\u26A0\uFE0F Imeshindikana kupata matangazo mapya. Inaonyesha matangazo yaliyohifadhiwa mwisho.");
+      const r = await refreshFromNetwork(true);
+      if (r && !r.ok) setErrorSlot("\u26A0\uFE0F Imeshindikana kupata matangazo mapya. Inaonyesha matangazo yaliyohifadhiwa mwisho.");
+      if (r && r.ok !== false) setErrorSlot("");
       renderBody();
-      updateBadges();
+      updateBadges(true);
     })();
   }
   function onEscClose(e) {
@@ -957,7 +1292,9 @@
   }
 
   /* ---------------- Online/offline listeners ---------------- */
-  window.addEventListener("online", () => { State.online = true; flushPendingReads(); if (State.overlayEl) renderBody(); });
+  window.addEventListener("online", () => { State.online = true; flushPendingReads(); autoSync(); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) autoSync(); });
+  setInterval(autoSync, 60000);
   window.addEventListener("offline", () => { State.online = false; if (State.overlayEl) renderBody(); });
 
   /* ---------------- Boot ---------------- */
