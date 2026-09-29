@@ -11,6 +11,12 @@ function dec(l){
     }}catch(e){}
   return l;
 }
+async function brave(q,off,key){
+  const r=await fetch('https://api.search.brave.com/res/v1/web/search?q='+encodeURIComponent(q)+'&count=10&offset='+Math.floor(off/10),{headers:{'accept':'application/json','x-subscription-token':key}});
+  if(!r.ok)throw new Error('brave '+r.status);
+  const d=await r.json();
+  return((d.web&&d.web.results)||[]).map(p=>({title:strip(p.title||''),link:p.url,displayLink:(p.meta_url&&p.meta_url.hostname||host(p.url)).replace(/^www\./,''),snippet:strip(p.description||''),img:(p.thumbnail&&p.thumbnail.src)||''})).filter(x=>x.title&&/^https?:/.test(x.link));
+}
 async function bing(q,off){
   const r=await fetch('https://www.bing.com/search?q='+encodeURIComponent(q)+'&count=10&first='+(off+1)+'&setlang=sw&cc=TZ',{headers:{'user-agent':UA,'accept-language':'sw,en;q=0.8'}});
   const t=await r.text();
@@ -31,7 +37,7 @@ async function ddg(q,off){
   return out;
 }
 export default{
-  async fetch(req){
+  async fetch(req,env){
     const u=new URL(req.url),q=(u.searchParams.get('q')||'').trim().slice(0,200),off=Math.min(90,parseInt(u.searchParams.get('off')||'0',10)||0);
     const H={'access-control-allow-origin':ORIGIN,'content-type':'application/json; charset=utf-8','cache-control':'public, max-age=3600'};
     if(u.searchParams.get('debug')){
@@ -41,7 +47,8 @@ export default{
     }
     if(!q)return new Response('{"items":[]}',{headers:H});
     let items=[];
-    try{items=await bing(q,off)}catch(e){}
+    if(env&&env.BRAVE_KEY){try{items=await brave(q,off,env.BRAVE_KEY)}catch(e){}}
+    if(!items.length){try{items=await bing(q,off)}catch(e){}}
     if(!items.length){try{items=await ddg(q,off)}catch(e){}}
     return new Response(JSON.stringify({items}),{headers:H});
   }
