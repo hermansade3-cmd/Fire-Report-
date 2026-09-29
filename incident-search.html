@@ -5,14 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Incident Search</title>
 <style>
-:root{--bg:#fff;--fg:#202124;--mut:#5f6368;--ln:#dfe1e5;--sf:#f1f3f4;--lk:#1a0dab;--gr:#188038;color-scheme:light}
-@media(prefers-color-scheme:dark){:root{--bg:#202124;--fg:#e8eaed;--mut:#9aa0a6;--ln:#3c4043;--sf:#303134;--lk:#8ab4f8;--gr:#81c995;color-scheme:dark}}
+:root{--bg:#fff;--fg:#202124;--mut:#5f6368;--ln:#dfe1e5;--sf:#f1f3f4;--lk:#1a0dab;--gr:#188038;--grbg:#e6f4ea;--cd:#fff;--wn:#b06000;--wnbg:#fef7e0;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#202124;--fg:#e8eaed;--mut:#9aa0a6;--ln:#3c4043;--sf:#303134;--lk:#8ab4f8;--gr:#81c995;--grbg:#1e3a2b;--cd:#28292c;--wn:#fdd663;--wnbg:#3b3320;color-scheme:dark}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 Arial,system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 header{display:flex;justify-content:flex-end;gap:14px;padding:12px 16px;font-size:14px}
 header a,.lnk{color:var(--fg);text-decoration:none;cursor:pointer}
-header a:hover{text-decoration:underline}
-#off{display:none;background:var(--sf);color:var(--mut);text-align:center;font-size:13px;padding:5px}
+header a:hover,.lnk:hover{text-decoration:underline}
+#off{display:none;background:var(--grbg);color:var(--gr);text-align:center;font-size:13px;padding:6px 10px}
+#off::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gr);margin-right:8px;vertical-align:1px}
 .w{max-width:720px;margin:0 auto;padding:0 16px 40px}
 .logo{font-weight:700;letter-spacing:-1px;text-decoration:none;white-space:nowrap}
 .hm{text-align:center;padding-top:9vh}
@@ -35,68 +36,164 @@ header a:hover{text-decoration:underline}
 .top{display:flex;align-items:center;gap:14px;padding:6px 0 14px;border-bottom:1px solid var(--ln);margin-bottom:10px}
 .top .logo{font-size:24px}
 .meta{color:var(--mut);font-size:14px;margin:8px 0}
+
+/* matokeo */
 .r{display:flex;gap:14px;margin:0 0 22px}
 .rb{flex:1;min-width:0}
-.r img{width:92px;height:92px;object-fit:cover;border-radius:10px;flex:none}
 .u{font-size:13px;color:var(--gr)}
+.u .pl{margin:0 0 0 8px}
 .t{display:block;color:var(--lk);font-size:20px;line-height:1.3;text-decoration:none;margin:2px 0 3px}
 .t:hover{text-decoration:underline}
 .sn{margin:0;font-size:14px;color:var(--mut);line-height:1.55}
+.sv{background:none;border:1px solid var(--ln);color:var(--lk);border-radius:14px;padding:4px 12px;font:12px Arial,sans-serif;cursor:pointer;margin-top:8px}
+.sv:disabled{opacity:.6}
 .more{width:100%;border:1px solid var(--ln);background:none;color:var(--lk);border-radius:20px;padding:11px;font:inherit;cursor:pointer}
+
+/* picha ndogo (thumbnail) */
+.th{flex:none;width:88px;height:88px;border-radius:12px;overflow:hidden;background:var(--sf);display:flex;align-items:center;justify-content:center;color:#fff;font:700 30px Arial,sans-serif}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.r .th{width:92px;height:92px}
+
+/* vidonge vidogo */
+.pls{display:flex;flex-wrap:wrap;margin:2px 0 0}
+.pl{display:inline-block;font-size:12px;line-height:1;padding:5px 9px;border-radius:10px;background:var(--sf);color:var(--mut);margin:0 6px 6px 0}
+.pl.ok{background:var(--grbg);color:var(--gr);font-weight:700}
+
+/* kadi za Hifadhi */
+.card{position:relative;display:flex;gap:14px;align-items:flex-start;background:var(--cd);border:1px solid var(--ln);border-radius:16px;padding:12px;margin:0 0 12px}
+.card:hover{background:var(--sf)}
+.card .cb{flex:1;min-width:0;padding-right:26px}
+.card .ct{display:block;color:var(--lk);font-size:17px;font-weight:700;line-height:1.3;text-decoration:none;margin:0 0 3px;overflow-wrap:anywhere}
+.card .ct::after{content:'';position:absolute;inset:0;border-radius:16px}
+.card .sn{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:8px}
+.card mark{background:rgba(251,188,5,.4);color:inherit;border-radius:3px;padding:0 1px}
+.card .x{position:absolute;top:6px;right:6px;z-index:2}
+.okc{display:flex;gap:14px;align-items:center;background:var(--grbg);border-radius:16px;padding:14px 16px;margin:8px 0 14px}
+.okc b{color:var(--gr);font-size:16px}
+.okc .meta{margin:2px 0 0}
+.dot{flex:none;width:12px;height:12px;border-radius:50%;background:var(--gr);box-shadow:0 0 0 5px rgba(24,128,56,.2)}
+.warn{background:var(--wnbg);color:var(--wn);border-radius:12px;padding:10px 14px;font-size:13px;margin:0 0 12px}
+.stk{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:4;padding:6px 0 2px}
+.empty{text-align:center;padding:36px 12px}
+.empty p{margin:0 0 10px}
+.foot{text-align:center;margin-top:24px}
+.sec{text-align:left;margin-top:34px}
+.sh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.sh h2{font-size:18px;margin:0}
+
+/* makala */
 .art h1{font-size:28px;line-height:1.25;margin:10px 0}
 .art h2{font-size:21px;margin:24px 0 6px;border-bottom:1px solid var(--ln);padding-bottom:4px}
 .art h3{font-size:17px;margin:18px 0 4px}
 .art p{margin:0 0 12px}
-.art img{max-width:100%;max-height:300px;border-radius:12px;display:block;margin:8px 0 14px}
+.art img{max-width:100%;max-height:300px;border-radius:12px;display:block;margin:8px 0 14px;cursor:zoom-in}
+.art img.big{max-height:none;cursor:zoom-out}
 .art figure{margin:14px 0}
 .art figure img{margin:0}
 .art figcaption{font-size:13px;color:var(--mut);margin-top:4px}
-.art img{cursor:zoom-in}
-.art img.big{max-height:none;cursor:zoom-out}
+.art .card img{margin:0;max-height:none;border-radius:0;cursor:inherit}
+.wl{color:var(--lk);text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
 .pt{font-size:26px;margin:6px 0}
 .row{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--ln);padding:10px 0}
 .row a{flex:1;color:var(--lk);text-decoration:none;min-width:0}
 .row small{color:var(--mut);display:block}
 .x{background:none;border:0;color:var(--mut);font-size:18px;cursor:pointer;padding:4px 8px;border-radius:8px}
 .x:hover{background:var(--sf)}
+.x.arm{color:#d93025;font-size:13px;font-weight:700}
 .tabs{display:flex;gap:6px;margin:12px 0}
 .tab{border:1px solid var(--ln);background:none;color:var(--fg);border-radius:18px;padding:6px 14px;font:14px Arial,sans-serif;cursor:pointer}
 .tab.on{background:var(--fg);color:var(--bg)}
+.tab.arm{border-color:#d93025;color:#d93025}
 .in{width:100%;border:1px solid var(--ln);border-radius:22px;padding:11px 16px;background:var(--bg);color:var(--fg);font:inherit}
 :focus-visible{outline:2px solid var(--lk);outline-offset:2px}
+/* picha */
+.vt{display:flex;gap:4px;margin:0 0 6px}
+.vt a{padding:8px 16px;font-size:14px;color:var(--mut);text-decoration:none;border-bottom:3px solid transparent}
+.vt a.on{color:var(--lk);border-color:var(--lk);font-weight:700}
+.sd{display:flex;gap:8px;margin:10px 0}
+.sd .tab{flex:1;text-align:center;padding:8px 10px}
+.gr{columns:2;column-gap:8px}
+@media(min-width:560px){.gr{columns:3}}
+.gi{position:relative;display:block;width:100%;break-inside:avoid;margin:0 0 8px;padding:0;border:0;border-radius:12px;overflow:hidden;background:var(--sf);cursor:zoom-in}
+.gi img{width:100%;height:100%;object-fit:cover;display:block}
+.gi .ck{position:absolute;left:6px;bottom:6px;width:22px;height:22px;border-radius:50%;background:var(--gr);color:#fff;font:700 13px/22px Arial,sans-serif;text-align:center}
+.vw{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.95);color:#fff;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.vw .bar{display:flex;justify-content:flex-end;padding:8px 10px}
+.vw .stg{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;padding:0 8px}
+.vw .stg img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+.vw .nv{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;border:0;border-radius:50%;background:rgba(255,255,255,.18);color:#fff;font-size:22px;cursor:pointer}
+.vw .nv.l{left:8px}.vw .nv.r{right:8px}
+.vw .inf{padding:10px 16px 4px}
+.vw .vtt{font-size:15px;margin:0 0 6px;overflow-wrap:anywhere}
+.vw .pl{background:rgba(255,255,255,.14);color:#fff}
+.vw .pl.ok{background:#1e6b3a;color:#fff}
+.vw .act{display:flex;gap:8px;padding:6px 16px 14px}
+.vb{border:0;border-radius:20px;padding:11px 20px;font:700 14px Arial,sans-serif;cursor:pointer;background:#fff;color:#202124}
+.vb.g{background:rgba(255,255,255,.16);color:#fff}
+.vb.arm{background:#d93025;color:#fff}
+.vw .x{color:#fff;font-size:22px}
+.toast{display:none;position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#323232;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;z-index:60;max-width:90%;text-align:center}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<div id="off">Uko offline. Unaona maudhui kutoka Hifadhi.</div>
+<div id="off">Uko offline. Makala ulizohifadhi bado zinapatikana, endelea kusoma.</div>
 <header><a href="index.html" id="hr">&larr; Ripoti</a><a href="#" id="hl" style="margin-right:auto">Nyumbani</a><a href="#hifadhi" id="hs">Hifadhi</a></header>
 <div class="w" id="app" aria-live="polite"></div>
 <noscript>Washa JavaScript ili kutumia app hii.</noscript>
 <script>
 (()=>{'use strict';
 /* Chanzo cha maudhui kinajengwa kwa vipande ili jina lisionekane kwa mtumiaji */
-const B={sw:'https://sw.wiki'+'pedia.org',en:'https://en.wiki'+'pedia.org'};
+const B={sw:'https://sw.wiki'+'pedia.org',en:'https://en.wiki'+'pedia.org',co:'https://commons.wiki'+'media.org',ov:'https://api.open'+'verse.org'};
 const $=s=>document.querySelector(s),app=$('#app'),enc=encodeURIComponent;
 const h=(t,a={},k=[])=>{const e=document.createElement(t);for(const n in a){const v=a[n];if(n==='c')e.className=v;else if(n==='t')e.textContent=v;else if(n.startsWith('on'))e[n]=v;else e.setAttribute(n,v)}[].concat(k).forEach(c=>c&&e.append(c));return e};
 const sl=ms=>new Promise(r=>setTimeout(r,ms));
 const okImg=u=>/^https:\/\/upload\.wikimedia\.org\//.test(u||'')?u:'';
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const SVG='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>';
+const PAL=['#4285f4','#ea4335','#f29900','#188038','#a142f4','#12b5cb'];
 
-/* ===== HIFADHI (IndexedDB) ===== */
-let dbp;
-const db=()=>dbp||(dbp=new Promise((res,rej)=>{const r=indexedDB.open('incident_search',1);r.onupgradeneeded=()=>{const d=r.result;d.createObjectStore('art',{keyPath:'id'});d.createObjectStore('q',{keyPath:'id'})};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
-const tx=(st,mode,fn)=>db().then(d=>new Promise((res,rej)=>{const t=d.transaction(st,mode),r=fn(t.objectStore(st));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})).catch(()=>null);
-const put=(st,v)=>tx(st,'readwrite',s=>s.put(v));
-const get=(st,id)=>tx(st,'readonly',s=>s.get(id));
-const all=async st=>(await tx(st,'readonly',s=>s.getAll()))||[];
-const del=(st,id)=>tx(st,'readwrite',s=>s.delete(id));
-const saved=new Set();
-all('art').then(a=>a.forEach(x=>saved.add(x.id)));
+/* ===== HIFADHI (IndexedDB, na mbadala kama haifanyi kazi) ===== */
+let sm='idb',dbp=null;
+const mem={art:new Map(),q:new Map(),img:new Map()};
+const lsK=(st,id)=>'is:'+st+':'+id;
+const lsGet=(st,id)=>{try{const v=localStorage.getItem(lsK(st,id));return v?JSON.parse(v):null}catch(e){return null}};
+const lsAll=st=>{const o=[];try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith('is:'+st+':')){try{o.push(JSON.parse(localStorage.getItem(k)))}catch(e){}}}}catch(e){}return o};
+const slim=v=>Object.assign({},v,{data:'',blob:null,pics:(v.pics||[]).map(p=>({src:p.src,cap:p.cap}))});
+const lsPut=(st,v)=>{try{localStorage.setItem(lsK(st,v.id),JSON.stringify(v))}catch(e){try{localStorage.setItem(lsK(st,v.id),JSON.stringify(slim(v)))}catch(e2){}}};
+const idbOpen=()=>new Promise((res,rej)=>{
+  let done=false;const fin=(f,v)=>{if(!done){done=true;f(v)}};
+  try{const r=indexedDB.open('incident_search',2);
+    r.onupgradeneeded=()=>{const d=r.result;['art','q','img'].forEach(n=>{if(!d.objectStoreNames.contains(n))d.createObjectStore(n,{keyPath:'id'})})};
+    r.onsuccess=()=>fin(res,r.result);r.onerror=()=>fin(rej,r.error);r.onblocked=()=>fin(rej,new Error('blocked'))}
+  catch(e){fin(rej,e)}
+  setTimeout(()=>fin(rej,new Error('timeout')),4000)});
+const db=()=>dbp||(dbp=idbOpen().catch(()=>{try{localStorage.setItem('is:test','1');localStorage.removeItem('is:test');sm='ls'}catch(e){sm='mem'}return null}));
+const put=async(st,v)=>{const d=await db();
+  if(d)return new Promise(res=>{try{const t=d.transaction(st,'readwrite');t.objectStore(st).put(v);t.oncomplete=()=>res(true);t.onerror=t.onabort=()=>res(false)}catch(e){res(false)}});
+  mem[st].set(v.id,v);if(sm==='ls')lsPut(st,v);return true};
+const get=async(st,id)=>{const d=await db();
+  if(d)return new Promise(res=>{try{const r=d.transaction(st,'readonly').objectStore(st).get(id);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null)}catch(e){res(null)}});
+  return mem[st].get(id)||(sm==='ls'?lsGet(st,id):null)};
+const all=async st=>{const d=await db();
+  if(d)return new Promise(res=>{try{const r=d.transaction(st,'readonly').objectStore(st).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([])}catch(e){res([])}});
+  const m=new Map();if(sm==='ls')lsAll(st).forEach(x=>m.set(x.id,x));mem[st].forEach((v,k)=>m.set(k,v));return[...m.values()]};
+const del=async(st,id)=>{const d=await db();mem[st].delete(id);try{if(sm==='ls')localStorage.removeItem(lsK(st,id))}catch(e){}
+  if(d)return new Promise(res=>{try{const t=d.transaction(st,'readwrite');t.objectStore(st).delete(id);t.oncomplete=()=>res(true);t.onerror=t.onabort=()=>res(false)}catch(e){res(false)}})};
+const saved=new Map();
+const imgSaved=new Set();
+const ready=Promise.all([all('art').then(a=>a.forEach(x=>saved.set(x.id,{lang:x.lang,title:x.title}))),all('img').then(a=>a.forEach(x=>imgSaved.add(x.id)))]).catch(()=>{});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
 const aid=(l,t)=>l+':'+t.toLowerCase();
+
+/* ===== PICHA ===== */
+const isrc=x=>!x?'':x.data||(x.blob?URL.createObjectURL(x.blob):'');
+const toData=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.onerror=()=>r('');f.readAsDataURL(b)});
 
 /* ===== MTANDAO ===== */
 async function jget(u,n=0){
   if(!navigator.onLine)throw{off:1};
-  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),10000);
+  const ac=new AbortController(),to=setTimeout(()=>ac.abort(),8000);
   try{const r=await fetch(u,{signal:ac.signal});clearTimeout(to);
     if(r.status===429||r.status>=500){if(n<2){await sl(1200*(n+1));return jget(u,n+1)}throw{}}
     if(!r.ok)throw{};return await r.json()}
@@ -109,13 +206,14 @@ async function searchNet(q,lang,off){
 }
 const BAD=/flag|icon|logo|symbol|commons-|edit-|question|ambox|portal|folder|stub|arrow|button|wikiquote|wikisource|wiktionary|disambig|padlock|blank|pictogram/i;
 async function blobOf(u){try{const ac=new AbortController(),to=setTimeout(()=>ac.abort(),12000);const r=await fetch(u,{signal:ac.signal});clearTimeout(to);return r.ok?await r.blob():null}catch(e){return null}}
+async function dataOf(u){const b=await blobOf(u);return b?await toData(b):''}
 async function picsNet(lang,title,max){
   try{
     const d=await jget(B[lang]+'/w/api.php?action=query&format=json&origin=*&redirects=1&generator=images&gimlimit=40&titles='+enc(title)+'&prop=imageinfo&iiprop=url%7Csize%7Cmime&iiurlwidth=640');
     const ps=d&&d.query?Object.values(d.query.pages):[];
     const c=ps.filter(p=>p.imageinfo&&p.imageinfo[0]).map(p=>({t:p.title,i:p.imageinfo[0]}))
       .filter(x=>/^image\/(jpeg|png|svg\+xml|gif|webp)/.test(x.i.mime)&&x.i.width>=220&&x.i.height>=140&&!BAD.test(x.t)&&okImg(x.i.thumburl)).slice(0,max);
-    const out=await Promise.all(c.map(async x=>{const b=await blobOf(x.i.thumburl);return b?{src:x.i.thumburl,blob:b,cap:x.t.replace(/^[^:]+:/,'').replace(/\.[a-z]+$/i,'').replace(/_/g,' ')}:null}));
+    const out=await Promise.all(c.map(async x=>{const data=await dataOf(x.i.thumburl);return data?{src:x.i.thumburl,data,cap:x.t.replace(/^[^:]+:/,'').replace(/\.[a-z]+$/i,'').replace(/_/g,' ')}:null}));
     return out.filter(Boolean);
   }catch(e){return null}
 }
@@ -126,59 +224,250 @@ async function fetchArt(lang,title,deep){
     const d=await jget(B[lang]+'/w/api.php?action=query&format=json&origin=*&redirects=1&prop=extracts%7Cpageimages%7Cinfo&explaintext=1&inprop=url&piprop=thumbnail&pithumbsize=600&titles='+enc(title));
     const p=d&&d.query&&Object.values(d.query.pages)[0];
     if(!p||p.missing!==undefined||!p.extract)return null;
-    a={id:aid(lang,p.title),lang,title:p.title,url:p.fullurl,text:p.extract,img:okImg(p.thumbnail&&p.thumbnail.source),t:Date.now(),pics:[]};
-    if(a.img)a.blob=await blobOf(a.img);
-  }
+    a={id:aid(lang,p.title),lang,title:p.title,url:p.fullurl,text:p.extract,img:okImg(p.thumbnail&&p.thumbnail.source),t:Date.now(),pics:[],data:''};
+    if(a.img)a.data=await dataOf(a.img);
+  }else if(a.blob&&!a.data){a.data=await toData(a.blob);a.blob=null}
   const np=await picsNet(a.lang,a.title,deep?8:3);
   if(np){a.pics=np;a.full=!!deep}
-  await put('art',a);saved.add(a.id);return a;
+  if(!await put('art',a)){a.pics=(a.pics||[]).map(p=>({src:p.src,cap:p.cap}));a.data='';await put('art',a)}
+  saved.set(a.id,{lang:a.lang,title:a.title});return a;
 }
-async function local(q){
+function scoreArts(q,pool){
   const ws=q.toLowerCase().split(/\s+/).filter(w=>w.length>1);if(!ws.length)return[];
-  return(await all('art')).map(a=>{const tl=a.title.toLowerCase(),tx=a.text.toLowerCase();let s=0;ws.forEach(w=>{if(tl.includes(w))s+=10;s+=Math.min(tx.split(w).length-1,20)});return{a,s,tx}})
-    .filter(x=>x.s>0).sort((x,y)=>y.s-x.s).slice(0,15).map(({a,tx})=>{const i=Math.max(0,tx.indexOf(ws[0]));return{title:a.title,lang:a.lang,url:a.url,img:a.img,ex:a.text.slice(Math.max(0,i-40),i+220).replace(/\n+/g,' ')}});
+  return pool.map(a=>{const tl=a.title.toLowerCase(),raw=a.text||'',tx=raw.toLowerCase();let s=0;ws.forEach(w=>{if(tl.includes(w))s+=10;s+=Math.min(tx.split(w).length-1,20)});
+    const i=Math.max(0,tx.indexOf(ws.find(w=>tx.includes(w))||ws[0]));
+    return{a,s,ex:raw.slice(Math.max(0,i-40),i+220).replace(/=+\s*([^=\n]+?)\s*=+/g,'$1').replace(/\n+/g,' ')}}).filter(x=>x.s>0).sort((x,y)=>y.s-x.s)
 }
+const local=async q=>scoreArts(q,await all('art')).slice(0,15).map(({a,ex})=>({title:a.title,lang:a.lang,url:a.url,img:'',ex}));
+
+/* ===== PICHA: huduma ya picha ya Incident Search ===== */
+/* Funguo za vyanzo vya premium (Access Key tu, si Secret). a = Picha Bora, b = Picha Zaidi. Ukiacha wazi, vyanzo visivyohitaji key vinatumika. */
+const K={a:'4NtGB6LtWlQTTJ6QmpKxTeEj_d9sPljUlBUkwTG7VUI',b:''};
+const HA='https://api.uns'+'plash.com',HB='https://pix'+'abay.com';
+const okPic=u=>/^https:\/\//.test(u||'')?u:'';
+const trC=new Map();
+async function enOf(q){
+  const k=q.toLowerCase();if(trC.has(k))return trC.get(k);
+  let r='';
+  try{const d=await jget(B.sw+'/w/api.php?action=query&format=json&formatversion=2&origin=*&redirects=1&generator=search&gsrlimit=1&gsrsearch='+enc(q)+'&prop=langlinks&lllang=en');
+    const p=d&&d.query&&d.query.pages&&d.query.pages[0],l=p&&p.langlinks&&p.langlinks[0];r=(l&&(l.title||l['*']))||''}catch(e){}
+  trC.set(k,r);return r;
+}
+async function commonsNet(q,page){
+  const d=await jget(B.co+'/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=20&gsroffset='+((page-1)*20)+'&gsrsearch='+enc(q+' filetype:bitmap')+'&prop=imageinfo&iiprop=url%7Csize%7Cmime%7Cextmetadata&iiurlwidth=500');
+  const ps=d&&d.query?Object.values(d.query.pages).sort((x,y)=>x.index-y.index):[];
+  const strip=t=>((t&&t.value)||'').replace(/<[^>]*>/g,'').replace(/&amp;/g,'&').trim();
+  const items=ps.filter(p=>p.imageinfo&&p.imageinfo[0]&&/^image\/(jpeg|png|webp)/.test(p.imageinfo[0].mime)).map(p=>{const i=p.imageinfo[0],m=i.extmetadata||{};
+    return{id:'a:c'+p.pageid,side:'a',alt:strip(m.ObjectName)||p.title.replace(/^[^:]+:/,'').replace(/\.[a-z]+$/i,'').replace(/_/g,' '),by:strip(m.Artist).slice(0,60),w:i.thumbwidth,h:i.thumbheight,thumbUrl:okPic(i.thumburl),fullUrl:okPic((i.thumburl||'').replace(/\/\d+px-/,'/1280px-')),dl:''}}).filter(x=>x.thumbUrl);
+  return{pages:items.length>=15?page+1:page,items};
+}
+async function ovNet(q,page){
+  const d=await jget(B.ov+'/v1/images/?page_size=20&mature=false&page='+page+'&q='+enc(q));
+  return{pages:Math.min(d.page_count||0,12),items:(d.results||[]).map(p=>({id:'b:o'+p.id,side:'b',alt:p.title||'',by:p.creator||'',w:p.width,h:p.height,thumbUrl:okPic(p.thumbnail),fullUrl:okPic(p.url)||okPic(p.thumbnail),dl:'',tg:(p.tags||[]).map(t=>t.name).slice(0,8)})).filter(x=>x.thumbUrl)};
+}
+async function imgNet(side,q,page){
+  if(side==='a'){
+    if(!K.a)return commonsNet(q,page);
+    const d=await jget(HA+'/search/photos?per_page=20&content_filter=high&page='+page+'&query='+enc(q)+'&client_id='+K.a);
+    return{pages:d.total_pages||0,items:(d.results||[]).map(p=>({id:'a:'+p.id,side:'a',alt:p.alt_description||p.description||'',by:(p.user&&p.user.name)||'',w:p.width,h:p.height,thumbUrl:okPic(p.urls&&p.urls.small),fullUrl:okPic(p.urls&&p.urls.regular),dl:(p.links&&p.links.download_location)||''})).filter(x=>x.thumbUrl)};
+  }
+  if(!K.b)return ovNet(q,page);
+  const d=await jget(HB+'/api/?key='+K.b+'&image_type=photo&safesearch=true&per_page=20&page='+page+'&q='+enc(q.slice(0,100)));
+  return{pages:Math.ceil((d.totalHits||0)/20),items:(d.hits||[]).map(p=>({id:'b:'+p.id,side:'b',alt:(p.tags||'').replace(/,\s*/g,', '),by:p.user||'',w:p.webformatWidth,h:p.webformatHeight,thumbUrl:okPic(p.webformatURL),fullUrl:okPic(p.largeImageURL||p.webformatURL),dl:''})).filter(x=>x.thumbUrl)};
+}
+/* upande mmoja: neno la kwanza, kisha tafsiri ya Kiingereza kama matokeo ni machache */
+async function loadSide(side,q,S,more){
+  const st=S[side],page=more?st.page+1:1;
+  let r=await imgNet(side,st.term||q,page);
+  if(!more&&r.items.length<4){
+    const en=await enOf(q);
+    if(en&&en.toLowerCase()!==q.toLowerCase()){try{const r2=await imgNet(side,en,1);if(r2.items.length>r.items.length){r=r2;st.term=en}}catch(e){}}
+  }
+  st.page=page;st.pages=r.pages;
+  const add=[];r.items.forEach(x=>{if(!st.items.some(y=>y.id===x.id)){st.items.push(x);add.push(x)}});
+  return add;
+}
+async function saveImg(x,tags){
+  if(imgSaved.has(x.id)){
+    const r=await get('img',x.id);
+    if(r){const nt=[...new Set([...(r.tags||[]),...tags])];if(nt.length!==(r.tags||[]).length){r.tags=nt;await put('img',r)}x.thumb=r.thumb}
+    return r;
+  }
+  const thumb=await dataOf(x.thumbUrl);if(!thumb)return null;
+  const r={id:x.id,side:x.side,alt:x.alt,by:x.by,w:x.w,h:x.h,thumbUrl:x.thumbUrl,fullUrl:x.fullUrl,dl:x.dl,thumb,full:'',tags:[...new Set([...tags,...(x.tg||[]).map(t=>String(t).toLowerCase())])],t:Date.now()};
+  if(!await put('img',r))return null;
+  imgSaved.add(x.id);x.thumb=thumb;return r;
+}
+async function autosave(items,tags,cb,prog,alive){
+  let i=0,n=0;
+  const w=async()=>{while(i<items.length){if(alive&&!alive())return;const x=items[i++];
+    try{const r=await saveImg(x,tags);if(r&&cb)cb(x.id)}catch(e){}n++;if(prog)prog(n,items.length)}};
+  await Promise.all([w(),w(),w(),w()]);
+}
+function scoreImgs(q,pool){
+  const ws=q.toLowerCase().split(/\s+/).filter(w=>w.length>1);if(!ws.length)return[];
+  return pool.map(r=>{const hay=((r.alt||'')+' '+(r.tags||[]).join(' ')).toLowerCase();let s=0;ws.forEach(w=>{if(hay.includes(w))s+=5});return{r,s}})
+    .filter(x=>x.s>0).sort((a,b)=>b.s-a.s||b.r.t-a.r.t).map(x=>x.r);
+}
+const szi=r=>((r.thumb||'').length+(r.full||'').length)*.75;
+const cap1=t=>{t=(t||'').trim();return t?t[0].toUpperCase()+t.slice(1):''};
+let tt;
+const toast=m=>{let t=$('.toast');if(!t){t=h('div',{c:'toast',role:'status'});document.body.append(t)}t.textContent=m;t.style.display='block';clearTimeout(tt);tt=setTimeout(()=>{t.style.display='none'},2600)};
+async function download(x){
+  toast('Inapakua...');
+  const rec=await get('img',x.id),dl=x.dl||(rec&&rec.dl),fu=x.fullUrl||(rec&&rec.fullUrl);
+  if(navigator.onLine&&dl&&K.a)fetch(dl+(dl.includes('?')?'&':'?')+'client_id='+K.a).catch(()=>{});
+  let blob=null;
+  if(rec&&rec.full){try{blob=await(await fetch(rec.full)).blob()}catch(e){}}
+  if(!blob&&navigator.onLine&&fu)blob=await blobOf(fu);
+  if(!blob){const t=(rec&&rec.thumb)||x.thumb;if(t){try{blob=await(await fetch(t)).blob()}catch(e){}}}
+  if(!blob){toast('Imeshindikana. Jaribu tena ukiwa online.');return}
+  const ext=(blob.type.split('/')[1]||'jpg').replace('jpeg','jpg').replace(/\+.*/,'');
+  const slug=(x.alt||'picha').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,40)||'picha';
+  const u=URL.createObjectURL(blob),a=h('a',{href:u,download:'incident-search-'+slug+'-'+x.id.replace(/\W/g,'').slice(-6)+'.'+ext});
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),30000);
+  toast('Picha imepakuliwa');
+}
+function viewer(list,i0,opts){
+  opts=opts||{};let i=i0,ver=0;
+  const ov=h('div',{c:'vw',role:'dialog','aria-modal':'true','aria-label':'Picha'}),
+    img=h('img',{alt:''}),ttl=h('p',{c:'vtt'}),pls=h('div',{c:'pls'}),
+    prev=h('button',{c:'nv l',type:'button','aria-label':'Iliyotangulia',t:'‹'}),next=h('button',{c:'nv r',type:'button','aria-label':'Inayofuata',t:'›'}),
+    stg=h('div',{c:'stg'},[img,prev,next]);
+  const key=e=>{if(e.key==='Escape')close();else if(e.key==='ArrowRight')go(1);else if(e.key==='ArrowLeft')go(-1)};
+  const close=()=>{document.removeEventListener('keydown',key);document.body.style.overflow='';ov.remove()};
+  const go=d=>{const n=i+d;if(n<0||n>=list.length)return;i=n;show()};
+  const show=async()=>{
+    const x=list[i],my=++ver;
+    ttl.textContent=cap1(x.alt)||'Picha';pls.textContent='';
+    pls.append(pill('Kutoka Incident Search'));if(x.by)pls.append(pill('Picha na '+x.by));
+    prev.style.visibility=i>0?'visible':'hidden';next.style.visibility=i<list.length-1?'visible':'hidden';
+    let rec=await get('img',x.id);if(my!==ver)return;
+    if(rec)pls.append(pill('✓ Imehifadhiwa offline','ok'));
+    img.onerror=null;img.src=(rec&&(rec.full||rec.thumb))||x.thumb||x.thumbUrl||'';
+    if(rec&&rec.full)return;
+    if(!navigator.onLine||!x.fullUrl)return;
+    /* ukubwa kamili unahifadhiwa kiotomatiki unapofunguliwa */
+    const d=await dataOf(x.fullUrl);if(my!==ver)return;
+    if(d){img.src=d;const r=rec||await saveImg(x,opts.tags||[]);if(r){r.full=d;await put('img',r);if(!rec&&my===ver)pls.append(pill('✓ Imehifadhiwa offline','ok'))}}
+    else{const t=(rec&&rec.thumb)||x.thumb||x.thumbUrl;img.onerror=()=>{img.onerror=null;img.src=t};img.src=x.fullUrl}
+  };
+  prev.onclick=()=>go(-1);next.onclick=()=>go(1);
+  let x0=null;stg.ontouchstart=e=>{x0=e.touches[0].clientX};
+  stg.ontouchend=e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50)go(dx<0?1:-1)};
+  stg.onclick=e=>{if(e.target===stg)close()};
+  const cb=h('button',{c:'x',type:'button','aria-label':'Funga',t:'✕',onclick:close}),
+    dl=h('button',{c:'vb',type:'button',t:'Pakua',onclick:()=>download(list[i])}),act=h('div',{c:'act'},[dl]);
+  if(opts.onDel){const b=h('button',{c:'vb g',type:'button',t:'Ondoa'});twoStep(b,async()=>{const x=list[i];close();await opts.onDel(x)},'Ondoa','Bofya tena');act.append(b)}
+  ov.append(h('div',{c:'bar'},[cb]),stg,h('div',{c:'inf'},[ttl,pls]),act);
+  document.body.append(ov);document.body.style.overflow='hidden';document.addEventListener('keydown',key);cb.focus();show();
+}
+const tileEl=(x,list,i,opts,tiles)=>{
+  const b=h('button',{c:'gi',type:'button','aria-label':x.alt||'Picha'}),im=h('img',{alt:x.alt||'',loading:'lazy'});
+  if(x.w&&x.h)b.style.aspectRatio=x.w+' / '+x.h;
+  im.onerror=async()=>{im.onerror=()=>b.remove();const r=await get('img',x.id);if(r&&r.thumb)im.src=r.thumb;else b.remove()};
+  im.src=x.thumb||x.thumbUrl;b.append(im);
+  if(imgSaved.has(x.id))b.append(h('span',{c:'ck',t:'✓'}));
+  b.onclick=()=>viewer(list,i,opts);tiles.set(x.id,b);return b;
+};
+const vtabs=(q,on)=>h('nav',{c:'vt'},[h('a',{c:on==='s'?'on':'',href:'#s/'+enc(q),t:'Maandishi'}),h('a',{c:on==='p'?'on':'',href:'#p/'+enc(q),t:'Picha'})]);
 
 /* ===== VIPANDE ===== */
 function logo(){const a=h('a',{c:'logo',href:'#','aria-label':'Incident Search'});const C=['#4285f4','#ea4335','#fbbc05','#4285f4','#34a853','#ea4335'];let i=0;
   [...'Incident Search'].forEach(ch=>{a.append(ch===' '?' ':h('span',{t:ch,style:'color:'+C[i++%6]}))});return a}
 async function sug(v,dd,go){
-  const rq=(await all('q')).filter(x=>x.q.toLowerCase().includes(v.toLowerCase())).slice(0,3).map(x=>x.q);let l=[];
+  const rq=(await all('q')).filter(x=>!x.kind&&x.q.toLowerCase().includes(v.toLowerCase())).slice(0,3).map(x=>x.q);let l=[];
   if(navigator.onLine){try{const d=await jget(B.sw+'/w/api.php?action=opensearch&format=json&origin=*&limit=6&search='+enc(v));l=(d&&d[1])||[]}catch(e){}}
   l=[...new Set([...rq,...l])].slice(0,7);dd.textContent='';
   l.forEach(t=>dd.append(h('button',{c:'sg',type:'button',t,onpointerdown:e=>{e.preventDefault();go(t)}})));
 }
-function box(val){
+function box(val,mode){
   const f=h('form',{c:'sb',autocomplete:'off',role:'search'}),ic=h('span',{c:'ico'}),dd=h('div',{c:'dd'}),
     i=h('input',{type:'search',value:val||'',placeholder:'Tafuta au andika swali...','aria-label':'Tafuta',enterkeyhint:'search',autocapitalize:'off'});
   ic.innerHTML=SVG;const sb=h('button',{c:'go',type:'submit',t:'Tafuta'});f.append(ic,i,sb,dd);
-  const go=q=>{q=q.trim();if(!q)return;dd.textContent='';i.blur();if(decodeURIComponent(location.hash.slice(1))==='s/'+q)route();else location.hash='s/'+enc(q)};
+  const go=q=>{q=q.trim();if(!q)return;dd.textContent='';i.blur();const pre=mode==='p'?'p/':'s/';if(decodeURIComponent(location.hash.slice(1))===pre+q)route();else location.hash=pre+enc(q)};
   f.onsubmit=e=>{e.preventDefault();go(i.value)};
   let tm;i.oninput=()=>{clearTimeout(tm);const v=i.value.trim();if(!v){dd.textContent='';return}tm=setTimeout(()=>sug(v,dd,go),250)};
   i.onblur=()=>setTimeout(()=>dd.textContent='',250);
   f._i=i;return f;
 }
 const sn=t=>{t=(t||'').replace(/\s+/g,' ').trim();return t.length>230?t.slice(0,230)+'...':t};
-const item=r=>h('div',{c:'r'},[h('div',{c:'rb'},[
-  h('div',{c:'u',t:(r.lang==='sw'?'Kiswahili':'English')+(saved.has(aid(r.lang,r.title))?' - imehifadhiwa offline':'')}),
-  h('a',{c:'t',href:'#a/'+r.lang+'/'+enc(r.title),t:r.title}),h('p',{c:'sn',t:sn(r.ex)})]),
-  r.img&&h('img',{src:r.img,alt:'',loading:'lazy',onerror:async e=>{const a=await get('art',aid(r.lang,r.title));if(a&&a.blob)e.target.src=URL.createObjectURL(a.blob);else e.target.remove()}})]);
+const lead=t=>{for(const l of(t||'').split('\n')){const s=l.trim();if(s&&!/^=+.*=+$/.test(s))return s}return''};
+const mins=a=>Math.max(1,Math.round(((a.text||'').split(/\s+/).length)/200));
+const ago=t=>{const d=Math.floor((Date.now()-t)/864e5);return d<=0?'Leo':d===1?'Jana':d<7?'Siku '+d+' zilizopita':new Date(t).toLocaleDateString('sw-TZ',{day:'numeric',month:'short',year:'numeric'})};
+const fmt=b=>b>=1048576?(b/1048576).toFixed(1)+' MB':Math.max(1,Math.round(b/1024))+' KB';
+const sz=a=>(a.text||'').length+((a.data||'').length*.75)+(a.blob?a.blob.size:0)+(a.pics||[]).reduce((t,p)=>t+((p.data||'').length*.75)+(p.blob?p.blob.size:0),0);
+const pill=(t,c)=>h('span',{c:'pl'+(c?' '+c:''),t});
+const tile=(th,title)=>{th.textContent=(title[0]||'?').toUpperCase();let n=0;for(const ch of title)n+=ch.charCodeAt(0);th.style.background=PAL[n%PAL.length]};
+const hl=(t,ws)=>{if(!ws||!ws.length)return[t];try{return t.split(new RegExp('('+ws.map(esc).join('|')+')','gi')).map((p,i)=>i%2?h('mark',{t:p}):p)}catch(e){return[t]}};
+const twoStep=(b,fn,l0,l1)=>{let armed=false,tm;b.onclick=e=>{e.preventDefault();e.stopPropagation();if(!armed){armed=true;b.textContent=l1;b.classList.add('arm');tm=setTimeout(()=>{armed=false;b.textContent=l0;b.classList.remove('arm')},3000);return}clearTimeout(tm);fn()}};
+
+/* safu ya matokeo ya utafutaji */
+const item=r=>{
+  const id=aid(r.lang,r.title),th=h('div',{c:'th'}),u=h('div',{c:'u'},[r.lang==='sw'?'Kiswahili':'English']),
+    body=h('div',{c:'rb'},[u,h('a',{c:'t',href:'#a/'+r.lang+'/'+enc(r.title),t:r.title}),h('p',{c:'sn',t:sn(r.ex)})]);
+  const setImg=s=>{let i=th.querySelector('img');if(!i){i=h('img',{alt:'',loading:'lazy'});th.textContent='';th.style.background='';th.append(i)}i.src=s};
+  tile(th,r.title);
+  if(r.img){const i=h('img',{src:r.img,alt:'',loading:'lazy'});i.onerror=async()=>{i.onerror=()=>i.remove();const a=await get('art',id);const s=a&&isrc(a);if(s)i.src=s;else i.remove()};th.textContent='';th.style.background='';th.append(i)}
+  const mark=()=>u.append(pill('✓ Imehifadhiwa','ok'));
+  if(saved.has(id)){mark();get('art',id).then(a=>{const s=a&&isrc(a);if(s)setImg(s)})}
+  else if(navigator.onLine){
+    const b=h('button',{c:'sv',type:'button',t:'Hifadhi offline'});
+    b.onclick=async()=>{b.disabled=true;b.textContent='Inahifadhi...';let a=null;try{a=await fetchArt(r.lang,r.title,true)}catch(e){}
+      if(a){b.remove();mark();const s=isrc(a);if(s)setImg(s)}else{b.disabled=false;b.textContent='Imeshindikana. Jaribu tena'}};
+    body.append(b);
+  }
+  return h('div',{c:'r'},[body,th]);
+};
+/* kadi ya makala iliyohifadhiwa */
+const card=(a,ex,ws,onDel)=>{
+  const th=h('div',{c:'th'}),s=isrc(a);
+  if(s)th.append(h('img',{src:s,alt:'',loading:'lazy',onerror:e=>e.target.remove()}));else tile(th,a.title);
+  const c=h('div',{c:'card'},[th,h('div',{c:'cb'},[
+    h('a',{c:'ct',href:'#a/'+a.lang+'/'+enc(a.title),t:a.title}),
+    h('p',{c:'sn'},hl(sn(ex||lead(a.text)),ws)),
+    h('div',{c:'pls'},[pill(a.lang==='sw'?'Kiswahili':'English'),pill('Dakika '+mins(a)),pill(ago(a.t))])])]);
+  if(onDel){const x=h('button',{c:'x',type:'button','aria-label':'Ondoa '+a.title,t:'✕'});twoStep(x,onDel,'✕','Futa?');c.append(x)}
+  return c;
+};
 const zoom=i=>{i.onclick=()=>i.classList.toggle('big');return i};
-const fig=p=>h('figure',{},[zoom(h('img',{src:p.blob?URL.createObjectURL(p.blob):p.src,alt:p.cap,loading:'lazy'})),h('figcaption',{t:p.cap})]);
-const offMsg='Uko offline au muunganisho umeshindikana. Unaona matokeo kutoka Hifadhi.';
+const fig=p=>{const i=zoom(h('img',{src:isrc(p)||p.src||'',alt:p.cap,loading:'lazy'}));const f=h('figure',{},[i,h('figcaption',{t:p.cap})]);i.onerror=()=>f.remove();return f};
+const offMsg='Mtandao haupatikani.';
+
+/* viungo vya ndani: majina ya makala zilizohifadhiwa yanakuwa viungo ndani ya maandishi */
+function linker(self){
+  const used=new Set(),map=new Map();let re=null;
+  try{
+    [...saved.values()].filter(s=>s.title.length>=4&&aid(s.lang,s.title)!==self).sort((x,y)=>y.title.length-x.title.length).slice(0,400)
+      .forEach(s=>{const k=s.title.toLowerCase();if(!map.has(k))map.set(k,s)});
+    if(map.size)re=new RegExp('(?<![\\p{L}\\p{N}])('+[...map.keys()].map(esc).join('|')+')(?![\\p{L}\\p{N}])','giu');
+  }catch(e){re=null}
+  return t=>{if(!re)return[t];return t.split(re).map((p,i)=>{if(i%2===0)return p;const k=p.toLowerCase(),s=map.get(k);if(!s||used.has(k))return p;used.add(k);return h('a',{c:'wl',href:'#a/'+s.lang+'/'+enc(s.title),t:p})})}
+}
 
 /* ===== MAONYESHO ===== */
 function home(){
   app.textContent='';const f=box('');
-  const w=h('div',{c:'hm'},[logo(),f,h('div',[h('button',{c:'bt',type:'button',t:'Tafuta',onclick:()=>f.requestSubmit()}),h('button',{c:'bt',type:'button',t:'Hifadhi',onclick:()=>location.hash='hifadhi'})])]);
-  const ch=h('div',{c:'chips'});w.append(ch);app.append(w);
-  all('q').then(q=>q.sort((a,b)=>b.t-a.t).slice(0,8).forEach(x=>ch.append(h('a',{c:'chip',href:'#s/'+enc(x.q),t:x.q}))));
+  const w=h('div',{c:'hm'},[logo(),f,h('div',[h('button',{c:'bt',type:'button',t:'Tafuta',onclick:()=>f.requestSubmit()}),h('button',{c:'bt',type:'button',t:'Picha',onclick:()=>{const v=f._i.value.trim();if(v)location.hash='p/'+enc(v);else f._i.focus()}}),h('button',{c:'bt',type:'button',t:'Hifadhi',onclick:()=>location.hash='hifadhi'})])]);
+  const ch=h('div',{c:'chips'}),sec=h('div',{c:'sec'});w.append(ch,sec);app.append(w);
+  all('q').then(q=>q.filter(x=>!x.kind).sort((a,b)=>b.t-a.t).slice(0,8).forEach(x=>ch.append(h('a',{c:'chip',href:'#s/'+enc(x.q),t:x.q}))));
+  all('art').then(a=>{if(!a.length)return;a.sort((x,y)=>y.t-x.t);
+    sec.append(h('div',{c:'sh'},[h('h2',{t:'Zilizohifadhiwa'}),h('a',{c:'lnk',href:'#hifadhi',t:'Ona zote ('+a.length+')'})]));
+    a.slice(0,4).forEach(x=>sec.append(card(x)))});
 }
 let rt=0;
 async function results(q){
   const tok=++rt;q=q.trim();app.textContent='';
-  const f=box(q);app.append(h('div',{c:'top'},[logo(),f]));
+  const f=box(q);app.append(h('div',{c:'top'},[logo(),f]),vtabs(q,'s'));
   const st=h('div',{c:'meta',id:'st',t:'Inatafuta...'}),list=h('div'),mb=h('div');app.append(st,list,mb);
+  const show=(items,msg)=>{st.textContent=msg;list.textContent='';items.forEach(r=>list.append(item(r)))};
+  /* matokeo ya Hifadhi tu: yanayosomeka kweli bila mtandao */
+  const cache=async()=>{const rec=await get('q',q.toLowerCase()),seen=new Set(),out=[];
+    const add=r=>{const k=aid(r.lang,r.title);if(!seen.has(k)&&saved.has(k)){seen.add(k);out.push(r)}};
+    ((rec&&rec.res)||[]).forEach(add);(await local(q)).forEach(add);return out};
+  const c=await cache();if(tok!==rt)return;
+  if(!navigator.onLine){show(c,c.length?'Matokeo '+c.length+' kutoka Hifadhi.':'Hakuna kilichopatikana kwenye Hifadhi kuhusu "'+q+'". Tafuta ukiwa online ili makala zihifadhiwe.');return}
+  if(c.length)show(c,'Matokeo '+c.length+' kutoka Hifadhi. Inasasisha...');
   let items=[],lang='sw',off=0,note='';
   try{
     let r=await searchNet(q,'sw',0);
@@ -186,17 +475,16 @@ async function results(q){
     if(tok!==rt)return;items=r;
   }catch(e){
     if(tok!==rt)return;
-    const rec=await get('q',q.toLowerCase());items=rec?rec.res:await local(q);
-    st.textContent=(items.length?offMsg:offMsg+' Hakuna kilichopatikana.');items.forEach(r=>list.append(item(r)));return;
+    show(c,c.length?'Matokeo '+c.length+' kutoka Hifadhi. '+offMsg:offMsg+' Hakuna kilichopatikana kwenye Hifadhi.');return;
   }
-  if(!items.length){st.textContent='Hakuna matokeo ya "'+q+'". Jaribu maneno mengine.';return}
-  st.textContent='Matokeo '+items.length+'.'+note;items.forEach(r=>list.append(item(r)));
+  if(!items.length){list.textContent='';st.textContent='Hakuna matokeo ya "'+q+'". Jaribu maneno mengine.';return}
+  show(items,'Matokeo '+items.length+'.'+note);
   put('q',{id:q.toLowerCase(),q,res:items,t:Date.now()});
   /* hifadhi ya kiotomatiki: makala 5 za juu */
   const top=items.slice(0,5);let n=0;
   for(const r of top){try{await fetchArt(r.lang,r.title)}catch(e){}n++;
     if(tok!==rt)continue;st.textContent='Matokeo '+items.length+'.'+note+' Inahifadhi offline: '+n+'/'+top.length}
-  if(tok===rt){st.textContent='Matokeo '+items.length+'.'+note+' Makala za juu zimehifadhiwa kwa offline.';list.textContent='';items.forEach(r=>list.append(item(r)))}
+  if(tok===rt){show(items,'Matokeo '+items.length+'.'+note+' Makala za juu zimehifadhiwa kwa offline.')}
   if(items.length===10){
     const b=h('button',{c:'more',type:'button',t:'Matokeo zaidi',onclick:async()=>{
       b.disabled=true;b.textContent='Inapakia...';off+=10;
@@ -205,54 +493,147 @@ async function results(q){
     mb.append(b);
   }
 }
-async function reader(lang,title){
-  app.textContent='';app.append(h('div',{c:'top'},[logo(),box('')]),h('div',{c:'meta',t:'Inapakia...'}));
-  let a=null,er=null;try{a=await fetchArt(lang,title,true)}catch(e){er=e}
-  app.lastChild.remove();
-  if(!a){app.append(h('p',{t:er&&er.off?'Makala hii haijahifadhiwa. Unganisha intaneti ili kuisoma.':'Makala haikupatikana au muunganisho umeshindikana.'}),h('a',{c:'chip',href:'javascript:history.back()',t:'Rudi'}));return}
-  const bx=h('article',{c:'art'});bx.append(h('div',{c:'u',t:'Imehifadhiwa kwa offline'}),h('h1',{t:a.title}));
-  if(a.blob||a.img)bx.append(zoom(h('img',{src:a.blob?URL.createObjectURL(a.blob):a.img,alt:a.title})));
-  const pics=(a.pics||[]).slice();let pend=true;
-  let stop=false;
-  a.text.split('\n').forEach(l=>{if(stop)return;const m=l.match(/^(=+)\s*(.+?)\s*=+$/);
+function article(a){
+  const bx=h('article',{c:'art'}),self=a.id;
+  bx.append(h('div',{c:'pls'},[pill('✓ Imehifadhiwa offline','ok'),pill(a.lang==='sw'?'Kiswahili':'English'),pill('Dakika '+mins(a)+' za kusoma')]),h('h1',{t:a.title}));
+  const s=isrc(a)||a.img;if(s)bx.append(zoom(h('img',{src:s,alt:a.title,onerror:e=>e.target.remove()})));
+  const L=linker(self),pics=(a.pics||[]).slice();let pend=true,stop=false;
+  (a.text||'').split('\n').forEach(l=>{if(stop)return;const m=l.match(/^(=+)\s*(.+?)\s*=+$/);
     if(m){if(/^(marejeo|tanbihi|viungo|angalia pia|references|external links|see also|notes|further reading|bibliography)/i.test(m[2])){stop=true;return}bx.append(h(m[1].length>2?'h3':'h2',{t:m[2]}));if(m[1].length<=2)pend=true}
-    else if(l.trim()){bx.append(h('p',{t:l}));if(pend&&pics.length){bx.append(fig(pics.shift()));pend=false}}});
+    else if(l.trim()){bx.append(h('p',{},L(l)));if(pend&&pics.length){bx.append(fig(pics.shift()));pend=false}}});
   if(pics.length){bx.append(h('h2',{t:'Picha na michoro'}));pics.forEach(p=>bx.append(fig(p)))}
-  const r=h('div');
-  r.append(h('button',{c:'tab',type:'button',t:'Ondoa kwenye Hifadhi',onclick:async()=>{await del('art',a.id);saved.delete(a.id);history.back()}}));
-  bx.append(r);app.append(bx);window.scrollTo(0,0);
+  const rm=h('button',{c:'tab',type:'button',t:'Ondoa kwenye Hifadhi'});
+  twoStep(rm,async()=>{await del('art',a.id);saved.delete(a.id);history.back()},'Ondoa kwenye Hifadhi','Bofya tena kuthibitisha');
+  bx.append(h('div',{style:'margin:18px 0'},[rm]));
+  const rel=h('div');bx.append(rel);
+  all('art').then(pool=>{
+    const seen=new Set([self]),out=[];
+    scoreArts(a.title,pool).forEach(x=>{if(out.length<4&&!seen.has(x.a.id)){seen.add(x.a.id);out.push(x.a)}});
+    pool.sort((x,y)=>y.t-x.t).forEach(x=>{if(out.length<4&&!seen.has(x.id)){seen.add(x.id);out.push(x)}});
+    if(!out.length)return;rel.append(h('h2',{t:'Endelea kusoma'}));out.forEach(x=>rel.append(card(x)))});
+  return bx;
+}
+async function reader(lang,title){
+  const tok=rt,id=aid(lang,title);
+  app.textContent='';app.append(h('div',{c:'top'},[logo(),box('')]),h('div',{c:'meta',id:'ld',t:'Inapakia...'}));
+  let a=await get('art',id),er=null;
+  if(!a){try{a=await fetchArt(lang,title,false)}catch(e){er=e}}
+  if(tok!==rt)return;
+  const ld=$('#ld');if(ld)ld.remove();
+  if(!a){app.append(h('p',{t:er&&er.off?'Makala hii haijahifadhiwa. Unganisha intaneti ili kuisoma.':'Makala haikupatikana au muunganisho umeshindikana.'}),h('a',{c:'chip',href:'#',onclick:e=>{e.preventDefault();history.back()},t:'Rudi'}));return}
+  const holder=h('div');app.append(holder);
+  const draw=x=>{holder.textContent='';holder.append(article(x))};
+  draw(a);window.scrollTo(0,0);
+  /* makala inaonekana mara moja kutoka Hifadhi; picha za ziada zinaongezwa nyuma ya pazia ukiwa online */
+  if(navigator.onLine&&!a.full){fetchArt(lang,title,true).then(n=>{if(n&&n.full&&tok===rt){const y=window.scrollY;draw(n);window.scrollTo(0,y)}}).catch(()=>{})}
+}
+async function pics(q){
+  const tok=++rt;q=q.trim();app.textContent='';
+  const f=box(q,'p');app.append(h('div',{c:'top'},[logo(),f]),vtabs(q,'p'));
+  if(!q){app.append(h('p',{c:'meta',t:'Andika neno hapo juu ili kutafuta picha.'}));return}
+  const st=h('div',{c:'meta',t:'Inatafuta picha...'}),sd=h('div',{c:'sd'}),msg=h('p',{c:'meta'}),gr=h('div',{c:'gr'}),mb=h('div');
+  app.append(st,sd,msg,gr,mb);
+  const tags=[...new Set([q.toLowerCase(),...q.toLowerCase().split(/\s+/).filter(w=>w.length>1)])],opts={tags},
+    mk=()=>({a:{items:[],page:0,pages:0,term:''},b:{items:[],page:0,pages:0,term:''}}),names={a:'Picha Bora',b:'Picha Zaidi'},tiles=new Map();
+  let S=mk(),side='a',fromNet=false;
+  const mark=id=>{const b=tiles.get(id);if(b&&!b.querySelector('.ck'))b.append(h('span',{c:'ck',t:'✓'}))};
+  const alive=()=>tok===rt;
+  const draw=()=>{
+    sd.textContent='';['a','b'].forEach(k=>sd.append(h('button',{c:'tab'+(side===k?' on':''),type:'button',t:names[k]+' ('+S[k].items.length+')',onclick:()=>{side=k;draw()}})));
+    gr.textContent='';mb.textContent='';tiles.clear();const L=S[side].items;
+    msg.textContent=L.length?'':(navigator.onLine?'Hakuna picha upande huu. Jaribu upande mwingine au neno lingine.':'Hakuna picha zilizohifadhiwa upande huu kuhusu "'+q+'".');
+    L.forEach((x,i)=>gr.append(tileEl(x,L,i,opts,tiles)));
+    if(fromNet&&L.length&&S[side].page<S[side].pages){
+      const b=h('button',{c:'more',type:'button',t:'Picha zaidi'});
+      b.onclick=async()=>{b.disabled=true;b.textContent='Inapakia...';
+        try{const n=await loadSide(side,q,S,true);if(!alive())return;draw();put('q',{id:'p:'+q.toLowerCase(),kind:'p',q,ids:[...S.a.items,...S.b.items].map(x=>x.id),t:Date.now()});autosave(n,tags,mark,null,alive)}
+        catch(e){b.disabled=false;b.textContent='Imeshindikana. Jaribu tena'}};
+      mb.append(b);
+    }
+  };
+  /* picha zilizohifadhiwa: kutoka utafutaji huo huo au zinazolingana na maneno */
+  const pool=await all('img'),byId=new Map(pool.map(r=>[r.id,r])),rec=await get('q','p:'+q.toLowerCase()),seen=new Set(),c=[];
+  ((rec&&rec.ids)||[]).forEach(id=>{const r=byId.get(id);if(r&&!seen.has(id)){seen.add(id);c.push(r)}});
+  scoreImgs(q,pool).forEach(r=>{if(!seen.has(r.id)){seen.add(r.id);c.push(r)}});
+  if(tok!==rt)return;
+  S.a.items=c.filter(x=>x.side==='a');S.b.items=c.filter(x=>x.side==='b');
+  if(!S.a.items.length&&S.b.items.length)side='b';
+  if(!navigator.onLine){st.textContent=c.length?'Picha '+c.length+' kutoka Incident Search.':'Hakuna picha zilizohifadhiwa kuhusu "'+q+'". Tafuta ukiwa online ili zihifadhiwe.';draw();return}
+  st.textContent=c.length?'Picha '+c.length+' zilizohifadhiwa. Inasasisha...':'Inatafuta picha...';if(c.length)draw();
+  const N=mk(),rs=await Promise.all(['a','b'].map(k=>loadSide(k,q,N,false).then(()=>({ok:1,k}),e=>({ok:0,k,e}))));
+  if(tok!==rt)return;
+  if(!rs.some(r=>r.ok)){
+    const nk=rs.every(r=>r.e&&r.e.nokey);
+    st.textContent=nk?'Huduma ya picha haijawashwa kwenye toleo hili.':(c.length?'Picha '+c.length+' kutoka Incident Search. '+offMsg:offMsg+' Hakuna picha zilizohifadhiwa kuhusu "'+q+'".');
+    draw();return;
+  }
+  rs.forEach(r=>{if(!r.ok)N[r.k]=S[r.k]});
+  const tot=N.a.items.length+N.b.items.length;
+  if(tot){S=N;fromNet=true;if(!S[side].items.length)side=S.a.items.length?'a':'b'}
+  const term=[N.a.term,N.b.term].find(Boolean);if(term)tags.push(term.toLowerCase());
+  draw();
+  if(!tot){st.textContent='Hakuna picha za "'+q+'". Jaribu maneno mengine.';return}
+  const total=S.a.items.length+S.b.items.length;
+  put('q',{id:'p:'+q.toLowerCase(),kind:'p',q,ids:[...S.a.items,...S.b.items].map(x=>x.id),t:Date.now()});
+  st.textContent='Picha '+total+' kutoka Incident Search.';
+  const first=S[side].items,rest=S[side==='a'?'b':'a'].items;
+  await autosave([...first,...rest],tags,mark,(n,t)=>{if(alive())st.textContent='Picha '+total+'. Inahifadhi offline: '+n+'/'+t},alive);
+  if(alive())st.textContent='Picha '+total+' kutoka Incident Search. Zimehifadhiwa kwa offline.';
 }
 async function library(){
   app.textContent='';
-  const arts=(await all('art')).sort((a,b)=>b.t-a.t),qs=(await all('q')).sort((a,b)=>b.t-a.t);
-  const kb=Math.round(arts.reduce((s,a)=>s+a.text.length+(a.blob?a.blob.size:0)+(a.pics||[]).reduce((t,p)=>t+(p.blob?p.blob.size:0),0),0)/1024);
-  const inp=h('input',{c:'in',type:'search',placeholder:'Tafuta ndani ya Hifadhi (inafanya kazi offline)','aria-label':'Tafuta ndani ya Hifadhi'});
-  const box2=h('div');let tab='a';
-  app.append(h('div',{c:'top'},[logo()]),h('h1',{c:'pt',t:'Hifadhi'}),h('p',{c:'meta',t:'Makala '+arts.length+' na utafutaji '+qs.length+' vimehifadhiwa (~'+kb+' KB). Vinasomeka bila intaneti.'}),inp);
-  const tabs=h('div',{c:'tabs'});app.append(tabs,box2);
-  const draw=async()=>{
-    tabs.textContent='';[['a','Makala'],['q','Utafutaji']].forEach(([k,t])=>tabs.append(h('button',{c:'tab'+(tab===k?' on':''),type:'button',t,onclick:()=>{tab=k;inp.value='';draw()}})));
-    box2.textContent='';const v=inp.value.trim();
-    if(v){const r=await local(v);if(!r.length)box2.append(h('p',{c:'meta',t:'Hakuna kilichopatikana ndani ya Hifadhi.'}));r.forEach(x=>box2.append(item(x)));return}
-    if(tab==='a'){if(!arts.length)box2.append(h('p',{c:'meta',t:'Bado hakuna makala. Tafuta kitu na makala za juu zitahifadhiwa kiotomatiki.'}));
-      arts.forEach(a=>{const row=h('div',{c:'row'},[h('a',{href:'#a/'+a.lang+'/'+enc(a.title)},[h('span',{t:a.title}),h('small',{t:new Date(a.t).toLocaleDateString('sw-TZ')+' - '+(a.lang==='sw'?'Kiswahili':'English')})]),
-        h('button',{c:'x',type:'button','aria-label':'Ondoa',t:'✕',onclick:async()=>{await del('art',a.id);saved.delete(a.id);row.remove()}})]);box2.append(row)})}
-    else{if(!qs.length)box2.append(h('p',{c:'meta',t:'Bado hujatafuta chochote.'}));
-      qs.forEach(x=>{const row=h('div',{c:'row'},[h('a',{href:'#s/'+enc(x.q)},[h('span',{t:x.q}),h('small',{t:x.res.length+' matokeo - '+new Date(x.t).toLocaleDateString('sw-TZ')})]),
-        h('button',{c:'x',type:'button','aria-label':'Ondoa',t:'✕',onclick:async()=>{await del('q',x.id);row.remove()}})]);box2.append(row)})}
+  const allq=await all('q');
+  let arts=(await all('art')).sort((a,b)=>b.t-a.t),imgs=(await all('img')).sort((a,b)=>b.t-a.t),qs=allq.filter(x=>!x.kind).sort((a,b)=>b.t-a.t),tab='a';
+  const sum=h('div',{c:'meta'}),okt=h('b'),okc=h('div',{c:'okc'},[h('span',{c:'dot'}),h('div',{},[okt,sum])]),
+    inp=h('input',{c:'in',type:'search','aria-label':'Tafuta ndani ya Hifadhi'}),tabs=h('div',{c:'tabs'}),
+    stk=h('div',{c:'stk'},[inp,tabs]),box2=h('div'),foot=h('div',{c:'foot'});
+  app.append(h('div',{c:'top'},[logo()]),h('h1',{c:'pt',t:'Hifadhi'}),okc);
+  if(sm!=='idb')app.append(h('p',{c:'warn',t:sm==='ls'?'Hifadhi ya kifaa hiki ina nafasi ndogo, picha nyingi huenda zisihifadhiwe.':'Kifaa hiki hakiruhusu kuhifadhi kwa kudumu. Vitu vitapotea ukifunga app.'}));
+  app.append(stk,box2,foot);
+  const empty=()=>h('div',{c:'empty'},[h('p',{t:'Bado hakuna makala zilizohifadhiwa.'}),h('p',{c:'meta',t:'Tafuta kitu ukiwa online. Makala 5 za juu huhifadhiwa zenyewe, na unaweza kuhifadhi zaidi kwa kitufe cha "Hifadhi offline".'}),h('a',{c:'chip',href:'#',t:'Anza kutafuta'})]);
+  const emptyI=()=>h('div',{c:'empty'},[h('p',{t:'Bado hakuna picha zilizohifadhiwa.'}),h('p',{c:'meta',t:'Tafuta upande wa Picha ukiwa online. Picha zinahifadhiwa zenyewe na unaweza kuzitazama bila intaneti.'}),h('a',{c:'chip',href:'#p/',t:'Tafuta picha'})]);
+  const rmArt=a=>()=>del('art',a.id).then(()=>{saved.delete(a.id);arts=arts.filter(x=>x.id!==a.id);draw()});
+  const rmImg=async x=>{await del('img',x.id);imgSaved.delete(x.id);imgs=imgs.filter(y=>y.id!==x.id);draw()};
+  const draw=()=>{
+    const total=arts.reduce((s,a)=>s+sz(a),0)+imgs.reduce((s,r)=>s+szi(r),0);
+    okt.textContent=(arts.length||imgs.length)?'Tayari kusomwa bila intaneti':'Hifadhi ni tupu';
+    sum.textContent='Makala '+arts.length+', picha '+imgs.length+', utafutaji '+qs.length+', nafasi '+fmt(total);
+    tabs.textContent='';[['a','Makala ('+arts.length+')'],['i','Picha ('+imgs.length+')'],['q','Utafutaji ('+qs.length+')']].forEach(([k,t])=>tabs.append(h('button',{c:'tab'+(tab===k?' on':''),type:'button',t,onclick:()=>{tab=k;inp.value='';draw()}})));
+    inp.placeholder=tab==='a'?'Tafuta ndani ya makala zilizohifadhiwa':tab==='i'?'Tafuta ndani ya picha zilizohifadhiwa':'Tafuta ndani ya utafutaji wako';
+    box2.textContent='';foot.textContent='';const v=inp.value.trim();
+    if(tab==='a'){
+      let list=arts.map(a=>({a,ex:''})),ws=null;
+      if(v){list=scoreArts(v,arts);ws=v.toLowerCase().split(/\s+/).filter(w=>w.length>1)}
+      if(!list.length)box2.append(v?h('p',{c:'meta',t:'Hakuna kilichopatikana ndani ya Hifadhi.'}):empty());
+      list.forEach(x=>box2.append(card(x.a,x.ex,ws,rmArt(x.a))));
+    }else if(tab==='i'){
+      const L=v?scoreImgs(v,imgs):imgs;
+      if(!L.length)box2.append(v?h('p',{c:'meta',t:'Hakuna picha iliyopatikana ndani ya Hifadhi.'}):emptyI());
+      else{const g=h('div',{c:'gr'}),tl=new Map(),o={tags:[],onDel:rmImg};L.forEach((x,i)=>g.append(tileEl(x,L,i,o,tl)));box2.append(g)}
+    }else{
+      const l=v?qs.filter(x=>x.q.toLowerCase().includes(v.toLowerCase())):qs;
+      if(!l.length)box2.append(h('p',{c:'meta',t:v?'Hakuna kilichopatikana.':'Bado hujatafuta chochote.'}));
+      l.forEach(x=>{const n=x.res.filter(r=>saved.has(aid(r.lang,r.title))).length;
+        const rx=h('button',{c:'x',type:'button','aria-label':'Ondoa',t:'✕'});
+        const row=h('div',{c:'row'},[h('a',{href:'#s/'+enc(x.q)},[h('span',{t:x.q}),h('small',{t:n+' kati ya '+x.res.length+' zimehifadhiwa - '+ago(x.t)})]),rx]);
+        twoStep(rx,()=>del('q',x.id).then(()=>{qs=qs.filter(y=>y.id!==x.id);draw()}),'✕','Futa?');box2.append(row)});
+    }
+    if(arts.length||qs.length||imgs.length){const cl=h('button',{c:'tab',type:'button',t:'Futa Hifadhi yote'});
+      twoStep(cl,async()=>{for(const a of arts)await del('art',a.id);for(const r of imgs)await del('img',r.id);for(const x of allq)await del('q',x.id);saved.clear();imgSaved.clear();arts=[];imgs=[];qs=[];draw()},'Futa Hifadhi yote','Bofya tena kuthibitisha');foot.append(cl)}
   };
   inp.oninput=draw;draw();
 }
 function route(){
   rt++;const x=decodeURIComponent(location.hash.slice(1)||'');
   if(x.startsWith('s/'))return results(x.slice(2));
+  if(x.startsWith('p/'))return pics(x.slice(2));
   if(x.startsWith('a/')){const p=x.slice(2).split('/');return reader(p[0],p.slice(1).join('/'))}
   if(x==='hifadhi')return library();
   home();
 }
 const net=()=>{$('#off').style.display=navigator.onLine?'none':'block'};
 addEventListener('online',net);addEventListener('offline',net);net();
-addEventListener('hashchange',route);route();
+addEventListener('hashchange',route);ready.then(route);
 })();
 </script>
 </body>
