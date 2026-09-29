@@ -34,6 +34,11 @@ export default{
   async fetch(req){
     const u=new URL(req.url),q=(u.searchParams.get('q')||'').trim().slice(0,200),off=Math.min(90,parseInt(u.searchParams.get('off')||'0',10)||0);
     const H={'access-control-allow-origin':ORIGIN,'content-type':'application/json; charset=utf-8','cache-control':'public, max-age=3600'};
+    if(u.searchParams.get('debug')){
+      const r=await fetch('https://www.bing.com/search?q=soda&count=10&setlang=sw&cc=TZ',{headers:{'user-agent':UA,'accept-language':'sw,en;q=0.8'}});
+      const t=await r.text();
+      return new Response(JSON.stringify({status:r.status,length:t.length,results:t.split('<li class="b_algo"').length-1,head:t.slice(0,300)},null,1),{headers:H});
+    }
     if(!q)return new Response('{"items":[]}',{headers:H});
     let items=[];
     try{items=await bing(q,off)}catch(e){}
