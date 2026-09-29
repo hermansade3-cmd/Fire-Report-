@@ -226,6 +226,9 @@ function setMain(html, title, opts) {
 opts = opts || {};
 $("#page-title").textContent = title;
 $("#back-btn").style.visibility = opts.back === false ? "hidden" : "visible";
+{ const _bb = $("#back-btn"), _sb = $("#inc-search-btn");
+  _bb.style.display = opts.back === false ? "none" : "";
+  if (_sb) _sb.style.display = opts.back === false ? "" : "none"; }
 $("#save-indicator").textContent = opts.showSave ? "" : "";
 $("#save-indicator").style.display = opts.showSave ? "inline" : "none";
 $("#main").innerHTML = html;
@@ -692,7 +695,7 @@ scheduleSave();
 }
 const stepKey = STEPS_ORDER[State.currentStep];
 $("#page-title").textContent = STEP_LABELS[stepKey];
-$("#back-btn").style.visibility = "visible";
+$("#back-btn").style.visibility = "visible"; $("#back-btn").style.display = ""; { const _s = $("#inc-search-btn"); if (_s) _s.style.display = "none"; }
 $("#save-indicator").style.display = "inline";
 const pct = Math.round(((State.currentStep + 1) / STEPS_ORDER.length) * 100);
 const body = renderStep(stepKey, r);
@@ -1766,6 +1769,7 @@ app.innerHTML = `
     <div class="content-col">
       <div class="offline-banner" id="offline-banner">Offline Mode \u2014 Data inahifadhiwa kwenye kifaa hiki</div>
       <div class="topbar">
+        <button class="back-btn" id="inc-search-btn" type="button" aria-label="Tafuta (Incident Search)" title="Incident Search" style="display:none;">\uD83D\uDD0D</button>
         <button class="back-btn" id="back-btn" aria-label="Back">\u2190</button>
         <h1 id="page-title">Dashboard</h1>
         <span class="save-indicator" id="save-indicator" style="display:none;"></span>
@@ -1786,6 +1790,7 @@ app.innerHTML = `
     <div id="toast-host"></div>
   `;
 $("#back-btn").addEventListener("click", () => { flushSave(); history.back(); });
+$("#inc-search-btn").addEventListener("click", () => { flushSave(); window.location.href = "incident-search.html"; });
 const fireBtn = $("#fire-science-btn");
 fireBtn.addEventListener("mouseenter", () => { fireBtn.style.background = "rgba(0,0,0,0.08)"; });
 fireBtn.addEventListener("mouseleave", () => { fireBtn.style.background = "transparent"; });
