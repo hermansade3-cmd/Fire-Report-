@@ -1769,7 +1769,7 @@ app.innerHTML = `
     <div class="content-col">
       <div class="offline-banner" id="offline-banner">Offline Mode \u2014 Data inahifadhiwa kwenye kifaa hiki</div>
       <div class="topbar">
-        <button class="back-btn" id="inc-search-btn" type="button" aria-label="Tafuta (Incident Search)" title="Incident Search" style="display:none;">\uD83D\uDD0D</button>
+        <button class="back-btn" id="inc-search-btn" type="button" aria-label="Tafuta (Incident Search)" title="Incident Search" style="display:none;">\u25AB\uFE0F</button>
         <button class="back-btn" id="back-btn" aria-label="Back">\u2190</button>
         <h1 id="page-title">Dashboard</h1>
         <span class="save-indicator" id="save-indicator" style="display:none;"></span>
