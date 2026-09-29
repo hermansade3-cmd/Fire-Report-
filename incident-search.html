@@ -48,6 +48,11 @@ header a:hover{text-decoration:underline}
 .art h3{font-size:17px;margin:18px 0 4px}
 .art p{margin:0 0 12px}
 .art img{max-width:100%;max-height:300px;border-radius:12px;display:block;margin:8px 0 14px}
+.art figure{margin:14px 0}
+.art figure img{margin:0}
+.art figcaption{font-size:13px;color:var(--mut);margin-top:4px}
+.art img{cursor:zoom-in}
+.art img.big{max-height:none;cursor:zoom-out}
 .pt{font-size:26px;margin:6px 0}
 .row{display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--ln);padding:10px 0}
 .row a{flex:1;color:var(--lk);text-decoration:none;min-width:0}
@@ -63,7 +68,7 @@ header a:hover{text-decoration:underline}
 </head>
 <body>
 <div id="off">Uko offline. Unaona maudhui kutoka Hifadhi.</div>
-<header><a href="#" id="hl">Nyumbani</a><a href="#hifadhi" id="hs">Hifadhi</a></header>
+<header><a href="index.html" id="hr">&larr; Ripoti</a><a href="#" id="hl" style="margin-right:auto">Nyumbani</a><a href="#hifadhi" id="hs">Hifadhi</a></header>
 <div class="w" id="app" aria-live="polite"></div>
 <noscript>Washa JavaScript ili kutumia app hii.</noscript>
 <script>
@@ -102,12 +107,30 @@ async function searchNet(q,lang,off){
   const ps=d&&d.query?Object.values(d.query.pages).sort((a,b)=>a.index-b.index):[];
   return ps.map(p=>({title:p.title,lang,url:p.fullurl,ex:p.extract||'',img:okImg(p.thumbnail&&p.thumbnail.source)}));
 }
-async function fetchArt(lang,title){
-  const c=await get('art',aid(lang,title));if(c)return c;
-  const d=await jget(B[lang]+'/w/api.php?action=query&format=json&origin=*&redirects=1&prop=extracts%7Cpageimages%7Cinfo&explaintext=1&inprop=url&piprop=thumbnail&pithumbsize=600&titles='+enc(title));
-  const p=d&&d.query&&Object.values(d.query.pages)[0];
-  if(!p||p.missing!==undefined||!p.extract)return null;
-  const a={id:aid(lang,p.title),lang,title:p.title,url:p.fullurl,text:p.extract,img:okImg(p.thumbnail&&p.thumbnail.source),t:Date.now()};
+const BAD=/flag|icon|logo|symbol|commons-|edit-|question|ambox|portal|folder|stub|arrow|button|wikiquote|wikisource|wiktionary|disambig|padlock|blank|pictogram/i;
+async function blobOf(u){try{const ac=new AbortController(),to=setTimeout(()=>ac.abort(),12000);const r=await fetch(u,{signal:ac.signal});clearTimeout(to);return r.ok?await r.blob():null}catch(e){return null}}
+async function picsNet(lang,title,max){
+  try{
+    const d=await jget(B[lang]+'/w/api.php?action=query&format=json&origin=*&redirects=1&generator=images&gimlimit=40&titles='+enc(title)+'&prop=imageinfo&iiprop=url%7Csize%7Cmime&iiurlwidth=640');
+    const ps=d&&d.query?Object.values(d.query.pages):[];
+    const c=ps.filter(p=>p.imageinfo&&p.imageinfo[0]).map(p=>({t:p.title,i:p.imageinfo[0]}))
+      .filter(x=>/^image\/(jpeg|png|svg\+xml|gif|webp)/.test(x.i.mime)&&x.i.width>=220&&x.i.height>=140&&!BAD.test(x.t)&&okImg(x.i.thumburl)).slice(0,max);
+    const out=await Promise.all(c.map(async x=>{const b=await blobOf(x.i.thumburl);return b?{src:x.i.thumburl,blob:b,cap:x.t.replace(/^[^:]+:/,'').replace(/\.[a-z]+$/i,'').replace(/_/g,' ')}:null}));
+    return out.filter(Boolean);
+  }catch(e){return null}
+}
+async function fetchArt(lang,title,deep){
+  let a=await get('art',aid(lang,title));
+  if(a&&(a.full||!deep||!navigator.onLine))return a;
+  if(!a){
+    const d=await jget(B[lang]+'/w/api.php?action=query&format=json&origin=*&redirects=1&prop=extracts%7Cpageimages%7Cinfo&explaintext=1&inprop=url&piprop=thumbnail&pithumbsize=600&titles='+enc(title));
+    const p=d&&d.query&&Object.values(d.query.pages)[0];
+    if(!p||p.missing!==undefined||!p.extract)return null;
+    a={id:aid(lang,p.title),lang,title:p.title,url:p.fullurl,text:p.extract,img:okImg(p.thumbnail&&p.thumbnail.source),t:Date.now(),pics:[]};
+    if(a.img)a.blob=await blobOf(a.img);
+  }
+  const np=await picsNet(a.lang,a.title,deep?8:3);
+  if(np){a.pics=np;a.full=!!deep}
   await put('art',a);saved.add(a.id);return a;
 }
 async function local(q){
@@ -139,7 +162,9 @@ const sn=t=>{t=(t||'').replace(/\s+/g,' ').trim();return t.length>230?t.slice(0,
 const item=r=>h('div',{c:'r'},[h('div',{c:'rb'},[
   h('div',{c:'u',t:(r.lang==='sw'?'Kiswahili':'English')+(saved.has(aid(r.lang,r.title))?' - imehifadhiwa offline':'')}),
   h('a',{c:'t',href:'#a/'+r.lang+'/'+enc(r.title),t:r.title}),h('p',{c:'sn',t:sn(r.ex)})]),
-  r.img&&h('img',{src:r.img,alt:'',loading:'lazy'})]);
+  r.img&&h('img',{src:r.img,alt:'',loading:'lazy',onerror:async e=>{const a=await get('art',aid(r.lang,r.title));if(a&&a.blob)e.target.src=URL.createObjectURL(a.blob);else e.target.remove()}})]);
+const zoom=i=>{i.onclick=()=>i.classList.toggle('big');return i};
+const fig=p=>h('figure',{},[zoom(h('img',{src:p.blob?URL.createObjectURL(p.blob):p.src,alt:p.cap,loading:'lazy'})),h('figcaption',{t:p.cap})]);
 const offMsg='Uko offline au muunganisho umeshindikana. Unaona matokeo kutoka Hifadhi.';
 
 /* ===== MAONYESHO ===== */
@@ -182,24 +207,25 @@ async function results(q){
 }
 async function reader(lang,title){
   app.textContent='';app.append(h('div',{c:'top'},[logo(),box('')]),h('div',{c:'meta',t:'Inapakia...'}));
-  let a=null,er=null;try{a=await fetchArt(lang,title)}catch(e){er=e}
+  let a=null,er=null;try{a=await fetchArt(lang,title,true)}catch(e){er=e}
   app.lastChild.remove();
   if(!a){app.append(h('p',{t:er&&er.off?'Makala hii haijahifadhiwa. Unganisha intaneti ili kuisoma.':'Makala haikupatikana au muunganisho umeshindikana.'}),h('a',{c:'chip',href:'javascript:history.back()',t:'Rudi'}));return}
   const bx=h('article',{c:'art'});bx.append(h('div',{c:'u',t:'Imehifadhiwa kwa offline'}),h('h1',{t:a.title}));
-  if(a.img)bx.append(h('img',{src:a.img,alt:a.title}));
+  if(a.blob||a.img)bx.append(zoom(h('img',{src:a.blob?URL.createObjectURL(a.blob):a.img,alt:a.title})));
+  const pics=(a.pics||[]).slice();let pend=true;
   let stop=false;
   a.text.split('\n').forEach(l=>{if(stop)return;const m=l.match(/^(=+)\s*(.+?)\s*=+$/);
-    if(m){if(/^(marejeo|tanbihi|viungo|angalia pia|references|external links|see also|notes|further reading|bibliography)/i.test(m[2])){stop=true;return}bx.append(h(m[1].length>2?'h3':'h2',{t:m[2]}))}
-    else if(l.trim())bx.append(h('p',{t:l}))});
+    if(m){if(/^(marejeo|tanbihi|viungo|angalia pia|references|external links|see also|notes|further reading|bibliography)/i.test(m[2])){stop=true;return}bx.append(h(m[1].length>2?'h3':'h2',{t:m[2]}));if(m[1].length<=2)pend=true}
+    else if(l.trim()){bx.append(h('p',{t:l}));if(pend&&pics.length){bx.append(fig(pics.shift()));pend=false}}});
+  if(pics.length){bx.append(h('h2',{t:'Picha na michoro'}));pics.forEach(p=>bx.append(fig(p)))}
   const r=h('div');
-  if(navigator.onLine&&a.url)r.append(h('a',{c:'chip',href:a.url,target:'_blank',rel:'noopener noreferrer',t:'Fungua chanzo mtandaoni'}));
   r.append(h('button',{c:'tab',type:'button',t:'Ondoa kwenye Hifadhi',onclick:async()=>{await del('art',a.id);saved.delete(a.id);history.back()}}));
   bx.append(r);app.append(bx);window.scrollTo(0,0);
 }
 async function library(){
   app.textContent='';
   const arts=(await all('art')).sort((a,b)=>b.t-a.t),qs=(await all('q')).sort((a,b)=>b.t-a.t);
-  const kb=Math.round(arts.reduce((s,a)=>s+a.text.length,0)/1024);
+  const kb=Math.round(arts.reduce((s,a)=>s+a.text.length+(a.blob?a.blob.size:0)+(a.pics||[]).reduce((t,p)=>t+(p.blob?p.blob.size:0),0),0)/1024);
   const inp=h('input',{c:'in',type:'search',placeholder:'Tafuta ndani ya Hifadhi (inafanya kazi offline)','aria-label':'Tafuta ndani ya Hifadhi'});
   const box2=h('div');let tab='a';
   app.append(h('div',{c:'top'},[logo()]),h('h1',{c:'pt',t:'Hifadhi'}),h('p',{c:'meta',t:'Makala '+arts.length+' na utafutaji '+qs.length+' vimehifadhiwa (~'+kb+' KB). Vinasomeka bila intaneti.'}),inp);
