@@ -99,21 +99,10 @@ async function jget(u,n=0){
     if(!r.ok)throw{};return await r.json()}
   catch(e){clearTimeout(to);if(n<1&&!(e&&e.off)){await sl(700);return jget(u,n+1)}throw e}
 }
-let wl='sw';
 async function searchNet(q,off){
-  if(CFG.api){
-    const d=await jget(CFG.api+(CFG.api.includes('?')?'&':'?')+'q='+enc(q)+'&off='+off);
-    return((d&&d.items)||[]).map(p=>({title:p.title,url:p.link,dom:p.displayLink||'',ex:p.snippet||'',img:''}));
-  }
-  /* mbadala usio na funguo (unatumika Worker ikiwa haijawekwa) */
-  const W={sw:'https://'+'sw.wiki'+'pedia.org',en:'https://'+'en.wiki'+'pedia.org'};
-  const one=async l=>{
-    const d=await jget(W[l]+'/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=10&gsroffset='+off+'&gsrsearch='+enc(q)+'&prop=pageimages%7Cextracts%7Cinfo&piprop=thumbnail&pithumbsize=160&exintro=1&explaintext=1&exsentences=2&exlimit=max&inprop=url');
-    const ps=d&&d.query?Object.values(d.query.pages).sort((a,b)=>a.index-b.index):[];
-    return ps.map(p=>({title:p.title,url:p.fullurl,dom:l==='sw'?'Kiswahili':'English',ex:p.extract||'',img:okImg(p.thumbnail&&p.thumbnail.source)}));
-  };
-  if(off===0){let r=await one('sw');wl='sw';if(!r.length){r=await one('en');wl='en'}return r}
-  return one(wl);
+  if(!CFG.api)throw{cfg:1};
+  const d=await jget(CFG.api+(CFG.api.includes('?')?'&':'?')+'q='+enc(q)+'&off='+off);
+  return((d&&d.items)||[]).map(p=>({title:p.title,url:p.link,dom:p.displayLink||'',ex:p.snippet||'',img:''}));
 }
 async function local(q){
   const ws=q.toLowerCase().split(/\s+/).filter(w=>w.length>1);if(!ws.length)return[];
@@ -169,8 +158,10 @@ async function results(q){
       if(items.length)put('q',{id:q.toLowerCase(),q,res:items,t:Date.now()});
     }catch(e){
       if(tok!==rt)return;
-            items=rec?rec.res:await local(q);
-      st.textContent=items.length?offMsg:offMsg+' Hakuna kilichopatikana.';items.forEach(r=>list.append(item(r)));return;
+            if(e&&e.cfg){st.textContent='Utafutaji haujaunganishwa bado.';return}
+      items=rec?rec.res:await local(q);
+      const why=e&&e.off?offMsg:'Seva ya utafutaji haijajibu. Angalia URL ya Worker au jaribu tena.';
+      st.textContent=items.length?why:why+' Hakuna kilichopatikana.';items.forEach(r=>list.append(item(r)));return;
     }
   }
   if(!items.length){st.textContent='Hakuna matokeo ya "'+q+'". Jaribu maneno mengine.';return}
