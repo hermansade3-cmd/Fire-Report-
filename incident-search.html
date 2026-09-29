@@ -102,7 +102,7 @@ async function jget(u,n=0){
 async function searchNet(q,off){
   if(!CFG.api)throw{cfg:1};
   const d=await jget(CFG.api+(CFG.api.includes('?')?'&':'?')+'q='+enc(q)+'&off='+off);
-  return((d&&d.items)||[]).map(p=>({title:p.title,url:p.link,dom:p.displayLink||'',ex:p.snippet||'',img:''}));
+  return((d&&d.items)||[]).map(p=>({title:p.title,url:p.link,dom:p.displayLink||'',ex:p.snippet||'',img:okImg(p.img)}));
 }
 async function local(q){
   const ws=q.toLowerCase().split(/\s+/).filter(w=>w.length>1);if(!ws.length)return[];
