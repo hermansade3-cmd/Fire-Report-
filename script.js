@@ -1755,15 +1755,12 @@ return [
 { r: "settings", ic: "\u2699\uFE0F", label: "Settings" },
 ];
 }
-const SADEBOOKS_URL = "https://hermansade3-cmd.github.io/sadebooks/";
 function buildShell() {
 const app = $("#app");
-const booksLink = `<a class="books-link" href="${SADEBOOKS_URL}" target="_blank" rel="noopener noreferrer"><span class="ic">\uD83D\uDCDA</span><span>SadeBooks</span><small>\u00B7 Soma vitabu vya Kiswahili</small></a>`;
 const navHtml = navButtons().map((n) => `<button class="nav-btn" data-route="${n.r.split("?")[0].split("/")[0]}" data-nav="/${n.r}"><span class="ic">${n.ic}</span><span>${n.label}</span></button>`).join("");
 app.innerHTML = `
     <nav class="sidebar">
       <div style="padding:8px 12px 16px 12px;"><strong style="font-size:15px;">\uD83D\uDEA8 Rescue Report</strong></div>
-      ${booksLink}
       ${navHtml}
     </nav>
     <div class="content-col">
@@ -1786,7 +1783,7 @@ app.innerHTML = `
       <main id="main"></main>
       <div class="footer-note">Created by Herman Sade</div>
     </div>
-    <nav class="bottom-nav">${booksLink}<div class="nav-row">${navHtml}</div></nav>
+    <nav class="bottom-nav"><div class="nav-row">${navHtml}</div></nav>
     <div id="toast-host"></div>
   `;
 $("#back-btn").addEventListener("click", () => { flushSave(); history.back(); });
