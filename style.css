@@ -637,6 +637,9 @@ button, .report-list-item, .chip { -webkit-user-select: none; user-select: none;
 }
 .trash-stat { cursor: pointer; }
 
+/* Ficha kipengele cha SadeBooks (link yoyote yenye "sadebooks") */
+a[href*="sadebooks" i], .books-link { display: none !important; }
+
 /* >>> MWISHO WA SEHEMU NILIYOPOKEA. Faili ulilobandika lilikatika kwenye
    ".trash-stat .num". Bandika hapa chini mistari yote iliyobaki ya faili
    lako la asili (kuanzia ".trash-stat .num" hadi mwisho), kisha futa
