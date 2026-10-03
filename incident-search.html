@@ -353,6 +353,35 @@ body.fb #fab{display:none}
 #tsw button[aria-pressed=true]{background:#fff;color:#111b21;font-weight:700}
 
 body.fb .ic{gap:4px}body.fb .ic button{width:40px;height:40px}body.fb .logo{font-size:28px}
+
+/* ===== FX: muonekano wa kiufundi ===== */
+#fxbg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+#fxbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:100;pointer-events:none;opacity:0;transition:opacity .25s;background:linear-gradient(90deg,transparent,#1877f2,#00e0ff,#7a5cff,transparent) no-repeat;background-size:50% 100%;animation:fxscan 1s linear infinite}
+#fxbar.on{opacity:1}
+@keyframes fxscan{from{background-position:-60% 0}to{background-position:160% 0}}
+@keyframes fxg{to{background-position:300% 0}}
+@keyframes fxrp{to{transform:scale(1);opacity:0}}
+@keyframes fxp{50%{transform:scale(1.25);color:#e11d48}}
+#hud{position:fixed;left:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:25;padding:6px 11px;border-radius:10px;background:#0b141acc;color:#7dffb3;font:600 11px/1.2 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;backdrop-filter:blur(8px);opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none}
+#hud.on{opacity:1;transform:none}
+.fx-r{opacity:0;transform:translateY(14px);transition:opacity .45s var(--d,0ms),transform .45s var(--d,0ms)}
+.fx-r.fx-v{opacity:1;transform:none}
+.fx-rp{position:absolute;border-radius:50%;pointer-events:none;background:currentColor;opacity:.2;transform:scale(0);animation:fxrp .55s ease-out forwards}
+.cr,nav button,.act button,.chips button,#menu button.h,.ic button,.story,.vid{position:relative;overflow:hidden}
+.card{position:relative}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),#1877f216,transparent 60%)}
+.card:hover::after{opacity:1}
+body.fb .story,body.fb .mas figure{transition:transform .25s ease,opacity .45s var(--d,0ms);transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--sc,1));will-change:transform}
+body.fb header{background:#ffffffd9;backdrop-filter:saturate(180%) blur(14px)}
+body.fb .logo{background:linear-gradient(90deg,#1877f2,#00c2ff,#7a5cff,#1877f2) 0 0/300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:fxg 6s linear infinite}
+body.fb .sb form{transition:box-shadow .2s,background .2s}
+body.fb .sb form:focus-within{background:#fff;box-shadow:0 0 0 2px #1877f2,0 0 24px #1877f255}
+body.fb .ph .av{background:linear-gradient(135deg,#1877f2,#7a5cff);box-shadow:0 0 0 3px #fff,0 0 0 5px #1877f2aa}
+body.fb nav button[aria-selected=true]{filter:drop-shadow(0 0 8px #1877f288)}
+body.fb .ph small,body.fb .meta,body.fb .src a,body.fb .tm{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
+body.fb .card{box-shadow:0 1px 0 #0001}
+body #f button#mic{flex:none;padding:0 14px;font-size:19px;opacity:1;display:grid;place-items:center}
+body #f button#mic.on{animation:fxp 1s infinite}
 </style></head>
 <body class="fb">
 <header></header>
@@ -672,6 +701,53 @@ $("#fab").onclick=()=>{scrollTo(0,0);$("#plus").click()};
 function leave(){if(history.state&&history.state.s)history.back();else setTheme("fb")}
 addEventListener("popstate",()=>{if(T==="wa")setTheme("fb")});
 function setTheme(t){if(t===T)return;T=t;if(t==="wa"){try{history.pushState({s:1},"")}catch(e){}}document.body.className=t;svx();gx();lbx();hdr();$("#q").value=q;view=null;scrollTo(0,0);q?render():home()}
+/* ===== FX: injini ya muonekano ===== */
+let fx=0;const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
+const cv=el("canvas");cv.id="fxbg";document.body.prepend(cv);
+const cx=cv.getContext("2d"),pt={x:-999,y:-999};let W,H,P=[],raf;
+function fit(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
+ P=Array.from({length:Math.min(70,Math.round(W*H/16000))},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35}))}
+function tick(){cx.clearRect(0,0,W,H);const c=T==="fb"?"24,119,242":"0,168,132";
+ for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
+  const dx=pt.x-p.x,dy=pt.y-p.y;if(Math.hypot(dx,dy)<140){p.x+=dx*.004;p.y+=dy*.004}
+  cx.fillStyle="rgba("+c+",.55)";cx.beginPath();cx.arc(p.x,p.y,1.6,0,6.3);cx.fill()}
+ for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],d=Math.hypot(a.x-b.x,a.y-b.y);
+  if(d<120){cx.strokeStyle="rgba("+c+","+.28*(1-d/120)+")";cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
+ raf=RM?0:requestAnimationFrame(tick)}
+addEventListener("resize",()=>{fit();if(RM)tick()});
+addEventListener("pointermove",e=>{pt.x=e.clientX;pt.y=e.clientY},{passive:true});
+document.addEventListener("visibilitychange",()=>{cancelAnimationFrame(raf);if(!document.hidden)tick()});
+fit();tick();
+/* Bar ya utafutaji + HUD ya kasi */
+const bar=el("div");bar.id="fxbar";const hud=el("div");hud.id="hud";document.body.append(bar,hud);let hudT;
+const _go=go;go=function(v){fx=performance.now();bar.classList.add("on");setTimeout(()=>bar.classList.remove("on"),20000);return _go.apply(this,arguments)};
+const io=window.IntersectionObserver&&!RM?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("fx-v");io.unobserve(e.target)}}),{threshold:.04}):null;
+new MutationObserver(()=>{const o=$("#out");
+ if(io)o.querySelectorAll(".card,.cr,.story,.st").forEach((n,i)=>{if(!n.classList.contains("fx-r")){n.classList.add("fx-r");n.style.setProperty("--d",Math.min(i,8)*45+"ms");io.observe(n)}});
+ if(fx&&S.web&&!o.querySelector(".sk")){const ms=Math.round(performance.now()-fx);fx=0;bar.classList.remove("on");
+  hud.textContent="● "+ms+"ms · "+(S.web.res||[]).length+" vyanzo"+(S.web.ans?" · AI ✓":"")+(navigator.onLine?"":" · offline");
+  hud.classList.add("on");clearTimeout(hudT);hudT=setTimeout(()=>hud.classList.remove("on"),6500)}
+}).observe($("#out"),{childList:true});
+/* Ripple + haptic + mwanga wa pointer + tilt ya 3D */
+document.addEventListener("pointerdown",e=>{const t=e.target.closest(".cr,nav button,.act button,.chips button,#menu button.h,.ic button,.story,.vid");if(!t||RM)return;
+ const r=t.getBoundingClientRect(),m=Math.max(r.width,r.height)*2,s=el("span","fx-rp");
+ s.style.cssText="width:"+m+"px;height:"+m+"px;left:"+(e.clientX-r.left-m/2)+"px;top:"+(e.clientY-r.top-m/2)+"px";t.append(s);setTimeout(()=>s.remove(),600);
+ if(navigator.vibrate)navigator.vibrate(8)});
+let hov=null;const reset=n=>{if(n){n.style.removeProperty("--rx");n.style.removeProperty("--ry");n.style.removeProperty("--sc")}};
+document.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse")return;const n=e.target.closest(".card,.story,.mas figure");
+ if(hov&&hov!==n)reset(hov);hov=n;if(!n)return;const r=n.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+ n.style.setProperty("--mx",x+"px");n.style.setProperty("--my",y+"px");
+ if(!RM&&n.matches(".story,.mas figure")){n.style.setProperty("--ry",((x/r.width-.5)*12)+"deg");n.style.setProperty("--rx",((.5-y/r.height)*12)+"deg");n.style.setProperty("--sc","1.03")}},{passive:true});
+/* Kutafuta kwa sauti */
+function mic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition,f=$("#f");if(!SR||!f||$("#mic"))return;
+ const b=el("button",null,"🎙️");b.type="button";b.id="mic";b.setAttribute("aria-label","Tafuta kwa sauti");
+ b.onclick=()=>{try{const r=new SR();r.lang="sw-TZ";r.interimResults=true;r.onstart=()=>b.classList.add("on");r.onend=r.onerror=()=>b.classList.remove("on");
+  r.onresult=e=>{const t=[...e.results].map(x=>x[0].transcript).join("");$("#q").value=t;if(e.results[e.results.length-1].isFinal&&t.trim())go(t.trim())};r.start()}catch(x){}};
+ f.append(b)}
+const _hdr=hdr;hdr=function(){_hdr();mic()};
+/* Mpito laini wa muonekano + njia za mkato */
+const _st=setTheme;setTheme=function(t){if(t===T)return;document.startViewTransition&&!RM?document.startViewTransition(()=>_st(t)):_st(t)};
+addEventListener("keydown",e=>{if((e.key==="/"||(e.key==="k"&&(e.ctrlKey||e.metaKey)))&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();$("#q").focus();$("#q").select()}});
 hdr();
 setTab("all");
 dball().then(a=>{const l=a.filter(x=>x.k[0]==="s").sort((x,y)=>y.t-x.t)[0];
