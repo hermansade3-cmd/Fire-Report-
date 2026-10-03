@@ -2,6 +2,7 @@
 <html lang="sw"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#008069">
+<meta name="description" content="R-Search: mtafutaji wa AI wa Kiswahili wenye jibu, picha, video na audio">
 <title>R-Search</title>
 <style>
 body.wa{--g:#008069;--g2:#25d366;--ink:#111b21;--mut:#667781;--lnk:#027eb5}
@@ -321,7 +322,7 @@ body.fb .rt{font-size:19px;padding:4px 14px}
 body.fb .sn{font-size:17px}
 body.fb .sec{background:#fff;border-bottom:6px solid var(--bg);padding:14px}
 @media(min-width:760px){body.fb .story{width:150px}}
-body.fb{--acc:#1877f2;--ink:#050505;--mut:#65676b;--line:#ced0d4;--bg:#d8dadf}
+body.fb{--acc:#5b5bf0;--ink:#050505;--mut:#65676b;--line:#ced0d4;--bg:#d8dadf}
 body.fb{font-family:"Segoe UI",Helvetica,Arial,sans-serif}
 body.fb .logo b{color:inherit}
 body.fb .ic button{background:#e4e6eb;color:#050505}
@@ -356,8 +357,8 @@ body.fb .ic{gap:4px}body.fb .ic button{width:40px;height:40px}body.fb .logo{font
 
 /* ===== FX: muonekano wa kiufundi ===== */
 #fxbg{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
-#fxbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:100;pointer-events:none;opacity:0;transition:opacity .25s;background:linear-gradient(90deg,transparent,#1877f2,#00e0ff,#7a5cff,transparent) no-repeat;background-size:50% 100%;animation:fxscan 1s linear infinite}
-#fxbar.on{opacity:1}
+#fxbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:100;pointer-events:none;opacity:0;transition:opacity .25s;background:linear-gradient(90deg,transparent,#5b5bf0,#00e0ff,#7a5cff,transparent) no-repeat;background-size:50% 100%}
+#fxbar.on{opacity:1;animation:fxscan 1s linear infinite}
 @keyframes fxscan{from{background-position:-60% 0}to{background-position:160% 0}}
 @keyframes fxg{to{background-position:300% 0}}
 @keyframes fxrp{to{transform:scale(1);opacity:0}}
@@ -369,19 +370,48 @@ body.fb .ic{gap:4px}body.fb .ic button{width:40px;height:40px}body.fb .logo{font
 .fx-rp{position:absolute;border-radius:50%;pointer-events:none;background:currentColor;opacity:.2;transform:scale(0);animation:fxrp .55s ease-out forwards}
 .cr,nav button,.act button,.chips button,#menu button.h,.ic button,.story,.vid{position:relative;overflow:hidden}
 .card{position:relative}
-.card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),#1877f216,transparent 60%)}
+.card::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .2s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),#5b5bf016,transparent 60%)}
 .card:hover::after{opacity:1}
 body.fb .story,body.fb .mas figure{transition:transform .25s ease,opacity .45s var(--d,0ms);transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(var(--sc,1));will-change:transform}
 body.fb header{background:#ffffffd9;backdrop-filter:saturate(180%) blur(14px)}
-body.fb .logo{background:linear-gradient(90deg,#1877f2,#00c2ff,#7a5cff,#1877f2) 0 0/300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:fxg 6s linear infinite}
+body.fb .logo{background:linear-gradient(90deg,#5b5bf0,#00c2ff,#7a5cff,#5b5bf0) 0 0/300% 100%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 body.fb .sb form{transition:box-shadow .2s,background .2s}
-body.fb .sb form:focus-within{background:#fff;box-shadow:0 0 0 2px #1877f2,0 0 24px #1877f255}
-body.fb .ph .av{background:linear-gradient(135deg,#1877f2,#7a5cff);box-shadow:0 0 0 3px #fff,0 0 0 5px #1877f2aa}
-body.fb nav button[aria-selected=true]{filter:drop-shadow(0 0 8px #1877f288)}
+body.fb .sb form:focus-within{background:#fff;box-shadow:0 0 0 2px #5b5bf0,0 0 24px #5b5bf055}
+body.fb .ph .av{background:linear-gradient(135deg,#5b5bf0,#7a5cff);box-shadow:0 0 0 3px #fff,0 0 0 5px #5b5bf0aa}
+body.fb nav button[aria-selected=true]{filter:drop-shadow(0 0 8px #5b5bf088)}
 body.fb .ph small,body.fb .meta,body.fb .src a,body.fb .tm{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px}
 body.fb .card{box-shadow:0 1px 0 #0001}
 body #f button#mic{flex:none;padding:0 14px;font-size:19px;opacity:1;display:grid;place-items:center}
 body #f button#mic.on{animation:fxp 1s infinite}
+
+/* ===== UX: giza, mapendekezo, vipendwa, hali za kiolesura ===== */
+.dk body.fb{--bg:#0e1117;--ink:#e6e9f0;--mut:#9aa4b2;--line:#252b37;color-scheme:dark}
+.dk body.fb header,.dk body.fb .sb,.dk body.fb nav,.dk body.fb .card,.dk body.fb .sec,.dk body.fb .stories,.dk body.fb #menu,.dk body.fb .chips button,.dk body.fb .story.add{background:#161b24}
+.dk body.fb header{background:#161b24d9}
+.dk body.fb .sb form,.dk body.fb .ic button,.dk body.fb #bk{background:#222a36;color:var(--ink)}
+.dk body.fb .sb input{color:var(--ink)}
+.dk body.fb .sb form:focus-within{background:#1c2330}
+.dk body.fb #menu button.h:hover,.dk body.fb .act button:hover{background:#222a36}
+.dk body.fb .sn,.dk body.fb .body{color:var(--ink)}
+.dk body.fb .ph .av{box-shadow:0 0 0 3px #161b24,0 0 0 5px #5b5bf0aa}
+#toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom));transform:translate(-50%,10px);z-index:120;max-width:90vw;padding:10px 16px;border-radius:12px;background:#111827ee;color:#fff;font-size:14px;opacity:0;pointer-events:none;transition:.22s}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#up{position:fixed;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));z-index:29;width:44px;height:44px;border-radius:50%;background:#fff;color:var(--acc,#00a884);font-size:20px;font-weight:700;box-shadow:0 2px 10px #0003;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s}
+#up.on{opacity:1;transform:none;pointer-events:auto}
+body.wa #up{bottom:calc(92px + env(safe-area-inset-bottom))}
+#sg{position:absolute;left:14px;right:14px;top:calc(100% - 4px);z-index:40;background:#fff;color:#111;border:1px solid #0001;border-radius:14px;box-shadow:0 10px 30px #0003;padding:6px;animation:pop .15s ease both}
+#sg button{display:block;width:100%;text-align:left;padding:11px 12px;border-radius:10px;font-size:15.5px}
+#sg button:hover,#sg button:focus-visible{background:#0001}
+.dk #sg{background:#1c2330;color:#e6e9f0}
+#clr{flex:none;width:36px;height:36px;margin:auto 0;border-radius:50%;opacity:.6;font-size:15px;display:grid;place-items:center}
+#q:placeholder-shown~#clr{display:none}
+#q::-webkit-search-cancel-button{display:none}
+@keyframes fxspin{to{transform:rotate(360deg)}}
+#f.busy::after{content:"";flex:none;width:18px;height:18px;margin:auto 14px auto 4px;border:2px solid #0003;border-top-color:var(--acc,#00a884);border-radius:50%;animation:fxspin .7s linear infinite}
+.msg::before{display:block;font-size:34px;margin-bottom:6px;content:"🔎"}
+.msg.err::before{content:"⚠️"}
+.retry{margin-top:10px;padding:9px 18px;border-radius:20px;background:var(--acc,#00a884);color:#fff;font-weight:600}
+@media(prefers-reduced-motion:reduce){#toast,#up{transition:none}}
 </style></head>
 <body class="fb">
 <header></header>
@@ -438,6 +468,7 @@ $("#mn").onclick=async()=>{const m=$("#menu");if(m.classList.contains("on")){m.c
  add("🕘 Historia",showHist);
  add("🗑️ Futa historia",()=>{try{localStorage.removeItem("rs_h")}catch(e){}if(view==="hist")showHist()});
  add("🏠 Ukurasa mkuu",leave);
+ add("⭐ Vipendwa",showFavs);
  m.classList.add("on")};
 if(T==="fb")$("#mn").onclick=fbMenu;
 if($("#sd"))$("#sd").onclick=()=>setTheme("wa");
@@ -641,6 +672,7 @@ const fbMenu=async()=>{const m=$("#menu");if(m.classList.contains("on")){m.class
  const h=hist();if(!h.length)m.append(el("h4",null,"Bado hakuna."));
  h.forEach(x=>add(x,()=>go(x)));
  if(h.length)add("🗑️ Futa historia",()=>{try{localStorage.removeItem("rs_h")}catch(e){}});
+ add("⭐ Vipendwa",showFavs);add("🌓 Hali ya giza",toggleDark);
  m.classList.add("on")};
 function render(){return T==="fb"?render_f():render_w()}
 function home(){return T==="fb"?home_f():home_w()}
@@ -703,28 +735,13 @@ addEventListener("popstate",()=>{if(T==="wa")setTheme("fb")});
 function setTheme(t){if(t===T)return;T=t;if(t==="wa"){try{history.pushState({s:1},"")}catch(e){}}document.body.className=t;svx();gx();lbx();hdr();$("#q").value=q;view=null;scrollTo(0,0);q?render():home()}
 /* ===== FX: injini ya muonekano ===== */
 let fx=0;const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
-const cv=el("canvas");cv.id="fxbg";document.body.prepend(cv);
-const cx=cv.getContext("2d"),pt={x:-999,y:-999};let W,H,P=[],raf;
-function fit(){const d=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
- P=Array.from({length:Math.min(70,Math.round(W*H/16000))},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.35,vy:(Math.random()-.5)*.35}))}
-function tick(){cx.clearRect(0,0,W,H);const c=T==="fb"?"24,119,242":"0,168,132";
- for(const p of P){p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;
-  const dx=pt.x-p.x,dy=pt.y-p.y;if(Math.hypot(dx,dy)<140){p.x+=dx*.004;p.y+=dy*.004}
-  cx.fillStyle="rgba("+c+",.55)";cx.beginPath();cx.arc(p.x,p.y,1.6,0,6.3);cx.fill()}
- for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],d=Math.hypot(a.x-b.x,a.y-b.y);
-  if(d<120){cx.strokeStyle="rgba("+c+","+.28*(1-d/120)+")";cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);cx.stroke()}}
- raf=RM?0:requestAnimationFrame(tick)}
-addEventListener("resize",()=>{fit();if(RM)tick()});
-addEventListener("pointermove",e=>{pt.x=e.clientX;pt.y=e.clientY},{passive:true});
-document.addEventListener("visibilitychange",()=>{cancelAnimationFrame(raf);if(!document.hidden)tick()});
-fit();tick();
 /* Bar ya utafutaji + HUD ya kasi */
-const bar=el("div");bar.id="fxbar";const hud=el("div");hud.id="hud";document.body.append(bar,hud);let hudT;
-const _go=go;go=function(v){fx=performance.now();bar.classList.add("on");setTimeout(()=>bar.classList.remove("on"),20000);return _go.apply(this,arguments)};
+const bar=el("div");bar.id="fxbar";const hud=el("div");hud.id="hud";hud.setAttribute("role","status");document.body.append(bar,hud);let hudT;
+const _go=go;go=function(v){fx=performance.now();bar.classList.add("on");const bf=$("#f");bf&&bf.classList.add("busy");setTimeout(()=>bar.classList.remove("on"),20000);return _go.apply(this,arguments)};
 const io=window.IntersectionObserver&&!RM?new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("fx-v");io.unobserve(e.target)}}),{threshold:.04}):null;
 new MutationObserver(()=>{const o=$("#out");
  if(io)o.querySelectorAll(".card,.cr,.story,.st").forEach((n,i)=>{if(!n.classList.contains("fx-r")){n.classList.add("fx-r");n.style.setProperty("--d",Math.min(i,8)*45+"ms");io.observe(n)}});
- if(fx&&S.web&&!o.querySelector(".sk")){const ms=Math.round(performance.now()-fx);fx=0;bar.classList.remove("on");
+ if(fx&&S.web&&!o.querySelector(".sk")){const ms=Math.round(performance.now()-fx);fx=0;bar.classList.remove("on");const bf=$("#f");bf&&bf.classList.remove("busy");
   hud.textContent="● "+ms+"ms · "+(S.web.res||[]).length+" vyanzo"+(S.web.ans?" · AI ✓":"")+(navigator.onLine?"":" · offline");
   hud.classList.add("on");clearTimeout(hudT);hudT=setTimeout(()=>hud.classList.remove("on"),6500)}
 }).observe($("#out"),{childList:true});
@@ -744,10 +761,47 @@ function mic(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition
  b.onclick=()=>{try{const r=new SR();r.lang="sw-TZ";r.interimResults=true;r.onstart=()=>b.classList.add("on");r.onend=r.onerror=()=>b.classList.remove("on");
   r.onresult=e=>{const t=[...e.results].map(x=>x[0].transcript).join("");$("#q").value=t;if(e.results[e.results.length-1].isFinal&&t.trim())go(t.trim())};r.start()}catch(x){}};
  f.append(b)}
-const _hdr=hdr;hdr=function(){_hdr();mic()};
+const _hdr=hdr;hdr=function(){_hdr();mic();ui()};
 /* Mpito laini wa muonekano + njia za mkato */
 const _st=setTheme;setTheme=function(t){if(t===T)return;document.startViewTransition&&!RM?document.startViewTransition(()=>_st(t)):_st(t)};
 addEventListener("keydown",e=>{if((e.key==="/"||(e.key==="k"&&(e.ctrlKey||e.metaKey)))&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();$("#q").focus();$("#q").select()}});
+/* ===== UX: giza, mapendekezo, vipendwa, toast ===== */
+const root=document.documentElement,deb=(f,ms)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>f(...a),ms)}};
+function toast(m){let t=$("#toast");if(!t){t=el("div");t.id="toast";t.setAttribute("role","status");document.body.append(t)}t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),2200)}
+let dk;try{dk=localStorage.getItem("rs_dk")}catch(e){}
+dk=dk==null?matchMedia("(prefers-color-scheme:dark)").matches:dk==="1";root.classList.toggle("dk",dk);
+function toggleDark(){dk=!dk;root.classList.toggle("dk",dk);try{localStorage.setItem("rs_dk",dk?"1":"0")}catch(e){}toast(dk?"🌙 Hali ya giza imewashwa":"☀️ Hali ya mwanga imewashwa")}
+function ui(){const f=$("#f"),i=$("#q");if(!f||!i||$("#clr"))return;const sb=f.parentElement;sb.style.position="relative";
+ const c=el("button",null,"✕");c.type="button";c.id="clr";c.setAttribute("aria-label","Futa utafutaji");
+ const g=el("div");g.id="sg";g.hidden=true;g.setAttribute("role","listbox");sb.append(g);f.insertBefore(c,$("#mic"));
+ const show=()=>{const v=i.value.trim().toLowerCase(),seen=new Set(),L=[...hist().map(x=>["🕘",x]),...EX.map(x=>["💡",x])].filter(([,x])=>{const k=x.toLowerCase();if(seen.has(k)||k===v||(v&&!k.includes(v)))return false;seen.add(k);return true}).slice(0,6);
+  g.replaceChildren(...L.map(([ic,x])=>{const b=el("button",null,ic+"  "+x);b.type="button";b.setAttribute("role","option");b.onpointerdown=e=>e.preventDefault();b.onclick=()=>{g.hidden=true;i.blur();go(x)};return b}));g.hidden=!L.length};
+ const sh=deb(show,120);i.addEventListener("input",sh);i.addEventListener("focus",show);i.addEventListener("blur",()=>setTimeout(()=>g.hidden=true,120));
+ i.addEventListener("keydown",e=>{if(e.key==="Escape"){g.hidden=true;i.blur()}});
+ c.onclick=()=>{i.value="";i.focus();show()}}
+/* Vipendwa + vitendo vya matokeo */
+const FK=u=>"f:"+u;
+function acts(){$("#out").querySelectorAll("article.card:not([data-ax])").forEach(c=>{c.dataset.ax=1;const a=c.querySelector("a.open");if(!a)return;
+ const u=a.href,t=(c.querySelector(".rt")||{}).textContent||u,sn=(c.querySelector(".sn")||{}).textContent||"",r=el("div","act");
+ const cp=el("button",null,"🔗 Nakili"),sh=el("button",null,"↗ Shiriki"),fv=el("button",null,"☆ Hifadhi"),fl=(b,m,o)=>{b.textContent=m;setTimeout(()=>b.textContent=o,1600)};
+ cp.onclick=async()=>{try{await navigator.clipboard.writeText(u);fl(cp,"✔ Imenakiliwa","🔗 Nakili")}catch(e){fl(cp,"Imeshindikana","🔗 Nakili")}};
+ sh.onclick=()=>navigator.share?navigator.share({title:t,url:u}).catch(()=>{}):cp.click();
+ dbget(FK(u)).then(x=>{if(x)fv.textContent="★ Imehifadhiwa"});
+ fv.onclick=async()=>{if(fv.textContent[0]==="★"){await dbdel(FK(u));fv.textContent="☆ Hifadhi";toast("Imeondolewa kwenye vipendwa")}else{await dbput({k:FK(u),t:Date.now(),u,title:t,sn});fv.textContent="★ Imehifadhiwa";toast("⭐ Imehifadhiwa kwenye vipendwa")}};
+ r.append(cp,sh,fv);c.append(r)})}
+async function showFavs(){view="fav";const o=$("#out");o.replaceChildren(back("⭐ Vipendwa"));scrollTo(0,0);
+ const L=(await dball()).filter(x=>x.k[0]==="f").sort((a,b)=>b.t-a.t);
+ if(!L.length){o.append(el("p","msg","Bado hakuna vipendwa. Bonyeza ☆ Hifadhi kwenye matokeo."));return}
+ L.forEach(x=>{const c=el("div","card"),a=el("a","open","Fungua chanzo →");a.href=safe(x.u);a.target="_blank";a.rel="noopener noreferrer";
+  const d=el("button","more","🗑️ Futa");d.style.margin="0 14px 12px";d.onclick=async()=>{await dbdel(x.k);c.remove()};
+  c.append(el("div","rt",x.title),el("div","sn",host(x.u)+" • "+x.sn.slice(0,140)),a,d);o.append(c)})}
+new MutationObserver(()=>{acts();const er=S.web&&S.web.err;
+ $("#out").querySelectorAll(".msg").forEach(m=>{if(m.dataset.r||!q||!(m.classList.contains("err")||(er&&m.textContent.startsWith(er))))return;m.dataset.r=1;
+  const b=el("button","retry","↻ Jaribu tena");b.onclick=()=>go(q);m.append(el("br"),b)})}).observe($("#out"),{childList:true});
+/* Rudi juu + hali ya mtandao */
+const up=el("button",null,"↑");up.id="up";up.setAttribute("aria-label","Rudi juu");document.body.append(up);up.onclick=()=>scrollTo({top:0,behavior:RM?"auto":"smooth"});
+let tk=0;addEventListener("scroll",()=>{if(tk)return;tk=requestAnimationFrame(()=>{tk=0;up.classList.toggle("on",scrollY>700)})},{passive:true});
+addEventListener("offline",()=>toast("📡 Huna intaneti. Utafutaji uliohifadhiwa unapatikana."));addEventListener("online",()=>toast("✔ Intaneti imerudi"));
 hdr();
 setTab("all");
 dball().then(a=>{const l=a.filter(x=>x.k[0]==="s").sort((x,y)=>y.t-x.t)[0];
