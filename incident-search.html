@@ -408,10 +408,11 @@ $("#mn").onclick=async()=>{const m=$("#menu");if(m.classList.contains("on")){m.c
  add("🖼️ Picha zilizohifadhiwa ("+im.length+")",()=>showSavedImgs(im));
  add("🕘 Historia",showHist);
  add("🗑️ Futa historia",()=>{try{localStorage.removeItem("rs_h")}catch(e){}if(view==="hist")showHist()});
- add("🏠 Ukurasa mkuu",()=>setTheme("fb"));
+ add("🏠 Ukurasa mkuu",leave);
  m.classList.add("on")};
 if(T==="fb")$("#mn").onclick=fbMenu;
 if($("#sd"))$("#sd").onclick=()=>setTheme("wa");
+if(T==="wa")$("#bk").onclick=leave;
 if($("#pk"))$("#pk").onclick=()=>q?setTab("img"):$("#q").focus();
 }
 document.addEventListener("click",e=>{if(!e.target.closest("#menu,#mn"))$("#menu").classList.remove("on")});
@@ -668,7 +669,9 @@ $("#lb").onclick=e=>{if(!e.target.closest("#lbc"))lbx()};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"){lbx();svx();gx()}
  if($("#gv").classList.contains("on")&&(e.key==="ArrowRight"||e.key==="ArrowLeft")){const t=$("#gv .tap."+(e.key==="ArrowRight"?"r":"l"));if(t)t.click()}});
 $("#fab").onclick=()=>{scrollTo(0,0);$("#plus").click()};
-function setTheme(t){if(t===T)return;T=t;document.body.className=t;svx();gx();lbx();hdr();$("#q").value=q;view=null;scrollTo(0,0);q?render():home()}
+function leave(){if(history.state&&history.state.s)history.back();else setTheme("fb")}
+addEventListener("popstate",()=>{if(T==="wa")setTheme("fb")});
+function setTheme(t){if(t===T)return;T=t;if(t==="wa"){try{history.pushState({s:1},"")}catch(e){}}document.body.className=t;svx();gx();lbx();hdr();$("#q").value=q;view=null;scrollTo(0,0);q?render():home()}
 hdr();
 setTab("all");
 dball().then(a=>{const l=a.filter(x=>x.k[0]==="s").sort((x,y)=>y.t-x.t)[0];
