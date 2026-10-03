@@ -49,6 +49,19 @@ body.has-results #recent{display:none}
 .card b{font-family:"Bricolage Grotesque",sans-serif}
 .card .url{font-size:14px;color:var(--mute)}
 .card audio{width:100%;margin-top:6px}
+.hero{position:relative}
+.hb{position:absolute;top:12px;font:600 14px "Source Sans 3",sans-serif;background:rgba(17,17,17,.7);color:#fff;border:0;border-radius:18px;padding:7px 14px;cursor:pointer}
+#back{left:12px;display:none}
+#svd{right:12px}
+body.has-results #back{display:block}
+body.has-results .hero{padding-top:54px}
+body.saved .tabs{display:none}
+.sv{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-left:6px solid var(--g);border-radius:10px;padding:10px 12px;margin:10px 0}
+.sv .o{flex:1;min-width:0;text-align:left;background:none;border:0;font:inherit;color:var(--ink);cursor:pointer}
+.sv b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sv small{color:var(--mute)}
+.sv .x{background:none;border:0;font-size:18px;cursor:pointer}
+.clr{font:inherit;font-size:14px;margin:8px 0;padding:6px 14px;border:1px solid #d9b4b0;border-radius:18px;background:#fff;color:#b3261e;cursor:pointer}
 .msg{color:var(--mute);margin:30px 0}
 .msg.err{color:#b3261e}
 .note{font-size:14px;color:#8a6d00;background:#fff8d6;border-radius:8px;padding:6px 12px;margin:14px 0 0}
@@ -59,6 +72,8 @@ footer i{display:block;height:8px;margin-bottom:16px;background:linear-gradient(
 </head>
 <body>
 <header class="hero">
+  <button class="hb" id="back" type="button">🔙 Rudi</button>
+  <button class="hb" id="svd" type="button">📥 Hifadhi</button>
   <h1 class="logo" id="logo"><b>R</b>-Search</h1>
   <p class="tag">Tafuta chochote. Pata majibu kwa Kiswahili.</p>
 </header>
@@ -120,7 +135,7 @@ async function search(q){
     if(mode==="web")await doWeb(q,k);else if(mode==="img")await doImg(q,k);else await doMedia(q);
   }catch(e){
     const c=(mode==="web"||mode==="img")?await get(k):null;
-    if(c){mode==="web"?showWeb(c,true):showImg(c,true)}
+    if(c){const n="Hakuna intaneti: unaona matokeo yaliyohifadhiwa kwenye simu yako.";mode==="web"?showWeb(c,n):showImg(c,n)}
     else msg(e.message+(mode==="web"||mode==="img"?" Hakuna matokeo yaliyohifadhiwa ya utafutaji huu.":" Video na sauti zinahitaji intaneti."),true);
   }
 }
@@ -131,9 +146,9 @@ async function doWeb(q,k){
   const rec={k,t:Date.now(),q,ans,res:(d.results||[]).map(x=>({title:x.title,url:x.url,c:(x.content||"").slice(0,300)}))};
   put(rec);showWeb(rec,false);
 }
-function showWeb(rec,cached){
+function showWeb(rec,note){
   const o=$("#out");o.replaceChildren();
-  if(cached)o.append(el("p","note","Hakuna intaneti: unaona matokeo yaliyohifadhiwa kwenye simu yako."));
+  if(note)o.append(el("p","note",note));
   if(rec.ans){const a=el("section","answer");a.append(el("h2",null,"Jibu la haraka"),el("p",null,rec.ans));o.append(a)}
   if(!rec.res.length){o.append(el("p","msg","Hakuna matokeo ya \""+rec.q+"\"."));return}
   rec.res.forEach(x=>{
@@ -146,7 +161,7 @@ async function doImg(q,k){
   const d=await jget("https://pixabay.com/api/?key="+PIX+"&q="+encodeURIComponent(en)+"&per_page=24&safesearch=true");
   const items=(d.hits||[]).map(h=>({u:h.webformatURL,l:h.largeImageURL,tags:h.tags||q,blob:null}));
   const rec={k,t:Date.now(),q,items};
-  showImg(rec,false);
+  showImg(rec,false);put(rec);
   Promise.all(items.map(async it=>{try{const r=await fetch(it.u);if(r.ok)it.blob=await r.blob()}catch(e){}})).then(()=>{if(items.length)put(rec)});
 }
 function save(b){const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="R-Search-"+Date.now()+".jpg";document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000)}
@@ -154,9 +169,9 @@ async function dl(it){
   try{const r=await fetch(it.l||it.u);if(!r.ok)throw 0;save(await r.blob())}
   catch(e){if(it.blob)save(it.blob);else window.open(it.l||it.u,"_blank")}
 }
-function showImg(rec,cached){
+function showImg(rec,note){
   const o=$("#out");o.replaceChildren();
-  if(cached)o.append(el("p","note","Hakuna intaneti: unaona picha zilizohifadhiwa kwenye simu yako."));
+  if(note)o.append(el("p","note",note));
   if(!rec.items.length){o.append(el("p","msg","Hakuna picha za \""+rec.q+"\"."));return}
   const g=el("div","imgs");
   rec.items.forEach(it=>{
@@ -188,12 +203,35 @@ async function doMedia(q){
     if(x.creator)c.append(el("div","url",x.creator));
     const au=document.createElement("audio");au.controls=true;au.preload="none";au.src=safeUrl(x.url);c.append(au);o.append(c)});
 }
+/* Hifadhi za offline na kurudi nyuma */
+let fromSaved=false;
+async function allRecs(){const db=await DB;if(!db)return[];return new Promise(r=>{try{const q=db.transaction("c").objectStore("c").getAll();q.onsuccess=()=>r(q.result||[]);q.onerror=()=>r([])}catch(e){r([])}})}
+async function dbop(fn){const db=await DB;if(!db)return;return new Promise(r=>{try{const t=db.transaction("c","readwrite");fn(t.objectStore("c"));t.oncomplete=t.onerror=t.onabort=()=>r()}catch(e){r()}})}
+function home(){document.body.classList.remove("has-results","saved");$("#out").replaceChildren();$("#q").value="";last="";fromSaved=false;recent()}
+async function showSaved(push){
+  if(push!==false)history.pushState(null,"","?hifadhi");
+  fromSaved=false;document.body.classList.add("has-results","saved");
+  const o=$("#out");o.replaceChildren(el("h2","rt","Hifadhi za offline"));
+  const rs=(await allRecs()).filter(x=>x.k.startsWith("web:")||x.k.startsWith("img:")).sort((a,b)=>b.t-a.t);
+  if(!rs.length){o.append(el("p","msg","Bado hakuna kilichohifadhiwa. Kila unachotafuta kwenye Yote na Picha kinahifadhiwa hapa kiotomatiki."));return}
+  rs.forEach(x=>{
+    const isImg=x.k.startsWith("img:"),row=el("div","sv"),ob=el("button","o");ob.type="button";
+    ob.append(el("b",null,(isImg?"🖼 ":"🌐 ")+x.q),el("small",null,(isImg?(x.items||[]).length+" picha":(x.res||[]).length+" matokeo")+" · "+new Date(x.t).toLocaleDateString()));
+    ob.onclick=()=>{fromSaved=true;document.body.classList.remove("saved");last=x.q;$("#q").value=x.q;setMode(isImg?"img":"web");const n="Imehifadhiwa kwenye simu yako.";isImg?showImg(x,n):showWeb(x,n)};
+    const xb=el("button","x","🗑");xb.type="button";xb.setAttribute("aria-label","Futa");xb.onclick=async()=>{await dbop(st=>st.delete(x.k));showSaved(false)};
+    row.append(ob,xb);o.append(row);
+  });
+  const c=el("button","clr","Futa zote");c.type="button";c.onclick=async()=>{if(confirm("Futa vitu vyote vilivyohifadhiwa?")){await dbop(st=>st.clear());showSaved(false)}};o.append(c);
+}
 /* Vidhibiti */
 function setMode(m){mode=m;document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.m===m))}
-function go(q){last=q;$("#q").value=q;history.replaceState(null,"","?q="+encodeURIComponent(q));search(q)}
+function go(q){const b=document.body.classList,u="?q="+encodeURIComponent(q);last=q;fromSaved=false;$("#q").value=q;(b.contains("has-results")&&!b.contains("saved")?history.replaceState:history.pushState).call(history,null,"",u);b.remove("saved");search(q)}
 $("#f").addEventListener("submit",e=>{e.preventDefault();const q=$("#q").value.trim();if(q)go(q)});
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{setMode(t.dataset.m);if(last)search(last)}));
-$("#logo").addEventListener("click",()=>{document.body.classList.remove("has-results");$("#out").replaceChildren();$("#q").value="";last="";history.replaceState(null,"",location.pathname);recent()});
+$("#logo").addEventListener("click",()=>{home();history.replaceState(null,"",location.pathname)});
+$("#back").addEventListener("click",()=>{if(fromSaved)showSaved(false);else{home();history.replaceState(null,"",location.pathname)}});
+$("#svd").addEventListener("click",()=>showSaved());
+window.addEventListener("popstate",()=>home());
 const p=new URLSearchParams(location.search).get("q");
 if(p)go(p);else recent();
 </script>
