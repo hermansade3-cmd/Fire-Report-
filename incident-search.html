@@ -160,10 +160,15 @@ nav button[aria-selected=true]{filter:none;opacity:1}
 #lbc{max-width:100%;text-align:center}
 .lbb{display:flex;gap:10px;justify-content:center;margin-top:12px}
 .lbb button{background:#fff;color:#050505;border-radius:20px;padding:9px 18px;font-weight:600;font-size:16px}
+.lf{display:flex;align-items:center;gap:8px;min-width:0}
+#bk{flex:none;width:44px;height:44px;border-radius:50%;background:#e4e6eb;font-size:22px;display:grid;place-items:center}
+.logo{font-size:30px;white-space:nowrap}
+.ic{gap:8px}.ic button{width:44px;height:44px}
+.top{gap:6px;padding:10px 10px 6px}
 </style></head>
 <body>
 <header><div class="wrap">
- <div class="top"><div class="logo">R<b>-Search</b></div>
+ <div class="top"><div class="lf"><button id="bk" aria-label="Rudi Fire Report" title="Rudi">🔙</button><div class="logo">R<b>-Search</b></div></div>
   <div class="ic"><button id="plus" aria-label="Utafutaji mpya">➕</button><button id="mag" aria-label="Tafuta">🔍</button><button id="mn" aria-label="Menyu">&#9776;</button></div></div>
  <div id="menu"></div>
  <div class="sb"><div class="av pf">R<img src="profile.jpg" alt="" onerror="this.remove()"><i class="on"></i></div><form id="f"><input id="q" type="search" placeholder="Unatafuta nini?" autocomplete="off" aria-label="Unatafuta nini?"><button aria-label="Tafuta">🔍</button></form><button type="button" id="pk" class="pk"><span>🖼️</span>Picha</button></div>
@@ -192,6 +197,8 @@ TABS.forEach(([k,l,ic])=>{const b=el("button");b.textContent=ic;b.setAttribute("
 function setTab(k){tab=k;view=null;nav.querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",b.dataset.k===k));scrollTo(0,0);if(q)render();else home()}
 /* Search */
 $("#f").onsubmit=e=>{e.preventDefault();const v=$("#q").value.trim();if(v){$("#q").blur();go(v)}};
+$("#bk").onclick=()=>{let r="";try{r=document.referrer||""}catch(e){}
+ if(/Fire-Report/i.test(r)&&history.length>1)history.back();else location.href="https://hermansade3-cmd.github.io/Fire-Report-/"};
 $("#pk").onclick=()=>q?setTab("img"):$("#q").focus();
 $("#plus").onclick=$("#mag").onclick=()=>{$("#q").focus();$("#q").select()};
 $("#mn").onclick=async()=>{const m=$("#menu");if(m.classList.contains("on")){m.classList.remove("on");return}
@@ -261,7 +268,7 @@ function ai(){const c=el("article","card"),W=S.web;
  const ac=el("div","act"),b1=el("button",null,"🔗 Vyanzo"),b2=el("button",null,"📋 Nakili"),b3=el("button",null,"↗ Shiriki");
  b1.onclick=()=>s.scrollIntoView({behavior:"smooth",block:"center"});
  b2.onclick=async()=>{try{await navigator.clipboard.writeText(W.ans);b2.textContent="✔ Imenakiliwa"}catch(e){b2.textContent="Imeshindikana"}setTimeout(()=>b2.textContent="📋 Nakili",1800)};
- b3.onclick=()=>{const d={title:"R-Search: "+q,text:W.ans.slice(0,200),url:location.href};navigator.share?navigator.share(d).catch(()=>{}):b2.click()};
+ b3.onclick=()=>{const t=["R-Search AI",q,W.ans].join("\n\n");navigator.share?navigator.share({text:t}).catch(()=>{}):b2.click()};
  ac.append(b1,b2,b3);c.append(ac);return c}
 function results(){const f=document.createDocumentFragment(),W=S.web;
  if(!W.res.length){f.append(el("p","msg",'Hakuna matokeo ya "'+q+'".'));return f}
