@@ -67,6 +67,9 @@ textarea{flex:1;border:0;background:none;resize:none;max-height:140px;padding:9p
 .m video{width:100%;aspect-ratio:16/9;background:#000;display:block}.grid.v{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
 .m .dl{margin:0 10px 10px;border:0;color:var(--red-ink);background:var(--red);border-radius:8px;padding:6px;font-size:13px;font-weight:600}
 .m.off .i::after{content:"📴 Offline";display:block;color:var(--red);font-weight:600;margin-top:2px}
+.yp{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer;overflow:hidden}.yp img{position:absolute;inset:0;height:100%;aspect-ratio:auto;cursor:pointer}
+.yp .pb{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;display:flex;align-items:center;justify-content:center;pointer-events:none}.yp .pb svg.i{width:26px;height:26px;fill:#fff;stroke:#fff}
+.yp iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 #scrim{display:none}
 @media(max-width:800px){
 #side{position:fixed;inset:0 auto 0 0;width:84%;max-width:320px;z-index:20;transform:translateX(-102%);transition:transform .2s}
@@ -170,6 +173,7 @@ header{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filte
 /* ===== FUNGUO ZA API (badilisha hapa ukitaka) ===== */
 const TAVILY_KEY = "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";
 const PIXABAY_KEY = "57792634-5e89dd610e4c1c840f815c524";
+const YT_KEY = "AIzaSyADf6dE8F9z9AVuOpK-foWYkfEDR6-VTw4";
 
 const $ = s => document.querySelector(s);
 const LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} } };
@@ -195,7 +199,7 @@ async function hydrate() {
 async function cacheOne(u) { if (!u || await mGet(u)) return; try { const r = await fetch(u); if (r.ok) await mPut(u, await r.blob()) } catch {} }
 async function cacheMsg(m) {
   const jobs = []; (m.images || []).forEach(i => jobs.push(i.thumb));
-  (m.videos || []).forEach(v => jobs.push(v.thumb)); (m.videos || []).slice(0, 4).forEach(v => v.file && jobs.push(v.file));
+  [...(m.videos || []), ...(m.videos2 || [])].forEach(v => jobs.push(v.thumb)); (m.videos2 || []).slice(0, 4).forEach(v => v.file && jobs.push(v.file));
   for (const u of jobs) await cacheOne(u); hydrate()
 }
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -298,7 +302,7 @@ function makeTitle(q) {
 const dur = d => Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0');
 const nm = t => esc(String(t || 'media').replace(/"/g, ''));
 const imgsHTML = it => `<div class="grid">` + it.map(i => `<div class="m"><img loading="lazy" data-k="${esc(i.thumb)}" alt="${esc(i.title)}"><div class="i"><b>${esc(i.title)}</b></div><button class="dl" data-dl="${esc(i.thumb)}" data-name="${nm(i.title)}" aria-label="Pakua picha">${ic('download')} Pakua</button></div>`).join('') + `</div>`;
-const vidsHTML = it => `<div class="grid v">` + it.map(i => `<div class="m"><video controls preload="none" playsinline data-k="${esc(i.file || '')}" data-p="${esc(i.thumb)}" aria-label="${esc(i.title)}"></video><div class="i"><b>${esc(i.title)}</b>${dur(i.duration || 0)}</div>${i.file ? `<button class="dl" data-dl="${esc(i.file)}" data-name="${nm(i.title)}" aria-label="Pakua video">${ic('download')} Pakua</button>` : ''}</div>`).join('') + `</div>`;
+const vidsHTML = it => `<div class="grid v">` + it.map(i => i.vid ? `<div class="m"><div class="yp" role="button" tabindex="0" data-vid="${esc(i.vid)}" aria-label="Cheza video: ${esc(i.title)}"><img src="${esc(i.thumb)}" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(i.vid)}/hqdefault.jpg'" data-k="${esc(i.thumb)}" alt="${esc(i.title)}"><span class="pb">${ic('play')}</span></div><div class="i"><b>${esc(i.title)}</b>${esc(i.user || '')}</div></div>` : `<div class="m"><video controls preload="none" playsinline data-k="${esc(i.file || '')}" data-p="${esc(i.thumb)}" aria-label="${esc(i.title)}"></video><div class="i"><b>${esc(i.title)}</b>${dur(i.duration || 0)}</div>${i.file ? `<button class="dl" data-dl="${esc(i.file)}" data-name="${nm(i.title)}" aria-label="Pakua video">${ic('download')} Pakua</button>` : ''}</div>`).join('') + `</div>`;
 const audHTML = it => it.filter(i => i.id).map(i => `<div class="au" data-id="${esc(i.id)}"><button class="pl" aria-label="Cheza">${ic('play')}</button><div class="x"><b>${esc(i.title)}</b><div class="bar" role="progressbar" aria-label="Maendeleo ya sauti"><i></i></div><small class="tm">0:00</small></div><button class="dl" data-adl="${esc(i.id)}" data-name="${nm(i.title)}" aria-label="Pakua audio">${ic('download')}</button></div>`).join('');
 const srcHTML = a => `<div class="src">` + a.map((s, i) => `<a class="card" href="${safeUrl(s.url)}" target="_blank" rel="noopener noreferrer"><small>[${i + 1}] ${esc(dom(s.url))}</small><b>${esc(s.title)}</b><p>${esc(s.content)}</p></a>`).join('') + `</div>`;
 /* Jibu kama essay: ondoa vichwa, orodha na alama; kila aya iwe maandishi ya kawaida */
@@ -348,14 +352,15 @@ function msgHTML(m) {
   if (m.type === 'web') return h + `<div class="body">${md(essay(m.text))}</div><div class="act"><button data-copy="1" aria-label="Nakili jibu" title="Nakili jibu">${ic('copy')}</button></div></div></div>`;
   return h + `<div class="body" style="color:var(--mute)">${ic(m.type)}</div></div></div>`
 }
+const vidsSecHTML = it => { const yt = it.filter(i => i.vid), px = it.filter(i => !i.vid); return (yt.length ? `<div class="sec">Video za kutazama</div>` + vidsHTML(yt) : '') + (px.length ? `<div class="sec">Video za kupakua</div>` + vidsHTML(px) : '') };
 const VK = { web: 'sources', images: 'images', videos: 'videos', audio: 'audio' };
-const DRAW = { web: srcHTML, images: imgsHTML, videos: vidsHTML, audio: audHTML };
+const DRAW = { web: srcHTML, images: imgsHTML, videos: vidsSecHTML, audio: audHTML };
 function viewHTML(c) {
   let h = pnd() ? `<div class="qh">${esc(pnd().q)}</div>${skel}` : '';
   [...c.messages].reverse().forEach((m, i) => {
     if (m.role !== 'ai') return;
     if (m.error) { if (i === 0 && !pnd()) h += msgHTML(m); return }
-    const a = (m.type === 'web' ? m[VK[mode]] : (m.type === mode ? m.items : null))?.filter(i => mode !== 'audio' || i.id);
+    const a = (m.type === 'web' ? (mode === 'videos' ? [...(m.videos || []), ...(m.videos2 || [])] : m[VK[mode]]) : (m.type === mode ? m.items : null))?.filter(i => mode !== 'audio' || i.id);
     if (a?.length) h += (m.q ? `<div class="qh">${esc(m.q)}</div>` : '') + DRAW[mode](a)
   });
   return h || `<div class="hero"><p>Bado hakuna matokeo. Uliza swali kwanza.</p></div>`
@@ -368,6 +373,7 @@ function renderMsgs() {
 }
 const scrollEnd = () => { const f = $('#feed'); f.scrollTop = f.scrollHeight };
 $('#msgs').onclick = e => {
+  const yp = e.target.closest('.yp'); if (yp) { playVid(yp); return }
   const im = e.target.closest('.m img'); if (im && im.getAttribute('src')) { openLB(im); return }
   const bar = e.target.closest('.au .bar');
   if (bar) { const id = bar.closest('.au').dataset.id, a = players.get(id); if (a?.duration) { const r = bar.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * a.duration; paint(id) } return }
@@ -380,6 +386,28 @@ $('#msgs').onclick = e => {
   if (t.dataset.copy) { navigator.clipboard?.writeText(t.closest('.ai').querySelector('.body').innerText); toast('Jibu limenakiliwa') }
   if (t.classList.contains('cp')) { toast('Msimbo umenakiliwa');  navigator.clipboard?.writeText(t.nextElementSibling.textContent); t.textContent = 'Copied ✓'; setTimeout(() => t.textContent = 'Copy', 1500) }
 };
+
+/* ---------- Video: utafutaji + kucheza ---------- */
+const unesc = s => { const t = document.createElement('textarea'); t.innerHTML = s || ''; return t.value };
+async function vidSearch(q) {
+  try {
+    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=30&safeSearch=moderate&videoEmbeddable=true&q=${encodeURIComponent(q.slice(0, 100))}&key=${YT_KEY}`);
+    if (!r.ok) return []; const d = await r.json();
+    return (d.items || []).filter(x => /^[\w-]{11}$/.test(x.id?.videoId || '')).map(x => {
+      const t = x.snippet.thumbnails || {};
+      return { title: unesc(x.snippet.title), thumb: (t.high || t.medium || t.default || {}).url || '', vid: x.id.videoId, user: unesc(x.snippet.channelTitle) }
+    })
+  } catch { return [] }
+}
+function playVid(el) {
+  const id = el.dataset.vid; if (!/^[\w-]{11}$/.test(id || '')) return;
+  if (el.querySelector('iframe')) return;
+  if (!navigator.onLine) { toast('Video inahitaji mtandao. Picha na maelezo vimehifadhiwa.'); return }
+  const f = document.createElement('iframe');
+  f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+  f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'; f.allowFullscreen = true; f.title = 'Video';
+  el.querySelector('.pb')?.remove(); el.appendChild(f); el.style.cursor = 'default'
+}
 
 /* ---------- Download ---------- */
 async function dl(btn) {
@@ -456,16 +484,16 @@ async function send() {
   let reply, mp = null; const none = { msg: 'Hakuna taarifa zinazolingana zilizopatikana.' };
   try {
     if (!navigator.onLine) throw { msg: 'Hauna intaneti. Unaweza kusoma historia yako (pamoja na picha na video zilizohifadhiwa), lakini utafutaji mpya unahitaji mtandao.', retry: true };
-    mp = Promise.allSettled([pix('images', q), pix('videos', q), audioSearch(q)]);
+    mp = Promise.allSettled([pix('images', q), vidSearch(q), audioSearch(q), pix('videos', q)]);
     const d = await tav({ query: q, search_depth: 'advanced', include_answer: 'advanced', max_results: 10 });
     const srcs = (d.results || []).map(r => ({ title: r.title, url: r.url, content: r.content || '' }));
     if (!srcs.length && !d.answer) throw none;
-    reply = { role: 'ai', type: 'web', q, text: essay(d.answer) || 'Hakuna muhtasari uliopatikana.', sources: srcs, images: [], videos: [], audio: [] };
+    reply = { role: 'ai', type: 'web', q, text: essay(d.answer) || 'Hakuna muhtasari uliopatikana.', sources: srcs, images: [], videos: [], videos2: [], audio: [] };
     const full = reply.text;
     for (let n = 0; n < full.length; n += 8) { pend.text = full.slice(0, n + 8); const el = $('#pend'); if (el) { el.innerHTML = pendHTML(); if (mode === 'chat' && nearBottom()) scrollEnd() } await new Promise(r => setTimeout(r, 12)) }
     pend.media = true; { const el = $('#pend'); if (el) el.innerHTML = pendHTML() }
-    const [im, vi, au] = await mp;
-    reply.images = (im.value || []).slice(0, 12); reply.videos = (vi.value || []).slice(0, 6); reply.audio = (au.value || []).slice(0, 6);
+    const [im, vi, au, pv] = await mp;
+    reply.images = (im.value || []).slice(0, 12); reply.videos = (vi.value || []).slice(0, 30); reply.audio = (au.value || []).slice(0, 6); reply.videos2 = (pv.value || []).slice(0, 12);
   } catch (e) { reply = { role: 'ai', error: e.msg || 'Hitilafu imetokea.', retry: e.retry ? q : null } }
   pend = null; c.messages.push(reply); save(); renderMsgs(); busy = false;
   if (reply.type === 'web') cacheMsg(reply)
@@ -496,6 +524,7 @@ $('#hs').addEventListener('input', e => { hq = e.target.value.trim().toLowerCase
 function openLB(im) { const l = $('#lb'), x = l.querySelector('img'); x.src = im.src; x.alt = im.alt; l.classList.add('on'); $('#lbx').focus() }
 $('#lb').onclick = e => { if (e.target.id === 'lb' || e.target.closest('#lbx')) $('#lb').classList.remove('on') };
 addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && document.activeElement?.classList.contains('yp')) { e.preventDefault(); playVid(document.activeElement) }
   if (e.key === 'Escape') { $('#lb').classList.remove('on'); drawer(false) }
   const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
   if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); newChat() }
