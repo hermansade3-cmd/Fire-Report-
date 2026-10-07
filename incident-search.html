@@ -70,6 +70,29 @@ textarea{flex:1;border:0;background:none;resize:none;max-height:140px;padding:9p
 .yp{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer;overflow:hidden}.yp img{position:absolute;inset:0;height:100%;aspect-ratio:auto;cursor:pointer}
 .yp .pb{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;display:flex;align-items:center;justify-content:center;pointer-events:none}.yp .pb svg.i{width:26px;height:26px;fill:#fff;stroke:#fff}
 .yp iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.wrap.vw{max-width:1180px}
+.vtabs{display:flex;gap:10px;position:sticky;top:-18px;z-index:4;margin:-18px -14px 16px;padding:12px 14px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.vtb{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 12px;border-radius:14px;border:1px solid var(--line);background:var(--panel);font-weight:700;font-size:14px;transition:background var(--t),transform var(--t),color var(--t)}
+.vtb:active{transform:scale(.97)}.vtb svg.i{width:18px;height:18px}
+.vtb .n{font-size:12px;font-weight:700;background:var(--bg);color:var(--mute);border-radius:99px;padding:2px 8px}
+.vtb[aria-selected=true]{background:linear-gradient(135deg,var(--red),var(--red2));border-color:transparent;color:#fff;box-shadow:var(--sh)}
+.vtb[aria-selected=true] .n{background:rgba(255,255,255,.25);color:#fff}
+.vgrid{display:grid;gap:26px 16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.vc{display:flex;flex-direction:column;min-width:0}
+.vc .yp,.vc .vpx{border-radius:14px;overflow:hidden;box-shadow:var(--sh);background:#000}
+.vc .yp img{transition:transform .3s}.vc:hover .yp img{transform:scale(1.04)}
+.vpx video{width:100%;aspect-ratio:16/9;background:#000;display:block}
+.dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.82);color:#fff;font-size:12px;font-weight:700;padding:2px 7px;border-radius:7px;letter-spacing:.2px}
+.vm{display:flex;gap:12px;padding:12px 4px 0}
+.av{flex:none;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
+.av svg.i{width:18px;height:18px}
+.vt{min-width:0}.vt b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14.5px;line-height:1.35;font-weight:700;overflow-wrap:anywhere}
+.vt small{display:block;color:var(--mute);font-size:12.5px;margin-top:3px}
+.vc.off .vt::after{content:"Imehifadhiwa kwa offline";display:block;color:var(--ok);font-size:11.5px;font-weight:700;margin-top:3px}
+.vc .vdl{margin:12px 4px 0;border:0;border-radius:99px;padding:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:6px}
+.vc .vdl:active{transform:scale(.98)}
+.vmore{display:flex;justify-content:center;margin:26px 0 8px}.vmore .btn{padding:11px 22px;border-radius:99px;font-weight:700}
+@media(max-width:520px){.vgrid{grid-template-columns:1fr;gap:26px}.vtb{font-size:13px;padding:10px 8px}}
 #scrim{display:none}
 @media(max-width:800px){
 #side{position:fixed;inset:0 auto 0 0;width:84%;max-width:320px;z-index:20;transform:translateX(-102%);transition:transform .2s}
@@ -191,7 +214,7 @@ const urls = new Map();
 async function res(k) { if (!k) return ['', 0]; const b = await mGet(k); if (b) { let u = urls.get(k); if (!u) { u = URL.createObjectURL(b); urls.set(k, u) } return [u, 1] } return [navigator.onLine ? k : '', 0] }
 async function hydrate() {
   for (const el of document.querySelectorAll('[data-k],[data-p]')) {
-    const card = el.closest('.m');
+    const card = el.closest('.m,.vc');
     if (el.dataset.k) { const [u, c] = await res(el.dataset.k); if (u && el.getAttribute('src') !== u) el.src = u; if (c) card?.classList.add('off') }
     if (el.dataset.p) { const [u] = await res(el.dataset.p); if (u) el.poster = u }
   }
@@ -200,7 +223,7 @@ async function cacheOne(u) { if (!u || await mGet(u)) return; try { const r = aw
 async function cacheMsg(m) {
   const jobs = []; (m.images || []).forEach(i => jobs.push(i.thumb));
   [...(m.videos || []), ...(m.videos2 || [])].forEach(v => jobs.push(v.thumb)); (m.videos2 || []).slice(0, 4).forEach(v => v.file && jobs.push(v.file));
-  for (const u of jobs) await cacheOne(u); hydrate()
+  for (let k = 0; k < jobs.length; k += 6) await Promise.all(jobs.slice(k, k + 6).map(cacheOne)); hydrate()
 }
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -355,7 +378,34 @@ function msgHTML(m) {
 const vidsSecHTML = it => { const yt = it.filter(i => i.vid), px = it.filter(i => !i.vid); return (yt.length ? `<div class="sec">Video za kutazama</div>` + vidsHTML(yt) : '') + (px.length ? `<div class="sec">Video za kupakua</div>` + vidsHTML(px) : '') };
 const VK = { web: 'sources', images: 'images', videos: 'videos', audio: 'audio' };
 const DRAW = { web: srcHTML, images: imgsHTML, videos: vidsSecHTML, audio: audHTML };
+let vsub = 'watch';
+const initial = t => (String(t || '?').trim().charAt(0) || '?').toUpperCase();
+const ytCard = i => `<article class="vc"><div class="yp" role="button" tabindex="0" data-vid="${esc(i.vid)}" aria-label="Cheza video: ${esc(i.title)}"><img src="${esc(i.thumb)}" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(i.vid)}/hqdefault.jpg'" data-k="${esc(i.thumb)}" alt="${esc(i.title)}">${i.duration ? `<span class="dur">${fdur(i.duration)}</span>` : ''}<span class="pb">${ic('play')}</span></div><div class="vm"><span class="av">${esc(initial(i.user))}</span><div class="vt"><b>${esc(i.title)}</b><small>${esc(i.user || '')}</small><small>${[i.views ? 'Watazamaji ' + cnt(i.views) : '', ago(i.at)].filter(Boolean).join(' · ')}</small></div></div></article>`;
+const pxCard = i => `<article class="vc"><div class="vpx"><video controls preload="none" playsinline data-k="${esc(i.file || '')}" data-p="${esc(i.thumb)}" aria-label="${esc(i.title)}"></video></div><div class="vm"><span class="av">${ic('download')}</span><div class="vt"><b>${esc(i.title)}</b><small>${esc(i.user || '')}</small><small>${dur(i.duration || 0)}</small></div></div>${i.file ? `<button class="dl vdl" data-dl="${esc(i.file)}" data-name="${nm(i.title)}" aria-label="Pakua video">${ic('download')} Pakua</button>` : ''}</article>`;
+const vskel = `<div class="vgrid">` + '<div><div class="sk" style="aspect-ratio:16/9;height:auto;border-radius:14px;margin:0"></div><div class="sk" style="width:85%"></div><div class="sk" style="width:55%"></div></div>'.repeat(6) + `</div>`;
+function videosView(c) {
+  const bl = []; c.messages.forEach((m, idx) => { if (m.role === 'ai' && !m.error && m.type === 'web') { const all = [...(m.videos || []), ...(m.videos2 || [])]; bl.push({ q: m.q, m, idx, yt: all.filter(v => v.vid), px: all.filter(v => !v.vid) }) } });
+  bl.reverse(); const nY = bl.reduce((n, b) => n + b.yt.length, 0), nP = bl.reduce((n, b) => n + b.px.length, 0);
+  const tb = (k, icn, lab, n) => `<button class="vtb" role="tab" data-vsub="${k}" aria-selected="${vsub === k}">${ic(icn)} ${lab} <span class="n">${n}</span></button>`;
+  const bar = `<div class="vtabs" role="tablist" aria-label="Aina ya video">${tb('watch', 'play', 'Kutazama', nY)}${tb('dl', 'download', 'Kupakua', nP)}</div>`;
+  let h = bar; if (pnd()) h += `<div class="qh">${esc(pnd().q)}</div>${vskel}`;
+  const key = vsub === 'watch' ? 'yt' : 'px', n = vsub === 'watch' ? nY : nP;
+  bl.forEach(b => { const a = b[key]; if (!a.length) return;
+    h += `<div class="qh">${esc(b.q)}</div><div class="vgrid">${a.map(vsub === 'watch' ? ytCard : pxCard).join('')}</div>` + (vsub === 'watch' && b.m.ytNext ? `<div class="vmore"><button class="btn" data-vmore="${b.idx}">Ona video zaidi</button></div>` : '') });
+  if (!n && !pnd()) { const o = vsub === 'watch' ? nP : nY; h += `<div class="hero"><p>${bl.length ? (vsub === 'watch' ? 'Hakuna video za kutazama kwa utafutaji huu.' : 'Hakuna video za kupakua kwa utafutaji huu.') : 'Bado hakuna video. Uliza swali kwanza.'}</p>${o ? `<p><button class="btn" style="margin-top:12px" data-vsub="${vsub === 'watch' ? 'dl' : 'watch'}">${vsub === 'watch' ? 'Ona video za kupakua (' + o + ')' : 'Ona video za kutazama (' + o + ')'}</button></p>` : ''}</div>` }
+  return h
+}
+async function loadMore(i, btn) {
+  const c = chats.find(x => x.id === cur), m = c?.messages[i]; if (!m?.ytNext) return;
+  if (!navigator.onLine) { toast('Hauna intaneti.'); return }
+  btn.disabled = true; btn.textContent = 'Inapakia...';
+  const r = await vidSearch(m.q, m.ytNext);
+  if (!r.items.length) { toast('Hakuna video zaidi kwa sasa.'); btn.disabled = false; btn.textContent = 'Ona video zaidi'; return }
+  const have = new Set((m.videos || []).map(v => v.vid)); m.videos = (m.videos || []).concat(r.items.filter(v => !have.has(v.vid))); m.ytNext = r.next;
+  save(); const f = $('#feed'), y = f.scrollTop; renderMsgs(); f.scrollTop = y; cacheMsg(m)
+}
 function viewHTML(c) {
+  if (mode === 'videos') return videosView(c);
   let h = pnd() ? `<div class="qh">${esc(pnd().q)}</div>${skel}` : '';
   [...c.messages].reverse().forEach((m, i) => {
     if (m.role !== 'ai') return;
@@ -369,7 +419,7 @@ function renderMsgs() {
   const c = chats.find(x => x.id === cur) || { messages: [] }; let h;
   if (mode === 'chat') h = c.messages.length || pnd() ? c.messages.map(msgHTML).join('') + `<div id="pend">${pendHTML()}</div>` : `<div class="hero"><img class="lg" src="profile.jpg" alt="" onerror="this.remove()"><h1>R-Search</h1><p>${greet()} Uliza chochote. Tafuta, elewa na pata majibu yenye vyanzo.</p></div>` + suggHTML();
   else h = viewHTML(c);
-  $('#msgs').innerHTML = h; if (mode === 'chat') scrollEnd(); else $('#feed').scrollTop = 0; hydrate(); players.forEach((_, id) => paint(id))
+  $('#msgs').classList.toggle('vw', mode === 'videos'); $('#msgs').innerHTML = h; if (mode === 'chat') scrollEnd(); else $('#feed').scrollTop = 0; hydrate(); players.forEach((_, id) => paint(id))
 }
 const scrollEnd = () => { const f = $('#feed'); f.scrollTop = f.scrollHeight };
 $('#msgs').onclick = e => {
@@ -382,6 +432,8 @@ $('#msgs').onclick = e => {
   if (t.dataset.shuf) { sugg = shuffle(QBANK).slice(0, 16); renderMsgs() }
   if (t.dataset.ask) { $('#q').value = t.dataset.ask; send() }
   if (t.dataset.retry) { const c = chats.find(x => x.id === cur); c.messages.pop(); c.messages.pop(); save(); $('#q').value = t.dataset.retry; send() }
+  if (t.dataset.vsub) { vsub = t.dataset.vsub; renderMsgs() }
+  if (t.dataset.vmore) loadMore(+t.dataset.vmore, t);
   if (t.dataset.dl || t.dataset.adl) dl(t);
   if (t.dataset.copy) { navigator.clipboard?.writeText(t.closest('.ai').querySelector('.body').innerText); toast('Jibu limenakiliwa') }
   if (t.classList.contains('cp')) { toast('Msimbo umenakiliwa');  navigator.clipboard?.writeText(t.nextElementSibling.textContent); t.textContent = 'Copied ✓'; setTimeout(() => t.textContent = 'Copy', 1500) }
@@ -389,15 +441,30 @@ $('#msgs').onclick = e => {
 
 /* ---------- Video: utafutaji + kucheza ---------- */
 const unesc = s => { const t = document.createElement('textarea'); t.innerHTML = s || ''; return t.value };
-async function vidSearch(q) {
+const isoSec = t => { const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(t || ''); return m ? (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0) : 0 };
+const fdur = d => { d = Math.floor(d || 0); const h = Math.floor(d / 3600), m = Math.floor(d % 3600 / 60), x = String(d % 60).padStart(2, '0'); return h ? `${h}:${String(m).padStart(2, '0')}:${x}` : `${m}:${x}` };
+const cnt = n => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+function ago(iso) {
+  const t = Date.parse(iso); if (!t) return ''; const m = Math.max(1, Math.floor((Date.now() - t) / 6e4));
+  if (m < 60) return `dakika ${m} zilizopita`; const h = Math.floor(m / 60); if (h < 24) return `saa ${h} zilizopita`;
+  const d = Math.floor(h / 24); if (d < 7) return `siku ${d} zilizopita`; if (d < 30) return `wiki ${Math.floor(d / 7)} zilizopita`;
+  if (d < 365) return `miezi ${Math.floor(d / 30)} iliyopita`; const y = Math.floor(d / 365); return y === 1 ? 'mwaka 1 uliopita' : `miaka ${y} iliyopita`
+}
+async function vidSearch(q, token) {
+  const none = { items: [], next: '' };
   try {
-    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=30&safeSearch=moderate&videoEmbeddable=true&q=${encodeURIComponent(q.slice(0, 100))}&key=${YT_KEY}`);
-    if (!r.ok) return []; const d = await r.json();
-    return (d.items || []).filter(x => /^[\w-]{11}$/.test(x.id?.videoId || '')).map(x => {
+    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=50&safeSearch=moderate&videoEmbeddable=true&q=${encodeURIComponent(q.slice(0, 100))}${token ? '&pageToken=' + encodeURIComponent(token) : ''}&key=${YT_KEY}`);
+    if (!r.ok) return none; const d = await r.json();
+    const items = (d.items || []).filter(x => /^[\w-]{11}$/.test(x.id?.videoId || '')).map(x => {
       const t = x.snippet.thumbnails || {};
-      return { title: unesc(x.snippet.title), thumb: (t.high || t.medium || t.default || {}).url || '', vid: x.id.videoId, user: unesc(x.snippet.channelTitle) }
-    })
-  } catch { return [] }
+      return { title: unesc(x.snippet.title), thumb: (t.high || t.medium || t.default || {}).url || '', vid: x.id.videoId, user: unesc(x.snippet.channelTitle), at: x.snippet.publishedAt }
+    });
+    if (items.length) try {
+      const r2 = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${items.map(i => i.vid).join(',')}&key=${YT_KEY}`);
+      if (r2.ok) { const mp = new Map(((await r2.json()).items || []).map(v => [v.id, v])); items.forEach(i => { const v = mp.get(i.vid); if (v) { i.duration = isoSec(v.contentDetails?.duration); i.views = +v.statistics?.viewCount || 0 } }) }
+    } catch {}
+    return { items, next: d.nextPageToken || '' }
+  } catch { return none }
 }
 function playVid(el) {
   const id = el.dataset.vid; if (!/^[\w-]{11}$/.test(id || '')) return;
@@ -432,7 +499,7 @@ async function tav(body) {
 }
 async function pix(kind, q) {
   if (!PIXABAY_KEY) throw { msg: 'Huduma ya utafutaji haijasanidiwa kikamilifu.' };
-  let r; try { r = await fetch(`https://pixabay.com/api/${kind === 'videos' ? 'videos/' : ''}?key=${PIXABAY_KEY}&q=${encodeURIComponent(q.slice(0, 100))}&per_page=24&safesearch=true`) } catch { throw DOWN }
+  let r; try { r = await fetch(`https://pixabay.com/api/${kind === 'videos' ? 'videos/' : ''}?key=${PIXABAY_KEY}&q=${encodeURIComponent(q.slice(0, 100))}&per_page=${kind === 'videos' ? 50 : 24}&safesearch=true`) } catch { throw DOWN }
   if (!r.ok) throw DOWN; const d = await r.json();
   return (d.hits || []).map(h => kind === 'videos' ? { title: h.tags, thumb: `https://i.vimeocdn.com/video/${h.picture_id}_640x360.jpg`, file: h.videos?.tiny?.url || h.videos?.small?.url || h.videos?.medium?.url || '', url: h.pageURL, duration: h.duration, user: h.user } : { title: h.tags, thumb: h.webformatURL, url: h.pageURL, user: h.user })
 }
@@ -493,7 +560,7 @@ async function send() {
     for (let n = 0; n < full.length; n += 8) { pend.text = full.slice(0, n + 8); const el = $('#pend'); if (el) { el.innerHTML = pendHTML(); if (mode === 'chat' && nearBottom()) scrollEnd() } await new Promise(r => setTimeout(r, 12)) }
     pend.media = true; { const el = $('#pend'); if (el) el.innerHTML = pendHTML() }
     const [im, vi, au, pv] = await mp;
-    reply.images = (im.value || []).slice(0, 12); reply.videos = (vi.value || []).slice(0, 30); reply.audio = (au.value || []).slice(0, 6); reply.videos2 = (pv.value || []).slice(0, 12);
+    reply.images = (im.value || []).slice(0, 12); { const yv = vi.value || {}; reply.videos = yv.items || []; reply.ytNext = yv.next || '' } reply.audio = (au.value || []).slice(0, 6); reply.videos2 = (pv.value || []).slice(0, 50);
   } catch (e) { reply = { role: 'ai', error: e.msg || 'Hitilafu imetokea.', retry: e.retry ? q : null } }
   pend = null; c.messages.push(reply); save(); renderMsgs(); busy = false;
   if (reply.type === 'web') cacheMsg(reply)
