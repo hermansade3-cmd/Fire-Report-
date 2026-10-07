@@ -94,6 +94,36 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 .hero{margin-top:6vh}.sg{margin-top:22px}.sgh{display:flex;align-items:center;justify-content:space-between;color:var(--mute);font-size:12px;font-weight:600;margin-bottom:8px}
 .sgh button{width:32px;height:32px;border:0;background:none;border-radius:50%;display:flex;align-items:center;justify-content:center}.sgh button:hover{background:var(--panel)}
 .chip{font-size:13px;text-align:left;overflow-wrap:anywhere}
+/* ===== Design system v2 ===== */
+:root{--bg:#f1f3f5;--panel:#fff;--elev:#fff;--ink:#101a24;--mute:#5b6a78;--line:#dde3e8;--red:#d2381f;--red2:#ff7a45;--ok:#1f9d63;--warn:#d9a000;--glass:rgba(255,255,255,.74);--sh:0 1px 2px rgba(16,26,36,.06),0 8px 24px rgba(16,26,36,.06);--ring:0 0 0 4px rgba(210,56,31,.16);--t:.16s ease}
+[data-theme=dark]{--bg:#0a1016;--panel:#111a23;--elev:#17222d;--ink:#e9eff4;--mute:#8fa1b0;--line:#223140;--red:#ff6a4d;--red2:#ffb36b;--glass:rgba(17,26,35,.74);--sh:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--ring:0 0 0 4px rgba(255,106,77,.22)}
+body{background:radial-gradient(900px 480px at 75% -8%,rgba(255,122,69,.11),transparent 60%),var(--bg)}
+main{position:relative}
+header{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+#side{background:var(--panel)}
+.tab{min-height:40px;min-width:44px;transition:background var(--t),color var(--t),transform var(--t)}.tab:active{transform:scale(.94)}.tab:hover{border-color:var(--red)}
+.btn{transition:background var(--t),transform var(--t)}.btn:active{transform:scale(.97)}
+.btn.pri{background:linear-gradient(135deg,var(--red),var(--red2));border-color:transparent}
+.box{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:24px;box-shadow:var(--sh);transition:box-shadow var(--t),border-color var(--t),transform var(--t)}
+.box:focus-within{box-shadow:var(--ring),var(--sh);border-color:var(--red);transform:translateY(-1px)}
+#send{background:linear-gradient(135deg,var(--red),var(--red2));transition:transform var(--t)}#send:hover{transform:scale(1.07)}#send:active{transform:scale(.93)}
+.msg{animation:in .22s ease both}@keyframes in{from{opacity:0;transform:translateY(6px)}}
+.card,.m,.au,.chip{box-shadow:var(--sh);transition:transform var(--t),border-color var(--t),box-shadow var(--t)}
+.card:hover,.m:hover{transform:translateY(-2px)}.chip:hover{transform:translateY(-1px)}.chip:active,.card:active{transform:scale(.98)}
+.m img{cursor:zoom-in;transition:transform .25s}.m:hover img{transform:scale(1.02)}.m{overflow:hidden}
+.hero .lg{width:72px;height:72px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 6px rgba(255,122,69,.16),var(--sh);margin-bottom:14px}
+.hero h1{background:linear-gradient(135deg,var(--ink) 30%,var(--red));-webkit-background-clip:text;background-clip:text;color:transparent}
+.act{display:flex;gap:4px;margin-top:2px}.act button{border:0;background:none;color:var(--mute);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}.act button:hover{background:var(--panel);color:var(--ink)}
+#hs{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 12px;color:var(--ink);outline:none;font:inherit;font-size:13px}#hs:focus{border-color:var(--red);box-shadow:var(--ring)}
+.kb{font-size:11px;color:var(--mute);text-align:center;padding-top:6px}
+.net{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none;box-shadow:0 0 0 3px rgba(31,157,99,.18)}.net.off{background:var(--warn);box-shadow:0 0 0 3px rgba(217,160,0,.22)}
+#toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translate(-50%,10px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;max-width:90vw;text-align:center}#toast.on{opacity:1;transform:translate(-50%,0)}
+#lb{position:fixed;inset:0;background:rgba(5,10,15,.88);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}#lb.on{display:flex;animation:in .18s}
+#lb img{max-width:100%;max-height:88dvh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)}#lbx{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;color:#fff;background:rgba(255,255,255,.14)}
+#sb{position:absolute;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--elev);box-shadow:var(--sh);display:none;align-items:center;justify-content:center;z-index:5}#sb.on{display:flex}
+#splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;pointer-events:none;animation:sp .45s .3s ease forwards}
+#splash img{width:84px;height:84px;border-radius:50%;object-fit:cover;animation:pu .8s ease infinite alternate}@keyframes sp{to{opacity:0;visibility:hidden}}@keyframes pu{to{transform:scale(1.07)}}
+@media(prefers-reduced-motion:reduce){#splash{display:none}.msg{animation:none}}
 </style>
 </head>
 <body>
@@ -101,7 +131,9 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stro
 <aside id="side" aria-label="Historia">
   <div class="brand"><img src="profile.jpg" alt="R-Search" width="34" height="34"><span>R-Search</span></div>
   <button class="btn pri" id="new" aria-label="Mazungumzo mapya" data-i="plus" data-t="New Chat"></button>
+  <input id="hs" type="search" placeholder="Tafuta kwenye historia" aria-label="Tafuta kwenye historia" autocomplete="off">
   <div id="hist"></div>
+  <div class="kb">Ctrl K chat mpya · / andika · Alt 1-5 maoneo</div>
 </aside>
 <div id="scrim"></div>
 <main>
@@ -114,6 +146,7 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stro
       <button class="tab" role="tab" data-m="videos" data-i="videos" aria-label="Video" title="Video" aria-selected="false"></button>
       <button class="tab" role="tab" data-m="audio" data-i="audio" aria-label="Audio" title="Audio" aria-selected="false"></button>
     </nav>
+    <span class="net" id="net" role="img" aria-label="Hali ya mtandao" title="Uko mtandaoni"></span>
     <button class="btn" id="theme" aria-label="Badilisha mwonekano"></button>
   </header>
   <section id="feed" aria-live="polite"><div class="wrap" id="msgs"></div></section>
@@ -127,8 +160,12 @@ svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stro
     </div>
     <div class="note" id="note"></div>
   </footer>
+<button id="sb" aria-label="Shuka chini" data-i="arrowdown"></button>
 </main>
 </div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="lb" role="dialog" aria-label="Picha kubwa"><button class="ib" id="lbx" aria-label="Funga" data-i="close"></button><img alt=""></div>
+<div id="splash" aria-hidden="true"><img src="profile.jpg" alt="" onerror="this.remove()"></div>
 <script>
 /* ===== FUNGUO ZA API (badilisha hapa ukitaka) ===== */
 const TAVILY_KEY = "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";
@@ -136,7 +173,7 @@ const PIXABAY_KEY = "57792634-5e89dd610e4c1c840f815c524";
 
 const $ = s => document.querySelector(s);
 const LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} } };
-let chats = [], cur = null, mode = 'chat', busy = false, pend = null;
+let chats = [], cur = null, mode = 'chat', busy = false, pend = null, hq = '';
 const MODES = { web: 'Wavuti', images: 'Picha', videos: 'Video', audio: 'Audio' };
 /* IndexedDB: historia (kv) + picha/video zilizohifadhiwa kwenye simu (media, kama Blob) */
 const DB = new Promise((ok, no) => { const r = indexedDB.open('rsa', 1); r.onupgradeneeded = () => { r.result.createObjectStore('kv'); r.result.createObjectStore('media') }; r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error) });
@@ -180,6 +217,9 @@ const I = {
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
   download: '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',
   refresh: '<path d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
+  arrowdown: '<path d="M12 5v14M6 13l6 6 6-6"/>',
   play: '<path d="M8 5v14l11-7z"/>',
   pause: '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
@@ -235,10 +275,10 @@ function setMode(m) {
 /* ---------- History ---------- */
 function renderHist() {
   const day = 864e5, now = new Date().setHours(0, 0, 0, 0), g = { 'Today': [], 'Yesterday': [], 'Earlier': [] };
-  [...chats].sort((a, b) => b.createdAt - a.createdAt).forEach(c => (c.createdAt >= now ? g.Today : c.createdAt >= now - day ? g.Yesterday : g.Earlier).push(c));
+  chats.filter(c => c.title.toLowerCase().includes(hq)).sort((a, b) => b.createdAt - a.createdAt).forEach(c => (c.createdAt >= now ? g.Today : c.createdAt >= now - day ? g.Yesterday : g.Earlier).push(c));
   $('#hist').innerHTML = Object.entries(g).filter(([, v]) => v.length).map(([k, v]) => `<div class="grp">${k}</div>` + v.map(c =>
     `<div class="it ${c.id === cur ? 'on' : ''}"><button class="t" data-open="${c.id}">${esc(c.title)}</button><button class="a" data-ren="${c.id}" aria-label="Badilisha jina">${ic('edit')}</button><button class="a" data-del="${c.id}" aria-label="Futa">${ic('trash')}</button></div>`).join('')).join('')
-    || '<div class="grp">Hakuna historia bado.</div>'
+    || `<div class="grp">${hq ? 'Hakuna mazungumzo yanayolingana.' : 'Hakuna historia bado. Maswali yako yatahifadhiwa hapa.'}</div>`
 }
 $('#hist').onclick = e => {
   const t = e.target.closest('button'); if (!t) return;
@@ -293,18 +333,19 @@ const QBANK = [
 const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a };
 let sugg = shuffle(QBANK).slice(0, 16);
 const suggHTML = () => `<div class="sg"><div class="sgh"><span>Maswali unayoweza kuuliza</span><button data-shuf="1" aria-label="Changanya mapendekezo">${ic('refresh')}</button></div><div class="chips">` + sugg.map(r => `<button class="chip" data-ask="${esc(r)}">${esc(r)}</button>`).join('') + `</div></div>`;
+const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Habari za asubuhi.' : h < 16 ? 'Habari za mchana.' : 'Habari za jioni.' };
 const pnd = () => pend && pend.chat === cur ? pend : null;
 const skel = `<div class="sk"></div><div class="sk" style="width:80%"></div>`;
 function pendHTML() {
   const p = pnd(); if (!p) return '';
-  return p.text ? `<div class="msg"><div class="ai"><div class="body">${md(p.text)}</div></div></div>`
+  return p.text ? `<div class="msg"><div class="ai"><div class="body">${md(p.text)}</div>${p.media ? `<div class="status"><span class="dots"><span></span><span></span><span></span></span> Inaandaa picha, video na audio...</div>` : ''}</div></div>`
     : `<div class="msg"><div class="ai"><div class="status"><span class="dots"><span></span><span></span><span></span></span> ${ic('search')} Searching the web...<br><small>Searching: “${esc(p.q)}”</small></div>${skel}</div></div>`
 }
 function msgHTML(m) {
   if (m.role === 'user') return `<div class="msg u"><div class="bub">${esc(m.text)}</div></div>`;
   const h = `<div class="msg"><div class="ai">`;
   if (m.error) return h + `<div class="err">${ic('alert')} ${esc(m.error)}<br>${m.retry ? `<button class="btn" data-retry="${esc(m.retry)}" style="margin-top:8px">Jaribu tena</button>` : ''}</div></div></div>`;
-  if (m.type === 'web') return h + `<div class="body">${md(essay(m.text))}</div></div></div>`;
+  if (m.type === 'web') return h + `<div class="body">${md(essay(m.text))}</div><div class="act"><button data-copy="1" aria-label="Nakili jibu" title="Nakili jibu">${ic('copy')}</button></div></div></div>`;
   return h + `<div class="body" style="color:var(--mute)">${ic(m.type)}</div></div></div>`
 }
 const VK = { web: 'sources', images: 'images', videos: 'videos', audio: 'audio' };
@@ -321,12 +362,13 @@ function viewHTML(c) {
 }
 function renderMsgs() {
   const c = chats.find(x => x.id === cur) || { messages: [] }; let h;
-  if (mode === 'chat') h = c.messages.length || pnd() ? c.messages.map(msgHTML).join('') + `<div id="pend">${pendHTML()}</div>` : `<div class="hero"><h1>R-Search</h1><p>Uliza chochote. Tafuta, elewa na pata majibu yenye vyanzo.</p></div>` + suggHTML();
+  if (mode === 'chat') h = c.messages.length || pnd() ? c.messages.map(msgHTML).join('') + `<div id="pend">${pendHTML()}</div>` : `<div class="hero"><img class="lg" src="profile.jpg" alt="" onerror="this.remove()"><h1>R-Search</h1><p>${greet()} Uliza chochote. Tafuta, elewa na pata majibu yenye vyanzo.</p></div>` + suggHTML();
   else h = viewHTML(c);
   $('#msgs').innerHTML = h; if (mode === 'chat') scrollEnd(); else $('#feed').scrollTop = 0; hydrate(); players.forEach((_, id) => paint(id))
 }
 const scrollEnd = () => { const f = $('#feed'); f.scrollTop = f.scrollHeight };
 $('#msgs').onclick = e => {
+  const im = e.target.closest('.m img'); if (im && im.getAttribute('src')) { openLB(im); return }
   const bar = e.target.closest('.au .bar');
   if (bar) { const id = bar.closest('.au').dataset.id, a = players.get(id); if (a?.duration) { const r = bar.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * a.duration; paint(id) } return }
   const t = e.target.closest('button'); if (!t) return;
@@ -335,7 +377,8 @@ $('#msgs').onclick = e => {
   if (t.dataset.ask) { $('#q').value = t.dataset.ask; send() }
   if (t.dataset.retry) { const c = chats.find(x => x.id === cur); c.messages.pop(); c.messages.pop(); save(); $('#q').value = t.dataset.retry; send() }
   if (t.dataset.dl || t.dataset.adl) dl(t);
-  if (t.classList.contains('cp')) { navigator.clipboard?.writeText(t.nextElementSibling.textContent); t.textContent = 'Copied ✓'; setTimeout(() => t.textContent = 'Copy', 1500) }
+  if (t.dataset.copy) { navigator.clipboard?.writeText(t.closest('.ai').querySelector('.body').innerText); toast('Jibu limenakiliwa') }
+  if (t.classList.contains('cp')) { toast('Msimbo umenakiliwa');  navigator.clipboard?.writeText(t.nextElementSibling.textContent); t.textContent = 'Copied ✓'; setTimeout(() => t.textContent = 'Copy', 1500) }
 };
 
 /* ---------- Download ---------- */
@@ -346,21 +389,21 @@ async function dl(btn) {
     let b = await mGet(u); if (!b) { const r = await fetch(u); if (!r.ok) throw 0; b = await r.blob(); mPut(u, b) }
     const a = document.createElement('a'), ext = (b.type.split('/')[1] || u.split('.').pop() || 'bin').replace('jpeg', 'jpg').replace('mpeg', 'mp3');
     a.href = URL.createObjectURL(b); a.download = 'R-Search-' + (btn.dataset.name || 'faili').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').slice(0, 40) + '.' + ext;
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); btn.innerHTML = ic('check') + (small ? '' : ' Imepakuliwa')
-  } catch { btn.innerHTML = small ? ic('alert') : 'Imeshindikana, jaribu tena' }
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); btn.innerHTML = ic('check') + (small ? '' : ' Imepakuliwa'); toast('Imepakuliwa')
+  } catch { btn.innerHTML = small ? ic('alert') : 'Imeshindikana, jaribu tena'; toast('Imeshindikana kupakua. Jaribu tena.') }
   setTimeout(() => btn.innerHTML = lab, 2500)
 }
 
 /* ---------- API ---------- */
-const DOWN = { msg: 'Samahani, search service haipatikani kwa sasa.', retry: true };
+const DOWN = { msg: 'Samahani, tumeshindwa kupata majibu kwa sasa. Jaribu tena baada ya muda mfupi.', retry: true };
 async function tav(body) {
-  if (!TAVILY_KEY) throw { msg: 'Search service haijasanidiwa.' };
+  if (!TAVILY_KEY) throw { msg: 'Huduma ya utafutaji haijasanidiwa kikamilifu.' };
   let r; try { r = await fetch('https://api.tavily.com/search', { method: 'POST', headers: { 'content-type': 'application/json', Authorization: 'Bearer ' + TAVILY_KEY }, body: JSON.stringify(body) }) } catch { throw DOWN }
-  if (r.status === 401 || r.status === 403) throw { msg: 'Search service haijasanidiwa.' };
+  if (r.status === 401 || r.status === 403) throw { msg: 'Huduma ya utafutaji haijasanidiwa kikamilifu.' };
   if (!r.ok) throw DOWN; return r.json()
 }
 async function pix(kind, q) {
-  if (!PIXABAY_KEY) throw { msg: 'Search service haijasanidiwa.' };
+  if (!PIXABAY_KEY) throw { msg: 'Huduma ya utafutaji haijasanidiwa kikamilifu.' };
   let r; try { r = await fetch(`https://pixabay.com/api/${kind === 'videos' ? 'videos/' : ''}?key=${PIXABAY_KEY}&q=${encodeURIComponent(q.slice(0, 100))}&per_page=24&safesearch=true`) } catch { throw DOWN }
   if (!r.ok) throw DOWN; const d = await r.json();
   return (d.hits || []).map(h => kind === 'videos' ? { title: h.tags, thumb: `https://i.vimeocdn.com/video/${h.picture_id}_640x360.jpg`, file: h.videos?.tiny?.url || h.videos?.small?.url || h.videos?.medium?.url || '', url: h.pageURL, duration: h.duration, user: h.user } : { title: h.tags, thumb: h.webformatURL, url: h.pageURL, user: h.user })
@@ -404,7 +447,8 @@ async function togglePlay(btn) {
 
 /* ---------- Send ---------- */
 async function send() {
-  const q = $('#q').value.trim(); if (!q || busy) return;
+  const q = $('#q').value.trim(); if (busy) return;
+  if (!q) { $('.box').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 220 }); return }
   busy = true; $('#q').value = ''; autosize();
   let c = chats.find(x => x.id === cur);
   if (!c) { c = { id: uid(), title: makeTitle(q), mode: 'chat', messages: [], createdAt: Date.now() }; chats.push(c); cur = c.id }
@@ -418,7 +462,8 @@ async function send() {
     if (!srcs.length && !d.answer) throw none;
     reply = { role: 'ai', type: 'web', q, text: essay(d.answer) || 'Hakuna muhtasari uliopatikana.', sources: srcs, images: [], videos: [], audio: [] };
     const full = reply.text;
-    for (let n = 0; n < full.length; n += 8) { pend.text = full.slice(0, n + 8); const el = $('#pend'); if (el) { el.innerHTML = pendHTML(); if (mode === 'chat') scrollEnd() } await new Promise(r => setTimeout(r, 12)) }
+    for (let n = 0; n < full.length; n += 8) { pend.text = full.slice(0, n + 8); const el = $('#pend'); if (el) { el.innerHTML = pendHTML(); if (mode === 'chat' && nearBottom()) scrollEnd() } await new Promise(r => setTimeout(r, 12)) }
+    pend.media = true; { const el = $('#pend'); if (el) el.innerHTML = pendHTML() }
     const [im, vi, au] = await mp;
     reply.images = (im.value || []).slice(0, 12); reply.videos = (vi.value || []).slice(0, 6); reply.audio = (au.value || []).slice(0, 6);
   } catch (e) { reply = { role: 'ai', error: e.msg || 'Hitilafu imetokea.', retry: e.retry ? q : null } }
@@ -440,8 +485,24 @@ if (!SR) $('#mic').style.display = 'none'; else {
   rec.onend = () => { on = false; $('#mic').classList.remove('rec') };
   $('#mic').onclick = () => { if (on) rec.stop(); else { try { rec.start(); on = true; $('#mic').classList.add('rec') } catch {} } }
 }
-addEventListener('offline', () => $('#note').textContent = 'Hauko mtandaoni · historia inasomeka');
-addEventListener('online', () => $('#note').textContent = '');
+var tt; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2400) }
+const net = () => { $('#net').classList.toggle('off', !navigator.onLine); $('#net').title = navigator.onLine ? 'Uko mtandaoni' : 'Hauko mtandaoni' };
+addEventListener('offline', () => { net(); toast('Hauko mtandaoni. Historia na vilivyohifadhiwa vinasomeka.') });
+addEventListener('online', () => { net(); toast('Mtandao umerudi') }); net();
+const fd = $('#feed'), nearBottom = () => fd.scrollHeight - fd.scrollTop - fd.clientHeight < 140;
+fd.addEventListener('scroll', () => $('#sb').classList.toggle('on', mode === 'chat' && !nearBottom()), { passive: true });
+$('#sb').onclick = () => fd.scrollTo({ top: fd.scrollHeight, behavior: 'smooth' });
+$('#hs').addEventListener('input', e => { hq = e.target.value.trim().toLowerCase(); renderHist() });
+function openLB(im) { const l = $('#lb'), x = l.querySelector('img'); x.src = im.src; x.alt = im.alt; l.classList.add('on'); $('#lbx').focus() }
+$('#lb').onclick = e => { if (e.target.id === 'lb' || e.target.closest('#lbx')) $('#lb').classList.remove('on') };
+addEventListener('keydown', e => {
+  if (e.key === 'Escape') { $('#lb').classList.remove('on'); drawer(false) }
+  const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); newChat() }
+  else if (e.key === '/' && !typing) { e.preventDefault(); $('#q').focus() }
+  else if (e.altKey && /^[1-5]$/.test(e.key)) { e.preventDefault(); setMode(['chat', 'web', 'images', 'videos', 'audio'][e.key - 1]) }
+});
+addEventListener('load', () => setTimeout(() => $('#splash')?.remove(), 900));
 (async () => {
   chats = (await kvGet('chats')) || LS.get('rsa_chats', []);
   renderMsgs(); renderHist(); navigator.storage?.persist?.()
