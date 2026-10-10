@@ -32,57 +32,43 @@
  * create index if not exists idx_posts_status_published on public.posts (status, published_at desc);
  * create index if not exists idx_posts_expires_at on public.posts (expires_at);
  * 
- * -- 2) Jedwali jipya la read-tracking (per-user, si per-announcement)
- * create table if not exists public.announcement_reads (
- *   id uuid primary key default gen_random_uuid(),
- *   announcement_id uuid not null references public.posts(id) on delete cascade,
- *   user_id text not null,
- *   read_at timestamptz not null default now(),
- *   unique (announcement_id, user_id)
- * );
- * 
- * create index if not exists idx_announcement_reads_user on public.announcement_reads (user_id);
- * create index if not exists idx_announcement_reads_announcement on public.announcement_reads (announcement_id);
- * 
- * -- ============================================================
- * -- Row Level Security
- * -- MUHIMU: App hii kwa sasa haina Supabase Auth iliyounganishwa —
- * -- "user_id" ni kitambulisho cha kifaa kinachotengenezwa na
- * -- announcements.js, si auth.uid() ya kweli. Kwa hiyo RLS chini
- * -- inaruhusu "anon" (publishable key) kusoma/kuandika read-receipts
- * -- zake bila kuthibitisha ni nani hasa kwa 100% — hii ni kikwazo
- * -- cha kiusalama kinachokubalika kwa crew app ya ndani, lakini
- * -- SI salama kwa data nyeti za kila mtumiaji. Kwa usalama kamili,
- * -- unganisha Supabase Auth halisi baadaye na badilisha policy hizi
- * -- kutumia auth.uid() = user_id.
- * -- ============================================================
- * 
- * alter table public.posts enable row level security;
- * 
- * drop policy if exists "Published posts readable by anyone" on public.posts;
- * create policy "Published posts readable by anyone"
- *   on public.posts for select
- *   using (status = 'published');
- * 
- * -- Endelea kuruhusu admin/service-role pekee kuandika/kubadilisha "posts"
- * -- (usiweke policy ya insert/update/delete kwa role ya "anon" hapa).
- * 
- * alter table public.announcement_reads enable row level security;
- * 
- * drop policy if exists "Anyone can read read-receipts" on public.announcement_reads;
- * create policy "Anyone can read read-receipts"
- *   on public.announcement_reads for select
- *   using (true);
- * 
- * drop policy if exists "Anyone can insert own read-receipt" on public.announcement_reads;
- * create policy "Anyone can insert own read-receipt"
- *   on public.announcement_reads for insert
- *   with check (true);
- * 
- * drop policy if exists "Anyone can update own read-receipt" on public.announcement_reads;
- * create policy "Anyone can update own read-receipt"
- *   on public.announcement_reads for update
- *   using (true);
+ * -- 2) Jedwali ZILIZOPO tayari kwenye Supabase na zinazotumika sasa:
+ * --    posts (matangazo) · media (maktaba ya media) · post_views (read/view tracking)
+ * --    reports (ripoti za watumiaji) · profiles (majina ya waandishi)
+ * --    site_settings (mipangilio ya admin).  "announcement_reads" HAIHITAJIKI tena.
+ *
+ * -- 3) RLS (endesha mara moja kwenye SQL editor; salama kurudia):
+ * alter table public.post_views enable row level security;
+ * drop policy if exists "ann insert views" on public.post_views;
+ * create policy "ann insert views" on public.post_views
+ *   for insert to anon, authenticated with check (true);
+ *
+ * alter table public.reports enable row level security;
+ * drop policy if exists "ann insert reports" on public.reports;
+ * create policy "ann insert reports" on public.reports
+ *   for insert to anon, authenticated with check (true);
+ *
+ * alter table public.media enable row level security;
+ * drop policy if exists "ann read media" on public.media;
+ * create policy "ann read media" on public.media
+ *   for select to anon, authenticated using (true);
+ *
+ * alter table public.site_settings enable row level security;
+ * drop policy if exists "ann read settings" on public.site_settings;
+ * create policy "ann read settings" on public.site_settings
+ *   for select to anon, authenticated using (true);
+ * -- ONYO: site_settings isiwe na siri (API keys/password). JS inasoma safu
+ * -- zilizoorodheshwa tu, lakini policy hii inaruhusu kusoma safu zote.
+ *
+ * -- profiles: USIFUNGUE moja kwa moja (inaweza kuwa na email/simu). Tengeneza view ya majina tu:
+ * create or replace view public.public_profiles as
+ *   select id, display_name, avatar_url from public.profiles;  -- badilisha majina ya safu kulingana na jedwali lako
+ * grant select on public.public_profiles to anon, authenticated;
+ *
+ * -- 4) Admin control panel inaweza kudhibiti (safu za hiari kwenye site_settings):
+ * --    announcements_enabled (bool) · announcement_banner (text) · announcement_categories (text, kwa koma)
+ * --    reports_enabled (bool) · allow_share (bool)
+ * -- Na kwenye posts: status, is_pinned, priority, category, expires_at, published_at (ratiba), deleted_at.
  * ================================================================ */
 
 "use strict";
@@ -95,8 +81,9 @@
  * CSS yake imepachikwa (inline) ndani ya JS hii — hakuna
  * faili la nje la announcements.css linalohitajika tena.
  *
- * Data source: Supabase table "posts" (published only), + jedwali
- * jipya "announcement_reads" kwa read-tracking ya kila mtumiaji.
+ * Data source (Supabase): posts (published + ratiba), media (maktaba),
+ * post_views (read tracking), reports (ripoti), profiles (waandishi),
+ * site_settings (udhibiti wa admin). Safu zisizojulikana zinaachwa kiotomatiki.
  * Offline cache: RescueDB/IndexedDB (settings store) — hakuna
  * IndexedDB nyingine iliyotengenezwa.
  *
@@ -112,7 +99,11 @@
   const SUPABASE_URL = "https://c--7f6fe176-f458-46d1-add7-d90bba190bf5-prod.lovable.cloud";
   const SUPABASE_ANON_KEY = "sb_publishable_6nwtjI7yQSuQF5DLJ6Nmbw_EtLzZVqo";
   const TABLE = "posts";
-  const READS_TABLE = "announcement_reads";
+  const VIEWS_TABLE = "post_views";       // read/view tracking (admin anaona views)
+  const REPORTS_TABLE = "reports";        // ripoti za watumiaji -> admin panel
+  const MEDIA_TABLE = "media";            // maktaba ya media ya admin
+  const PROFILES_TABLE = "profiles";      // majina ya waandishi
+  const SETTINGS_TABLE = "site_settings"; // mipangilio ya admin (mstari 1)
   const PAGE_SIZE = 20;
 
   const CACHE_KEY = "cachedAnnouncements";        // array ya posts (backward-compatible key)
@@ -120,6 +111,14 @@
   const READ_IDS_KEY = "annReadIds";              // array ya id zilizosomwa (local)
   const PENDING_READS_KEY = "annPendingReads";    // queue ya reads bado hazijafika Supabase
   const USER_ID_KEY = "annLocalUserId";
+  const CACHE_EXTRA_KEY = "cachedAnnouncementsExtra"; // { media, profiles, settings }
+  const SCHEMA_KEY = "annAdaptiveSchema";            // safu zilizokubaliwa na post_views
+  const PENDING_REPORTS_KEY = "annPendingReports";
+  const REPORTED_KEY = "annReportedIds";
+  const REPORT_REASONS = ["Taarifa si sahihi", "Maudhui yasiyofaa", "Kosa / hitilafu", "Spam", "Nyingine"];
+  const SETTING_KEYS = ["announcements_enabled", "show_announcements", "announcements_disabled_message",
+    "announcement_banner", "banner_text", "banner", "notice", "announcement_categories", "categories",
+    "reports_enabled", "allow_reports", "allow_share", "sharing_enabled", "site_name", "app_name"];
 
   const CATEGORIES = [
     { key: "Yote", label: "Yote", ic: "" },
@@ -139,6 +138,22 @@
     info: { label: "INFO", ic: "\uD83D\uDD35", rank: 3, cls: "info" },
   };
   function priorityMeta(p) { return PRIORITY_META[p] || PRIORITY_META.normal; }
+  // Category za msingi + zilizowekwa na admin (site_settings) + zilizopo kwenye posts zenyewe.
+  function getCategories() {
+    const list = CATEGORIES.slice();
+    const seen = new Set(list.map((c) => c.key.toLowerCase()));
+    function add(name) {
+      name = String(name || "").trim();
+      if (!name || seen.has(name.toLowerCase())) return;
+      seen.add(name.toLowerCase());
+      list.push({ key: name, label: name, ic: "\uD83D\uDCCC" });
+    }
+    let extra = setting("announcement_categories", "categories");
+    if (typeof extra === "string" && extra.trim()[0] !== "[") extra = extra.split(",");
+    toArray(extra).forEach(add);
+    State.all.forEach((p) => add(p.category));
+    return list;
+  }
 
   /* ---------------- Small helpers ---------------- */
   function esc(s) {
@@ -182,6 +197,31 @@
     return !isNaN(d) && d.getTime() < Date.now();
   }
   function getRawBody(p) { return p.content || p.body || p.excerpt || ""; }
+  // Tangazo lililopangwa (published_at bado haijafika) halionyeshwi.
+  function isScheduled(p) {
+    if (!p.published_at) return false;
+    const d = new Date(p.published_at);
+    return !isNaN(d) && d.getTime() > Date.now() + 30000;
+  }
+  // Mipangilio kutoka site_settings (admin panel).
+  function setting() {
+    const st = State.settings;
+    if (!st) return undefined;
+    for (let i = 0; i < arguments.length; i++) {
+      const v = st[arguments[i]];
+      if (v !== undefined && v !== null && v !== "") return v;
+    }
+    return undefined;
+  }
+  function isFalse(v) { return v === false || v === "false" || v === 0 || v === "0"; }
+  // Jina la mwandishi kutoka profiles (si UUID mbichi).
+  function authorName(p) {
+    const pr = State.profiles[String(p.author_id)];
+    if (pr && pr.name) return pr.name;
+    if (p.author_name) return String(p.author_name);
+    const a = p.author_id ? String(p.author_id) : "";
+    return a && !/^[0-9a-f-]{32,36}$/i.test(a) ? a : "Uongozi";
+  }
 
   /* ---------------- Media helpers (picha / video / audio / document) ---------------- */
   const MEDIA_EXT = {
@@ -291,11 +331,12 @@
         name = item.name || item.title || item.file_name || item.filename;
       }
       if (!raw) return;
-      const t0 = normalizeType(type) || normalizeType(mime) || hint || typeFromExt(extOf(raw)) || "document";
+      const lib = State.mediaByUrl.get(String(raw).trim());
+      const t0 = normalizeType(type) || normalizeType(mime) || hint || (lib && lib.type) || typeFromExt(extOf(raw)) || "document";
       const url = safeLinkUrl(raw) || (t0 === "image" ? safeImgSrc(raw) : null);
       if (!url || seen.has(url)) return;
       seen.add(url);
-      out.push({ url, type: t0, name: name || fileNameOf(url) });
+      out.push({ url, type: t0, name: name || (lib && lib.name) || fileNameOf(url) });
     }
     add(getImage(p), "image");
     toArray(p.media).forEach((m) => add(m));
@@ -305,6 +346,11 @@
     add(p.audio_url, "audio");
     add(p.document_url, "document");
     add(p.attachment_url);
+    // Maktaba ya media (jedwali "media"): kwa post_id, au kwa orodha ya id.
+    State.media.forEach((m) => { if (m.postId != null && String(m.postId) === String(p.id)) add(m); });
+    [p.media_ids, p.attachment_ids, p.media, p.attachments].forEach((v) => toArray(v).forEach((x) => {
+      if (x != null && typeof x !== "object" && State.mediaById.has(String(x))) add(State.mediaById.get(String(x)));
+    }));
     parseBody(getRawBody(p)).items.forEach((m) => add(m, m.type));
     return out
       .map((m, i) => ({ m, i }))
@@ -665,6 +711,48 @@
 }
 .ann-media-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
 
+/* ---------- Banner ya admin + dirisha la ripoti ---------- */
+.ann-info-banner {
+  background: color-mix(in srgb, var(--accent, #e05a2f) 16%, var(--bg-raised, #161c2b));
+  border: 1px solid var(--line, #232b3e);
+  color: var(--text, #eef2f8);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.ann-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,.6);
+  z-index: 660;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.ann-modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-raised, #161c2b);
+  border: 1px solid var(--line, #232b3e);
+  border-radius: 14px;
+  padding: 16px;
+}
+.ann-modal-card h3 { margin: 0 0 12px; color: var(--text, #eef2f8); font-size: 16px; }
+.ann-modal-card select, .ann-modal-card textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-raised-2, #1c283d);
+  border: 1px solid var(--line, #232b3e);
+  color: var(--text, #eef2f8);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 10px;
+  font-family: inherit;
+}
+
 /* ---------- Responsive ---------- */
 @media (min-width: 600px) {
   .ann-body { max-width: 640px; margin: 0 auto; }
@@ -690,9 +778,14 @@
   }
   // Kama safu "deleted_at" haipo kwenye jedwali, tunajaribu tena bila hiyo (badala ya kushindwa kabisa).
   let hasDeletedCol = true;
+  let hasSchedFilter = true; // matangazo yaliyopangiwa ratiba (published_at ya baadaye) hayatolewi
   async function restGet(query) {
-    const build = () => `${SUPABASE_URL}/rest/v1/${TABLE}?${query}${hasDeletedCol ? "&deleted_at=is.null" : ""}`;
+    const build = () => `${SUPABASE_URL}/rest/v1/${TABLE}?${query}${hasDeletedCol ? "&deleted_at=is.null" : ""}${hasSchedFilter ? `&or=(published_at.is.null,published_at.lte.${new Date().toISOString()})` : ""}`;
     let res = await fetch(build(), { headers: authHeaders() });
+    if (res.status === 400 && hasSchedFilter) {
+      hasSchedFilter = false;
+      res = await fetch(build(), { headers: authHeaders() });
+    }
     if (res.status === 400 && hasDeletedCol) {
       hasDeletedCol = false;
       res = await fetch(build(), { headers: authHeaders() });
@@ -703,6 +796,130 @@
     }
     return res.json();
   }
+  /* ---------------- Jedwali zingine: media, profiles, site_settings, post_views, reports ---------------- */
+  async function tableGet(table, query) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, { headers: authHeaders() });
+    if (!res.ok) {
+      const t = await res.text().catch(() => "");
+      const err = new Error("HTTP " + res.status + " " + t.slice(0, 160));
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  }
+
+  // Insert inayojirekebisha: safu isiyokuwepo (PGRST204) au thamani inayokataliwa na
+  // FK/check constraint huondolewa na kujaribu tena. "protect" = safu zisizoondolewa kamwe.
+  async function adaptiveInsert(table, candidates, protect) {
+    const payload = {};
+    Object.keys(candidates).forEach((k) => {
+      const v = candidates[k];
+      if (v !== undefined && v !== null && v !== "") payload[k] = v;
+    });
+    for (let i = 0; i < 14; i++) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+        method: "POST",
+        headers: authHeaders({ "Content-Type": "application/json", Prefer: "return=minimal" }),
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) return payload;
+      const text = await res.text().catch(() => "");
+      let j = {};
+      try { j = JSON.parse(text); } catch (e) { /* si JSON */ }
+      const msg = String(j.message || text || "");
+      if (j.code === "23505") return payload; // tayari imerekodiwa
+      let drop = null;
+      const m = msg.match(/Could not find the '([^']+)' column/i);
+      if (m && m[1] in payload) drop = m[1];
+      if (!drop && (j.code === "23503" || j.code === "23514" || j.code === "22P02")) {
+        const hint = msg + " " + String(j.details || "");
+        drop = Object.keys(payload).find((k) => protect.indexOf(k) === -1 &&
+          (hint.indexOf(k) !== -1 || hint.indexOf(String(payload[k])) !== -1)) || null;
+      }
+      if (drop && protect.indexOf(drop) === -1) { delete payload[drop]; continue; }
+      const err = new Error("HTTP " + res.status + " " + msg.slice(0, 160));
+      err.status = res.status;
+      throw err;
+    }
+    throw new Error("insert imeshindikana (majaribio mengi)");
+  }
+
+  function normalizeMediaRow(r) {
+    if (!r || r.deleted_at) return null;
+    let url = r.url || r.file_url || r.public_url || r.src || r.href || "";
+    if (!url && (r.path || r.storage_path || r.file_path)) {
+      const path = String(r.path || r.storage_path || r.file_path).replace(/^\/+/, "");
+      url = `${SUPABASE_URL}/storage/v1/object/public/${r.bucket || r.bucket_id || "media"}/${path}`;
+    }
+    url = safeLinkUrl(url);
+    if (!url) return null;
+    return {
+      id: r.id,
+      url,
+      type: normalizeType(r.type || r.kind || r.media_type) || normalizeType(r.mime_type || r.mime || r.content_type) || typeFromExt(extOf(url)) || "document",
+      name: r.name || r.title || r.file_name || r.filename || r.alt || fileNameOf(url),
+      postId: r.post_id || r.announcement_id || null,
+    };
+  }
+  function setMedia(list) {
+    State.media = list || [];
+    State.mediaById = new Map();
+    State.mediaByUrl = new Map();
+    State.media.forEach((m) => {
+      if (m.id != null) State.mediaById.set(String(m.id), m);
+      State.mediaByUrl.set(m.url, m);
+    });
+  }
+  function pickSettings(row) {
+    if (!row) return null;
+    const out = {};
+    SETTING_KEYS.forEach((k) => { if (row[k] !== undefined) out[k] = row[k]; });
+    return out;
+  }
+  function applyExtras(ex) {
+    if (!ex) return;
+    if (Array.isArray(ex.media)) setMedia(ex.media);
+    if (ex.profiles) State.profiles = ex.profiles;
+    if (ex.settings) State.settings = ex.settings;
+  }
+  async function fetchProfilesFor(posts) {
+    const ids = Array.from(new Set(posts.map((p) => p.author_id).filter(Boolean).map(String)));
+    if (!ids.length) return {};
+    const inList = ids.slice(0, 100).map((i) => `"${i.replace(/"/g, "")}"`).join(",");
+    const attempts = [["public_profiles", "id"], ["public_profiles", "user_id"], [PROFILES_TABLE, "id"], [PROFILES_TABLE, "user_id"]];
+    for (const [table, col] of attempts) {
+      try {
+        const rows = await tableGet(table, `select=*&${col}=in.(${encodeURIComponent(inList)})`);
+        const map = {};
+        rows.forEach((r) => {
+          const name = r.display_name || r.full_name || r.name || r.username || "";
+          if (!name) return;
+          const entry = { name: String(name), avatar: safeImgSrc(r.avatar_url || r.avatar || "") };
+          [r.id, r.user_id].forEach((k) => { if (k != null) map[String(k)] = entry; });
+        });
+        if (Object.keys(map).length) return map;
+      } catch (e) { /* jaribu chanzo kinachofuata */ }
+    }
+    return {};
+  }
+  async function refreshExtras() {
+    if (Date.now() - (State.extrasAt || 0) < 120000) return;
+    State.extrasAt = Date.now();
+    const [media, settings, profiles] = await Promise.all([
+      tableGet(MEDIA_TABLE, "select=*&limit=1000").then((rows) => rows.map(normalizeMediaRow).filter(Boolean)).catch(() => null),
+      tableGet(SETTINGS_TABLE, "select=*&limit=1").then((rows) => pickSettings(rows[0])).catch(() => null),
+      fetchProfilesFor(State.all).catch(() => null),
+    ]);
+    if (media) setMedia(media);
+    if (settings) State.settings = settings;
+    if (profiles && Object.keys(profiles).length) State.profiles = Object.assign({}, State.profiles, profiles);
+    await dbSet(CACHE_EXTRA_KEY, { media: State.media, profiles: State.profiles, settings: State.settings });
+  }
+  function bannerHtml() {
+    const b = setting("announcement_banner", "banner_text", "banner", "notice");
+    return typeof b === "string" && b.trim() ? `<div class="ann-info-banner">\uD83D\uDCE3 ${esc(b)}</div>` : "";
+  }
+
   function fetchPage(offset, limit) {
     return restGet(`select=*&status=eq.published&order=published_at.desc&offset=${offset}&limit=${limit}`);
   }
@@ -718,29 +935,28 @@
     }
     return ids;
   }
+  const VIEW_KEYS = ["post_id", "viewer_id", "session_id", "device_id", "user_id"];
   async function fetchRemoteReadIds(userId) {
+    const sch = State.schema.views;
+    const userCol = sch && sch.keys ? sch.keys.find((k) => k !== "post_id") : null;
+    if (!userCol) return [];
     try {
-      const url = `${SUPABASE_URL}/rest/v1/${READS_TABLE}?select=announcement_id&user_id=eq.${encodeURIComponent(userId)}`;
-      const res = await fetch(url, { headers: authHeaders() });
-      if (!res.ok) return [];
-      const rows = await res.json();
-      return rows.map((r) => r.announcement_id);
+      const rows = await tableGet(VIEWS_TABLE, `select=post_id&${userCol}=eq.${encodeURIComponent(userId)}&limit=1000`);
+      return rows.map((r) => r.post_id).filter(Boolean);
     } catch (e) {
-      console.error("announcements: fetchRemoteReadIds failed", e);
-      return [];
+      return []; // RLS inaweza kuzuia select — hali ya "imesomwa" inabaki kwenye kifaa
     }
   }
+  // Kila tangazo likifunguliwa mara ya kwanza -> mstari mmoja kwenye post_views (admin anaona idadi ya views).
   async function pushRead(announcementId, userId) {
-    const url = `${SUPABASE_URL}/rest/v1/${READS_TABLE}?on_conflict=announcement_id,user_id`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: authHeaders({
-        "Content-Type": "application/json",
-        Prefer: "resolution=merge-duplicates,return=minimal",
-      }),
-      body: JSON.stringify({ announcement_id: announcementId, user_id: userId, read_at: new Date().toISOString() }),
-    });
-    if (!res.ok) throw new Error("HTTP " + res.status);
+    const known = State.schema.views && State.schema.views.keys;
+    const cand = {};
+    (known || VIEW_KEYS).forEach((k) => { cand[k] = k === "post_id" ? announcementId : userId; });
+    const used = await adaptiveInsert(VIEWS_TABLE, cand, ["post_id"]);
+    if (!known) {
+      State.schema.views = { keys: Object.keys(used) };
+      await dbSet(SCHEMA_KEY, State.schema);
+    }
   }
 
   /* ---------------- App state ---------------- */
@@ -761,12 +977,18 @@
     overlayEl: null,
     lastMode: "list",   // list | detail (kwa kuhifadhi scroll)
     listScroll: 0,
+    media: [], mediaById: new Map(), mediaByUrl: new Map(), // jedwali "media"
+    profiles: {}, settings: null, extrasAt: 0,            // "profiles", "site_settings"
+    schema: {}, pendingReports: [], reported: new Set(),
   };
 
   async function loadLocalReadState() {
     const ids = await dbGet(READ_IDS_KEY, []);
     State.readIds = new Set(ids || []);
     State.pendingReads = (await dbGet(PENDING_READS_KEY, [])) || [];
+    State.schema = (await dbGet(SCHEMA_KEY, {})) || {};
+    State.pendingReports = (await dbGet(PENDING_REPORTS_KEY, [])) || [];
+    State.reported = new Set((await dbGet(REPORTED_KEY, [])) || []);
   }
   async function persistReadIds() { await dbSet(READ_IDS_KEY, Array.from(State.readIds)); }
   async function persistPending() { await dbSet(PENDING_READS_KEY, State.pendingReads); }
@@ -795,7 +1017,7 @@
   }
 
   function getUnreadCount() {
-    return State.all.filter((p) => !isExpired(p) && !State.readIds.has(p.id)).length;
+    return State.all.filter((p) => !isExpired(p) && !isScheduled(p) && !State.readIds.has(p.id)).length;
   }
 
   /* ---------------- Data pipeline ---------------- */
@@ -804,6 +1026,7 @@
     const meta = await dbGet(CACHE_META_KEY, {});
     State.all = cached || [];
     State.lastSync = meta && meta.lastSync ? meta.lastSync : null;
+    applyExtras(await dbGet(CACHE_EXTRA_KEY, null));
   }
   async function saveCache() {
     await dbSet(CACHE_KEY, State.all);
@@ -833,12 +1056,14 @@
       } catch (e) {
         console.error("announcements: prune failed (cache haikusafishwa)", e);
       }
+      try { await refreshExtras(); } catch (e) { console.error("announcements: extras failed", e); }
       await saveCache();
 
       const remoteReadIds = await fetchRemoteReadIds(State.userId);
       remoteReadIds.forEach((id) => State.readIds.add(id));
       await persistReadIds();
       await flushPendingReads();
+      await flushPendingReports();
       State.online = true;
       return { ok: true };
     } catch (e) {
@@ -869,7 +1094,7 @@
   }
 
   function getFilteredList() {
-    let list = State.all.filter((p) => (State.view === "archive" ? isExpired(p) : !isExpired(p)));
+    let list = State.all.filter((p) => !isScheduled(p) && (State.view === "archive" ? isExpired(p) : !isExpired(p)));
     if (State.category !== "Yote") {
       list = list.filter((p) => (p.category || "").toLowerCase() === State.category.toLowerCase());
     }
@@ -956,9 +1181,69 @@
     annToast(ok ? "\u2713 Imenakiliwa" : "Imeshindikana kunakili");
   }
 
+  /* ---------------- Ripoti (jedwali "reports") ---------------- */
+  async function sendReport(item) {
+    await adaptiveInsert(REPORTS_TABLE, {
+      post_id: item.post_id, reason: item.reason,
+      details: item.details, description: item.details, message: item.details,
+      reporter_id: item.reporter_id, user_id: item.reporter_id, status: "pending",
+    }, ["post_id"]);
+  }
+  async function flushPendingReports() {
+    if (!State.pendingReports.length || !navigator.onLine) return;
+    const rest = [];
+    for (const it of State.pendingReports) { try { await sendReport(it); } catch (e) { rest.push(it); } }
+    State.pendingReports = rest;
+    await dbSet(PENDING_REPORTS_KEY, rest);
+  }
+  async function submitReport(p, reason, details) {
+    const item = { post_id: p.id, reason, details, reporter_id: State.userId };
+    try {
+      await sendReport(item);
+    } catch (e) {
+      console.error("announcements: report failed", e);
+      if (!navigator.onLine || e instanceof TypeError) {
+        State.pendingReports.push(item);
+        await dbSet(PENDING_REPORTS_KEY, State.pendingReports);
+        State.reported.add(p.id);
+        await dbSet(REPORTED_KEY, Array.from(State.reported));
+        return "queued";
+      }
+      return false;
+    }
+    State.reported.add(p.id);
+    await dbSet(REPORTED_KEY, Array.from(State.reported));
+    return true;
+  }
+  function openReportDialog(p) {
+    if (State.reported.has(p.id)) { annToast("Tayari umeripoti tangazo hili"); return; }
+    const host = State.overlayEl || document.body;
+    const m = document.createElement("div");
+    m.className = "ann-modal";
+    m.innerHTML = `<div class="ann-modal-card" role="dialog" aria-modal="true" aria-label="Ripoti tangazo">
+      <h3>\uD83D\uDEA9 Ripoti tangazo</h3>
+      <select id="ann-rep-reason">${REPORT_REASONS.map((r) => `<option>${esc(r)}</option>`).join("")}</select>
+      <textarea id="ann-rep-details" rows="4" maxlength="500" placeholder="Maelezo (hiari)"></textarea>
+      <div class="ann-detail-actions">
+        <button class="ann-action-btn" id="ann-rep-cancel">Ghairi</button>
+        <button class="ann-action-btn" id="ann-rep-send">Tuma</button>
+      </div></div>`;
+    host.appendChild(m);
+    m.addEventListener("click", async (e) => {
+      if (e.target === m || e.target.id === "ann-rep-cancel") { m.remove(); return; }
+      if (e.target.id !== "ann-rep-send") return;
+      e.target.disabled = true;
+      const reason = m.querySelector("#ann-rep-reason").value;
+      const details = m.querySelector("#ann-rep-details").value.trim();
+      const r = await submitReport(p, reason, details);
+      m.remove();
+      annToast(r === true ? "\u2713 Ripoti imetumwa. Asante." : r === "queued" ? "Ripoti itatumwa ukiwa online" : "Imeshindikana kutuma ripoti");
+    });
+  }
+
   /* ---------------- Rendering ---------------- */
   function chipHtml() {
-    return CATEGORIES.map((c) => `
+    return getCategories().map((c) => `
       <button class="ann-chip ${State.category === c.key ? "active" : ""}" data-cat="${esc(c.key)}">
         ${c.ic ? c.ic + " " : ""}${esc(c.label)}
       </button>`).join("");
@@ -1000,6 +1285,9 @@
   }
 
   function listHtml() {
+    if (isFalse(setting("announcements_enabled", "show_announcements"))) {
+      return `<div class="ann-empty">\uD83D\uDEAB<br>${esc(setting("announcements_disabled_message") || "Matangazo yamezimwa kwa sasa na admin.")}</div>`;
+    }
     const list = getFilteredList();
     if (State.loading && !State.all.length) {
       return `<div class="ann-skeleton">Inapakia matangazo\u2026</div>`;
@@ -1062,7 +1350,7 @@
         <h2 class="ann-detail-title">${esc(p.title || "Tangazo")}</h2>
         <div class="ann-detail-meta">
           <span>${esc(fmt(getWhen(p)))}</span>
-          <span>\u00B7 ${esc(p.author_id ? String(p.author_id) : "Uongozi")}</span>
+          <span>\u00B7 ${esc(authorName(p))}</span>
           <span>\u00B7 ${unread ? "\uD83D\uDD34 Haijasomwa" : "\u2713 Imesomwa"}</span>
         </div>
         ${mediaHtml(visual)}
@@ -1070,8 +1358,9 @@
         ${mediaHtml(files)}
         ${extUrl ? `<a class="ann-external-btn" href="${esc(extUrl)}" target="_blank" rel="noopener noreferrer">\uD83D\uDD17 Fungua Kiungo</a>` : ""}
         <div class="ann-detail-actions">
-          <button class="ann-action-btn" id="ann-share">\u2197 Share</button>
+          ${isFalse(setting("allow_share", "sharing_enabled")) ? "" : `<button class="ann-action-btn" id="ann-share">\u2197 Share</button>`}
           <button class="ann-action-btn" id="ann-copy">\uD83D\uDCCB Copy</button>
+          ${isFalse(setting("reports_enabled", "allow_reports")) ? "" : `<button class="ann-action-btn" id="ann-report">\uD83D\uDEA9 Ripoti</button>`}
         </div>
       </div>`;
   }
@@ -1086,6 +1375,7 @@
         <button class="ann-refresh-btn" id="ann-refresh" aria-label="Sasisha matangazo">\u21BB Refresh</button>
       </div>
       <div class="ann-error-slot" id="ann-error-slot"></div>
+      ${bannerHtml()}
       <input class="ann-search" id="ann-search" type="search" inputmode="search" placeholder="\uD83D\uDD0D Tafuta matangazo..." value="${esc(State.query)}" aria-label="Tafuta matangazo">
       <div class="ann-chips" role="group" aria-label="Chuja kwa category">${chipHtml()}</div>
       <div class="ann-tabs" role="tablist">
@@ -1153,6 +1443,7 @@
 
   /* ---------------- Actions wiring (event delegation, once per overlay) ---------------- */
   async function doRefresh() {
+    State.extrasAt = 0; // lazimisha kupakua media/settings/profiles upya
     setErrorSlot("");
     annToast("\u21BB Inasasisha\u2026");
     const r = await refreshFromNetwork(true);
@@ -1199,6 +1490,9 @@
 
       const copyBtn = e.target.closest("#ann-copy");
       if (copyBtn) { const p = State.all.find((x) => x.id === State.detailId); if (p) copyAnnouncement(p); return; }
+
+      const repBtn = e.target.closest("#ann-report");
+      if (repBtn) { const p = State.all.find((x) => x.id === State.detailId); if (p) openReportDialog(p); return; }
 
       const img = e.target.closest(".ann-detail-img");
       if (img) { openImageViewer(img.src); return; }
@@ -1292,7 +1586,7 @@
   }
 
   /* ---------------- Online/offline listeners ---------------- */
-  window.addEventListener("online", () => { State.online = true; flushPendingReads(); autoSync(); });
+  window.addEventListener("online", () => { State.online = true; flushPendingReads(); flushPendingReports(); autoSync(); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) autoSync(); });
   setInterval(autoSync, 60000);
   window.addEventListener("offline", () => { State.online = false; if (State.overlayEl) renderBody(); });
