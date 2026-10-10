@@ -150,6 +150,7 @@ header{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filte
 #splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;pointer-events:none;animation:sp .45s .3s ease forwards}
 #splash img{width:84px;height:84px;border-radius:50%;object-fit:cover;animation:pu .8s ease infinite alternate}@keyframes sp{to{opacity:0;visibility:hidden}}@keyframes pu{to{transform:scale(1.07)}}
 @media(prefers-reduced-motion:reduce){#splash{display:none}.msg{animation:none}}
+#tri{position:fixed;inset:0;z-index:9999;background:var(--bg,#fff);display:none;flex-direction:column}#tri.on{display:flex}#tri iframe{flex:1;border:0;width:100%}#triX{position:absolute;top:calc(8px + env(safe-area-inset-top));right:8px;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:18px}
 </style>
 </head>
 <body>
@@ -171,6 +172,7 @@ header{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filte
       <button class="tab" role="tab" data-m="images" data-i="images" aria-label="Picha" title="Picha" aria-selected="false"></button>
       <button class="tab" role="tab" data-m="videos" data-i="videos" aria-label="Video" title="Video" aria-selected="false"></button>
       <button class="tab" role="tab" data-m="audio" data-i="audio" aria-label="Audio" title="Audio" aria-selected="false"></button>
+      <button class="tab" id="triBtn" type="button" aria-label="R-AI Trinity" title="R-AI Trinity">🤝 Trinity</button>
     </nav>
     <span class="net" id="net" role="img" aria-label="Hali ya mtandao" title="Uko mtandaoni"></span>
     <button class="btn" id="theme" aria-label="Badilisha mwonekano"></button>
@@ -189,6 +191,470 @@ header{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filte
 <button id="sb" aria-label="Shuka chini" data-i="arrowdown"></button>
 </main>
 </div>
+<div id="tri" role="dialog" aria-label="R-AI Trinity"><button id="triX" type="button" aria-label="Funga">✕</button><iframe id="triF" title="R-AI Trinity" allow="microphone"></iframe></div>
+<script type="text/plain" id="triSrc"><!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2f6df6">
+<title>R-AI Trinity</title>
+<style>
+:root{--bg:#eaeef6;--panel:#fff;--txt:#141a29;--mut:#6b7691;--bd:#dfe5f1;--me:#2f6df6;--sade:#3b82f6;--fire:#f97316;--search:#16a34a;--sh:0 1px 2px rgba(20,30,60,.1)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0a0f1a;--panel:#151c2b;--txt:#e8ecf4;--mut:#8a96ad;--bd:#243049;--sh:none}}
+:root[data-theme=dark]{--bg:#0a0f1a;--panel:#151c2b;--txt:#e8ecf4;--mut:#8a96ad;--bd:#243049;--sh:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--txt);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+#top{display:flex;align-items:center;gap:6px;padding:8px 8px 8px 6px;padding-top:calc(8px + env(safe-area-inset-top));background:var(--panel);border-bottom:1px solid var(--bd);box-shadow:var(--sh)}
+.ib{width:40px;height:40px;border-radius:50%;font-size:20px;display:grid;place-items:center;flex:none}.ib:active{background:var(--bd)}
+.grp{flex:1;display:flex;align-items:center;gap:10px;min-width:0}
+.stack{display:flex}.stack .av{width:34px;height:34px;margin-left:-10px;border:2px solid var(--panel);position:relative}.stack .av:first-child{margin-left:0}
+.stack .av.on::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--c);animation:pulse 1s infinite}
+.gi{min-width:0}.gi b{display:block;font-size:16px}.gi small{display:block;color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gi small.live{color:var(--search)}
+.av{width:32px;height:32px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none;font-style:normal;align-self:flex-end}
+.sade{--c:var(--sade)}.fire{--c:var(--fire)}.search{--c:var(--search)}
+#chat{flex:1;overflow-y:auto;padding:12px 10px 6px;display:flex;flex-direction:column;gap:8px}
+.pill{align-self:center;background:var(--panel);color:var(--mut);font-size:12px;padding:3px 12px;border-radius:999px;box-shadow:var(--sh);text-align:center}
+.row{display:flex;gap:8px;max-width:100%;animation:in .25s ease}.row.me{justify-content:flex-end}
+.bub{background:var(--panel);border-radius:4px 16px 16px 16px;padding:7px 11px 5px;max-width:86%;box-shadow:var(--sh);min-width:0}
+.row.me .bub{background:var(--me);color:#fff;border-radius:16px 4px 16px 16px}.row.err .bub{border:1px solid #ef4444}
+.nm{font-weight:700;font-size:13px;color:var(--c)}.tx{white-space:pre-wrap;overflow-wrap:anywhere}
+.tm{font-size:10.5px;color:var(--mut);text-align:right;margin-top:2px}.row.me .tm{color:rgba(255,255,255,.75)}
+.src{margin-top:7px;padding-top:6px;border-top:1px dashed var(--bd);font-size:12px}.src a{display:block;color:var(--c);word-break:break-word;margin-top:3px}.src small{color:var(--mut)}
+.media{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px}.media img{width:100%;height:92px;object-fit:cover;border-radius:8px;display:block}
+video{width:100%;max-height:230px;border-radius:10px;margin-top:8px;background:#000}.cr{font-size:11px;color:var(--mut);margin-top:4px}
+.dots{display:flex;gap:4px;padding:6px 2px}.dots i{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:bl 1.2s infinite}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+.welcome{margin:auto;text-align:center;max-width:340px;padding:10px}.welcome .stack{justify-content:center;margin-bottom:10px}.welcome .av{width:54px;height:54px;font-size:20px;align-self:auto}
+.welcome p{color:var(--mut);margin:6px 0 14px}.chips{display:flex;flex-direction:column;gap:8px}.chip{background:var(--panel);border-radius:14px;padding:10px 12px;box-shadow:var(--sh);text-align:left}
+#f{display:flex;gap:8px;align-items:center;padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom));background:var(--bg)}
+#q{flex:1;border:0;border-radius:24px;padding:12px 16px;background:var(--panel);color:var(--txt);font-size:16px;box-shadow:var(--sh);outline:none;min-width:0}
+#b{width:46px;height:46px;border-radius:50%;background:var(--me);color:#fff;font-size:18px;flex:none}#b:disabled{opacity:.45}
+#ov{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:.2s;z-index:5}#ov.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;bottom:0;left:0;width:82%;max-width:330px;background:var(--panel);z-index:6;transform:translateX(-100%);transition:.25s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}#drawer.on{transform:none}
+.dh{padding:14px}.dh h3{margin:0}#nc{margin:0 14px 10px;padding:12px;border-radius:12px;background:var(--me);color:#fff;font-weight:600}
+#hist{flex:1;overflow-y:auto;padding:0 8px 12px}.hi{display:flex;align-items:center;gap:4px;padding:6px 6px 6px 10px;border-radius:12px}.hi.cur{background:var(--bg)}
+.hi .t{flex:1;min-width:0;text-align:left}.hi b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hi small{color:var(--mut)}.empty{color:var(--mut);text-align:center;padding:20px}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--panel);z-index:7;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));transform:translateY(105%);transition:.25s;max-height:85%;overflow-y:auto}#sheet.on{transform:none}
+#sheet h3{margin:0 0 6px}.set{margin:14px 0}.set>b{display:block;margin-bottom:6px;font-size:13px;color:var(--mut)}
+.seg{display:flex;background:var(--bg);border-radius:12px;padding:3px}.seg button{flex:1;padding:8px 4px;border-radius:10px;font-size:14px}.seg button.on{background:var(--me);color:#fff}
+.danger{width:100%;padding:12px;border-radius:12px;background:#ef444422;color:#ef4444;font-weight:600}.note{font-size:12px;color:var(--mut);margin-top:10px}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes bl{0%,60%,100%{opacity:.25}30%{opacity:1}}@keyframes pulse{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.35)}}
+</style>
+</head>
+<body>
+<header id="top">
+  <button class="ib" id="menu" aria-label="Menu">☰</button>
+  <div class="grp">
+    <div class="stack"><i class="av sade" data-ai="sade">N</i><i class="av fire" data-ai="fire">I</i><i class="av search" data-ai="search">A</i></div>
+    <div class="gi"><b>R-AI Trinity</b><small id="sub"></small></div>
+  </div>
+  <button class="ib" id="new" aria-label="New chat">＋</button>
+  <button class="ib" id="gear" aria-label="Settings">⚙</button>
+</header>
+<main id="chat"></main>
+<form id="f"><input id="q" autocomplete="off" required><button id="b" aria-label="Send">➤</button></form>
+<div id="ov"></div>
+<aside id="drawer">
+  <div class="dh"><h3 data-i="hist"></h3></div>
+  <button id="nc" data-i="nc"></button>
+  <div id="hist"></div>
+</aside>
+<section id="sheet">
+  <h3 data-i="set"></h3>
+  <div class="set"><b data-i="lang"></b><div class="seg" data-k="lang"><button data-v="auto" data-i="auto"></button><button data-v="sw">Kiswahili</button><button data-v="en">English</button></div></div>
+  <div class="set"><b data-i="theme"></b><div class="seg" data-k="theme"><button data-v="auto" data-i="auto"></button><button data-v="light" data-i="light"></button><button data-v="dark" data-i="dark"></button></div></div>
+  <div class="set"><b data-i="media"></b><div class="seg" data-k="media"><button data-v="1" data-i="on"></button><button data-v="0" data-i="off"></button></div></div>
+  <button class="danger" id="clr" data-i="clear"></button>
+  <div class="note" data-i="note"></div>
+</section>
+<script>
+// ===== R-AI TRINITY: Tavily key MOJA, hakuna LLM key =====
+// AI tatu wanachati kama watu watatu; kila mmoja ana pembe yake ya swali ili majibu yasifanane.
+// Lugha ya jibu inafuata lugha ya mtumiaji (Kiswahili au Kiingereza).
+// R-AI Search ndiye mwenye vyanzo; Sade na R-AI Fire wanatoa majibu tu.
+const SETTINGS = { lang: "auto", theme: "auto", media: true };   // vinabadilishwa kwenye Mipangilio
+const TAVILY_API_KEY = "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";
+const CFG = { MAX_QUERY: 380, TIMEOUT: 20000, CACHE_TTL: 10 * 60 * 1000, SIMILARITY_MAX: 0.5, MIN_SCORE: 0.3 };
+const cache = new Map();
+
+const CHAIN = [
+  { ai: "sade",   name: "Nancy",        topic: "general" },
+  { ai: "fire",   name: "Ivan",   topic: "general" },
+  { ai: "search", name: "Aisha", topic: "news" },
+];
+
+const T = {
+  sw: {
+    angle: { sade: "",
+             fire: "usalama, hatari na mbinu za kiufundi",
+             search: "takwimu, ushahidi na vyanzo" },
+    alt:   { sade: "historia na muktadha",
+             fire: "vifaa na hatua za vitendo",
+             search: "habari mpya na ushahidi wa nyongeza" },
+    ref: "rejea",
+    intro: { sade: ["Habari! Nimeangalia swali lako, hiki ndicho nilichopata:", "Nianze mimi na picha ya jumla:"],
+             fire: ["Asante Nancy. Kwa mtazamo wa kiufundi:", "Sawa Nancy, nikiongezea upande wa usalama na hatari:"],
+             search: ["Sawa Ivan. Nimetafuta ushahidi na taarifa mpya:", "Nimepitia vyanzo vya wavuti, hivi ndivyo vinavyojitokeza:"] },
+    hand:  { sade: ["Ivan, unaonaje kwa upande wa kiufundi na usalama?"],
+             fire: ["Aisha, tafadhali tuletee ushahidi na vyanzo."],
+             search: ["Vyanzo vyote tulivyotumia vimeorodheshwa hapa chini."] },
+    working: n => n + " anatafuta...",
+    fail: (n, e) => n + " ameshindwa kupata jibu: " + e,
+    noAnswer: "Sikupata muhtasari kamili wa hoja hii (vyanzo vimeorodheshwa na Aisha).",
+    nothingNew: "Sina jambo jipya la kuongeza zaidi ya yaliyosemwa tayari.",
+    none: "Hakuna jibu lililopatikana. Jaribu tena baadaye.",
+    creditImg: "Picha kutoka Pixabay: ",
+    creditVid: "Video kutoka Pixabay: ",
+    lowRelevance: "Sikupata vyanzo vinavyohusiana moja kwa moja na swali hili.",
+    noTranslate: "(Tafsiri haikupatikana kwa sasa; jibu limeachwa kwa lugha ya chanzo.)",
+    err: { key: () => "Tavily key si sahihi (401)", limit: s => "Kikomo cha matumizi ya Tavily kimefikiwa (" + s + ")",
+           http: s => "Tavily imerudisha hitilafu " + s, timeout: () => "Tavily imechelewa (timeout)", net: m => "Tavily haipatikani: " + m },
+  },
+  en: {
+    angle: { sade: "",
+             fire: "safety, risks and technical methods",
+             search: "statistics, evidence and sources" },
+    alt:   { sade: "history and context",
+             fire: "equipment and practical steps",
+             search: "latest news and additional evidence" },
+    ref: "context",
+    intro: { sade: ["Hi! I looked into your question, here's what I found:", "Let me start with the big picture:"],
+             fire: ["Thanks Nancy. From a technical angle:", "Building on that, here's the safety and risk side:"],
+             search: ["Thanks Ivan. I looked for evidence and recent info:", "I went through the web sources, and here's what stands out:"] },
+    hand:  { sade: ["Ivan, what's your take on the technical and safety side?"],
+             fire: ["Aisha, can you back this up with evidence and sources?"],
+             search: ["All the sources we used are listed below."] },
+    working: n => n + " is searching...",
+    fail: (n, e) => n + " couldn't get an answer: " + e,
+    noAnswer: "I couldn't get a full summary for this one (sources are listed by Aisha).",
+    nothingNew: "I have nothing new to add beyond what's already been said.",
+    none: "No answer found. Please try again later.",
+    creditImg: "Images from Pixabay: ",
+    creditVid: "Videos from Pixabay: ",
+    lowRelevance: "I couldn't find sources directly relevant to this question.",
+    noTranslate: "(Translation unavailable right now; the answer is left in the source language.)",
+    err: { key: () => "Tavily key is invalid (401)", limit: s => "Tavily usage limit reached (" + s + ")",
+           http: s => "Tavily returned error " + s, timeout: () => "Tavily timed out", net: m => "Tavily unreachable: " + m },
+  },
+};
+
+// Lugha: Kiswahili au Kiingereza (sare au maneno yasiyojulikana = Kiswahili)
+const SW = new Set("na ya wa kwa ni hii huu hizi katika kuhusu nini nani vipi gani je ambao lakini sana jinsi naomba tafadhali nifanye ninaweza una nina yangu wako chake mimi wewe sisi hapa pale kwamba pia au kama kwanini mbona jengo kuzima moto".split(" "));
+const EN = new Set("the is are of to and a in for what how why who when where can do does should about with this that it be on as you i my your was were will would could".split(" "));
+function detectLang(t) {
+  let s = 0, e = 0;
+  (String(t).toLowerCase().match(/\p{L}+/gu) || []).forEach(w => { if (SW.has(w)) s++; if (EN.has(w)) e++; });
+  return e > s ? "en" : "sw";
+}
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
+const words = t => new Set((String(t).toLowerCase().match(/\p{L}{4,}/gu) || []));
+function similarity(a, b) {
+  const A = words(a), B = words(b);
+  if (!A.size || !B.size) return 0;
+  let i = 0; A.forEach(w => { if (B.has(w)) i++; });
+  return i / (A.size + B.size - i);
+}
+const firstSentence = t => (String(t).split(/(?<=[.!?])\s/)[0] || "").slice(0, 140);
+
+async function tavilyOnce(query, topic, exclude) {
+  const key = [query.toLowerCase(), topic, exclude.join(",")].join("|");
+  const hit = cache.get(key);
+  if (hit && Date.now() - hit.t < CFG.CACHE_TTL) return hit.v;
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), CFG.TIMEOUT);
+  try {
+    const body = { query, max_results: 5, search_depth: "basic", include_answer: "basic", topic };
+    if (exclude.length) body.exclude_domains = exclude;
+    const r = await fetch("https://api.tavily.com/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + TAVILY_API_KEY },
+      body: JSON.stringify(body), signal: ctl.signal,
+    });
+    if (!r.ok) return { ok: false, code: r.status === 401 ? "key" : [429, 432, 433].includes(r.status) ? "limit" : "http", arg: r.status };
+    const d = await r.json();
+    const v = {
+      ok: true, answer: (d.answer || "").trim(),
+      results: (d.results || []).map(x => ({
+        title: x.title || "", url: x.url || "",
+        score: typeof x.score === "number" ? x.score : null, date: x.published_date || null,
+      })),
+    };
+    cache.set(key, { t: Date.now(), v });
+    return v;
+  } catch (e) {
+    return e.name === "AbortError" ? { ok: false, code: "timeout" } : { ok: false, code: "net", arg: e.message };
+  } finally { clearTimeout(timer); }
+}
+async function tavily(query, topic, exclude) {
+  let r = await tavilyOnce(query, topic, exclude);
+  if (r.ok && !r.results.length && topic !== "general") r = await tavilyOnce(query, "general", exclude);
+  return r;
+}
+
+// ===== Tafsiri (MyMemory, bure, bila key): jibu likiwa lugha tofauti na ya mtumiaji =====
+// Hiari: weka barua pepe yako hapa kuongeza kikomo cha kila siku cha MyMemory.
+const MYMEMORY_EMAIL = "";
+function chunkText(text, max = 450) {
+  const parts = text.split(/(?<=[.!?])\s+/), out = [];
+  let cur = "";
+  for (let p of parts) {
+    while (p.length > max) { if (cur) { out.push(cur); cur = ""; } out.push(p.slice(0, max)); p = p.slice(max); }
+    if ((cur + " " + p).trim().length > max) { out.push(cur); cur = p; } else cur = (cur + " " + p).trim();
+  }
+  if (cur) out.push(cur);
+  return out.filter(Boolean);
+}
+async function translateChunk(q, from, to) {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 12000);
+  try {
+    const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(q) +
+      "&langpair=" + from + "|" + to + (MYMEMORY_EMAIL ? "&de=" + encodeURIComponent(MYMEMORY_EMAIL) : "");
+    const r = await fetch(url, { signal: ctl.signal });
+    if (!r.ok) return null;
+    const d = await r.json();
+    const t = d && d.responseData && d.responseData.translatedText;
+    if (!t || Number(d.responseStatus) !== 200 || /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(t)) return null;
+    return t;
+  } catch { return null; } finally { clearTimeout(timer); }
+}
+async function translate(text, from, to) {
+  const parts = await Promise.all(chunkText(text).map(c => translateChunk(c, from, to)));
+  return parts.every(Boolean) ? parts.join(" ") : null;   // kama kipande chochote kimeshindwa, rudisha null
+}
+
+// ===== Picha na video kutoka Pixabay (Nancy = picha, Ivan = video) =====
+const PIXABAY_API_KEY = "57792634-5e89dd610e4c1c840f815c524";
+const pixCache = new Map();
+
+// Pixabay haisaidii Kiswahili: swali la Kiswahili linatafsiriwa kwa Kiingereza kisha maneno muhimu yanachukuliwa
+function mediaKeywords(text) {
+  const stop = new Set([...SW, ...EN, "please", "make", "made", "best", "very"]);
+  const ws = (String(text).toLowerCase().match(/\p{L}{4,}/gu) || []).filter(w => !stop.has(w));
+  return [...new Set(ws)].slice(0, 4).join(" ").slice(0, 100);
+}
+async function mediaQuery(question, lang) {
+  let t = question;
+  if (lang === "sw") { const tr = await translate(question, "sw", "en"); if (tr) t = tr; }
+  return mediaKeywords(t) || mediaKeywords(question) || question.slice(0, 40);
+}
+async function pixabay(kind, q) {
+  if (!q) return [];
+  const key = kind + "|" + q;
+  if (pixCache.has(key)) return pixCache.get(key);
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 10000);
+  try {
+    const url = "https://pixabay.com/api/" + (kind === "video" ? "videos/" : "") +
+      "?key=" + PIXABAY_API_KEY + "&q=" + encodeURIComponent(q) + "&per_page=3&safesearch=true" +
+      (kind === "image" ? "&image_type=photo&orientation=horizontal" : "");
+    const r = await fetch(url, { signal: ctl.signal });
+    if (!r.ok) return [];
+    const d = await r.json();
+    const out = (d.hits || []).slice(0, kind === "video" ? 2 : 3).map(h => {
+      if (kind === "video") {
+        const v = (h.videos && (h.videos.tiny || h.videos.small)) || {};
+        return { src: v.url || "", poster: v.thumbnail || "", page: h.pageURL || "", user: h.user || "" };
+      }
+      return { src: h.webformatURL || "", page: h.pageURL || "", user: h.user || "", alt: h.tags || "" };
+    }).filter(x => x.src && x.page);
+    pixCache.set(key, out);
+    return out;
+  } catch { return []; } finally { clearTimeout(timer); }
+}
+
+
+const NEWS_RE = /habari|hivi karibuni|\bleo\b|\bjana\b|news|latest|recent|today|yesterday|breaking/i;
+
+async function runDebate(question, emit) {
+  question = question.slice(0, 300);
+  const lang = SETTINGS.lang === "auto" ? detectLang(question) : SETTINGS.lang, L = T[lang];
+  const topic = NEWS_RE.test(question) ? "news" : "general";
+  const givenAnswers = [], seenUrls = new Set(), usedDomains = new Set(), allSources = [];
+  let shown = 0;
+  const mediaQP = mediaQuery(question, lang);   // inaanza mapema, inasubiriwa pale tu inapohitajika
+
+  for (const c of CHAIN) {
+    const sourcesFor = c.ai === "search" ? allSources : undefined;   // Aisha pekee ndiye mwenye vyanzo
+    emit("status", { text: L.working(c.name), ai: c.ai });
+    let finished = false;
+
+    for (let attempt = 0; attempt < 2 && !finished; attempt++) {
+      // Swali la mtumiaji ndilo msingi wa kila utafutaji (hakuna kuteleza mada);
+      // pembe ya kila AI inaongezwa kama kiambishi kifupi tu.
+      const suffix = attempt ? L.alt[c.ai] : L.angle[c.ai];
+      const query = (question.slice(0, 250) + " " + suffix).trim().slice(0, CFG.MAX_QUERY);
+      const r = await tavily(query, topic, attempt ? [...usedDomains] : []);
+
+      if (!r.ok) {
+        emit("message", { ai: c.ai, text: L.fail(c.name, L.err[r.code](r.arg)), error: true, sources: sourcesFor });
+        finished = true; break;
+      }
+      // Ulinzi wa mada: kama vyanzo vyote vina alama ya uhusiano ndogo, usionyeshe jibu la mada nyingine
+      const top = r.results.length ? Math.max(...r.results.map(x => x.score == null ? 1 : x.score)) : 0;
+      const relevant = top >= CFG.MIN_SCORE;
+      const fresh = r.results.filter(x => x.url && !seenUrls.has(x.url));
+      const repeated = r.answer && givenAnswers.some(a => similarity(a, r.answer) > CFG.SIMILARITY_MAX);
+      const useful = relevant && ((r.answer && !repeated) || (!r.answer && fresh.length));
+
+      if (useful) {
+        fresh.forEach(x => { seenUrls.add(x.url); allSources.push(x); const h = host(x.url); if (h) usedDomains.add(h); });
+        let shownAnswer = r.answer, note = "";
+        if (r.answer) {
+          const from = detectLang(r.answer);
+          if (from !== lang) {              // jibu lipo kwa lugha nyingine: tafsiri kwa lugha ya mtumiaji
+            const tr = await translate(r.answer, from, lang);
+            if (tr) shownAnswer = tr; else note = "\n\n" + L.noTranslate;
+          }
+          givenAnswers.push(r.answer);
+        }
+        let text = pick(L.intro[c.ai]) + "\n\n" + (shownAnswer || L.noAnswer) + note;
+        if (c.ai !== "search" || allSources.length) text += "\n\n" + pick(L.hand[c.ai]);
+        let media = {};
+        if ((c.ai === "sade" || c.ai === "fire") && SETTINGS.media) {          // Nancy: picha, Ivan: video
+          const items = await pixabay(c.ai === "sade" ? "image" : "video", await mediaQP);
+          if (items.length) {
+            const users = [...new Set(items.map(x => x.user).filter(Boolean))].join(", ");
+            media = c.ai === "sade"
+              ? { images: items, mediaCredit: L.creditImg + users }
+              : { videos: items, mediaCredit: L.creditVid + users };
+          }
+        }
+        emit("message", { ai: c.ai, text, sources: sourcesFor, ...media });
+        shown++; finished = true;
+      } else if (attempt === 1) {
+        emit("message", { ai: c.ai, text: relevant ? L.nothingNew : L.lowRelevance, sources: sourcesFor });
+        finished = true;
+      }
+    }
+  }
+  if (!shown) emit("message", { ai: "sade", text: L.none, error: true });
+}
+
+const NAMES={sade:"Nancy",fire:"Ivan",search:"Aisha"},INIT={sade:"N",fire:"I",search:"A"};
+const $=id=>document.getElementById(id);
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+const UI={
+ sw:{sub:"Nancy, Ivan, Aisha · mtandaoni",ph:"Andika ujumbe...",hist:"Historia",nc:"＋ Mazungumzo mapya",empty:"Hakuna mazungumzo bado",set:"Mipangilio",lang:"Lugha ya majibu",auto:"Otomatiki",theme:"Mandhari",light:"Mwanga",dark:"Giza",media:"Picha na video (Pixabay)",on:"Washa",off:"Zima",clear:"Futa historia yote",confirm:"Futa mazungumzo yote?",
+  joined:"Nancy, Ivan na Aisha wako kwenye mazungumzo",welcome:"Habari! Sisi ni Nancy, Ivan na Aisha. Uliza chochote, tutajadili pamoja.",note:"Historia na mipangilio vimehifadhiwa kwenye kifaa chako (IndexedDB), vinafanya kazi offline.",
+  sugg:["Nawezaje kuzima moto wa jengo?","Kizima moto cha aina gani kinafaa jikoni?","What causes electrical fires at home?"]},
+ en:{sub:"Nancy, Ivan, Aisha · online",ph:"Type a message...",hist:"History",nc:"＋ New chat",empty:"No chats yet",set:"Settings",lang:"Answer language",auto:"Auto",theme:"Theme",light:"Light",dark:"Dark",media:"Images & videos (Pixabay)",on:"On",off:"Off",clear:"Clear all history",confirm:"Delete all chats?",
+  joined:"Nancy, Ivan and Aisha are in the chat",welcome:"Hi! We're Nancy, Ivan and Aisha. Ask anything and we'll talk it through together.",note:"History and settings are saved on your device (IndexedDB) and work offline.",
+  sugg:["What causes electrical fires at home?","How do I use a fire extinguisher?","Nawezaje kuzima moto wa jengo?"]}};
+let uiL="sw";const u=k=>UI[uiL][k];
+
+// ---- IndexedDB (historia na mipangilio, offline) ----
+const DB={db:null,
+ open(){return new Promise((ok,no)=>{const r=indexedDB.open("rai-trinity",1);r.onupgradeneeded=()=>{r.result.createObjectStore("chats",{keyPath:"id"});r.result.createObjectStore("kv")};r.onsuccess=()=>{this.db=r.result;ok()};r.onerror=()=>no(r.error)})},
+ tx(s,m,f){if(!this.db)return Promise.resolve(null);return new Promise((ok,no)=>{const t=this.db.transaction(s,m),q=f(t.objectStore(s));t.oncomplete=()=>ok(q&&q.result);t.onerror=()=>no(t.error)}).catch(()=>null)},
+ all(){return this.tx("chats","readonly",s=>s.getAll()).then(r=>r||[])},
+ put(c){return this.tx("chats","readwrite",s=>s.put(JSON.parse(JSON.stringify(c))))},
+ del(id){return this.tx("chats","readwrite",s=>s.delete(id))},
+ clear(){return this.tx("chats","readwrite",s=>s.clear())},
+ get(k){return this.tx("kv","readonly",s=>s.get(k))},
+ set(k,v){return this.tx("kv","readwrite",s=>s.put(v,k))}};
+
+let cur=null,busy=false;
+const chat=$("chat");
+const tm=t=>new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+const scroll=()=>chat.scrollTo({top:chat.scrollHeight,behavior:"smooth"});
+function setSub(t){const s=$("sub");s.textContent=t||u("sub");s.className=t?"live":""}
+function setOn(ai){document.querySelectorAll("#top .stack .av").forEach(a=>a.classList.toggle("on",a.dataset.ai===ai))}
+function applyUI(){
+  document.querySelectorAll("[data-i]").forEach(e=>e.textContent=u(e.dataset.i));
+  $("q").placeholder=u("ph");if(!busy)setSub();
+  if(SETTINGS.theme==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=SETTINGS.theme;
+  document.querySelectorAll(".seg").forEach(g=>g.querySelectorAll("button").forEach(b=>{
+    const v=g.dataset.k==="media"?(SETTINGS.media?"1":"0"):SETTINGS[g.dataset.k];b.classList.toggle("on",b.dataset.v===v)}));
+}
+const okHost=x=>{try{return new URL(x).hostname.endsWith("pixabay.com")}catch{return false}};
+function row(m){
+  const me=m.role==="me",w=el("div","row "+(me?"me":m.ai)+(m.error?" err":""));
+  if(!me){const a=el("i","av",INIT[m.ai]);w.appendChild(a)}
+  const b=el("div","bub");
+  if(!me)b.appendChild(el("div","nm",NAMES[m.ai]));
+  b.appendChild(el("div","tx",m.text));
+  if(m.images&&m.images.length){const g=el("div","media");
+    m.images.forEach(i=>{if(!okHost(i.src)||!okHost(i.page))return;const a=el("a");a.href=i.page;a.target="_blank";a.rel="noopener noreferrer";
+      const im=el("img");im.src=i.src;im.loading="lazy";im.alt=i.alt||"";a.appendChild(im);g.appendChild(a)});b.appendChild(g)}
+  if(m.videos&&m.videos.length)m.videos.forEach(v=>{if(!okHost(v.src))return;const vd=el("video");vd.controls=true;vd.preload="none";vd.playsInline=true;
+    if(okHost(v.poster))vd.poster=v.poster;vd.src=v.src;b.appendChild(vd)});
+  if(m.mediaCredit)b.appendChild(el("div","cr",m.mediaCredit));
+  if(m.sources&&m.sources.length){const s=el("div","src");
+    m.sources.forEach(r=>{if(!/^https?:\/\//.test(r.url))return;const a=el("a",null,r.title||r.url);a.href=r.url;a.target="_blank";a.rel="noopener noreferrer";s.appendChild(a);
+      const meta=[r.score!=null?"score "+r.score.toFixed(2):"",r.date||""].filter(Boolean).join(" · ");if(meta)s.appendChild(el("small",null,meta))});b.appendChild(s)}
+  b.appendChild(el("div","tm",tm(m.t||Date.now())));
+  w.appendChild(b);chat.appendChild(w);return w;
+}
+function removeTyping(){const t=$("typing");if(t)t.remove()}
+function showTyping(ai){removeTyping();if(!ai)return;
+  const w=el("div","row "+ai);w.id="typing";w.appendChild(el("i","av",INIT[ai]));
+  const b=el("div","bub");b.append(el("div","nm",NAMES[ai]));const d=el("div","dots");d.innerHTML="<i></i><i></i><i></i>";b.appendChild(d);
+  w.appendChild(b);chat.appendChild(w);scroll()}
+function intro(t){chat.appendChild(el("div","pill",new Date(t).toLocaleDateString([],{weekday:"long",day:"numeric",month:"long"})));chat.appendChild(el("div","pill",u("joined")))}
+function render(){
+  chat.innerHTML="";
+  if(!cur||!cur.messages.length){
+    chat.appendChild(el("div","pill",u("joined")));
+    const w=el("div","welcome"),st=el("div","stack");
+    ["sade","fire","search"].forEach(a=>st.appendChild(el("i","av "+a,INIT[a])));
+    w.appendChild(st);w.appendChild(el("p",null,u("welcome")));
+    const ch=el("div","chips");u("sugg").forEach(s=>{const c=el("button","chip",s);c.onclick=()=>send(s);ch.appendChild(c)});
+    w.appendChild(ch);chat.appendChild(w);return;
+  }
+  intro(cur.created);cur.messages.forEach(row);chat.scrollTop=chat.scrollHeight;
+}
+function add(m){cur.messages.push(m);cur.updated=Date.now();row(m);DB.put(cur);scroll()}
+async function send(text){
+  text=String(text||"").trim();if(!text||busy)return;busy=true;$("b").disabled=true;closeAll();
+  uiL=SETTINGS.lang==="auto"?detectLang(text):SETTINGS.lang;applyUI();
+  if(!cur||!cur.messages.length){
+    cur={id:Date.now()+"-"+Math.random().toString(36).slice(2,6),title:text.slice(0,42),created:Date.now(),updated:Date.now(),messages:[]};
+    chat.innerHTML="";intro(cur.created);
+  }
+  add({role:"me",text,t:Date.now()});
+  try{
+    await runDebate(text,(ev,d)=>{
+      if(ev==="status"){setSub(d.text);setOn(d.ai);showTyping(d.ai)}
+      else if(ev==="message"){removeTyping();add({...d,t:Date.now()})}
+    });
+  }catch(e){removeTyping();add({ai:"sade",text:String(e&&e.message||e),error:true,t:Date.now()})}
+  removeTyping();setOn(null);busy=false;setSub();$("b").disabled=false;$("q").focus();
+}
+// ---- Drawer, settings ----
+function closeAll(){["drawer","sheet","ov"].forEach(i=>$(i).classList.remove("on"))}
+async function openDrawer(){
+  const list=(await DB.all()).sort((a,b)=>b.updated-a.updated),h=$("hist");h.innerHTML="";
+  if(!list.length)h.appendChild(el("div","empty",u("empty")));
+  list.forEach(c=>{
+    const r=el("div","hi"+(cur&&cur.id===c.id?" cur":"")),t=el("button","t"),x=el("button","ib","🗑");
+    t.append(el("b",null,c.title),el("small",null,new Date(c.updated).toLocaleString([],{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})));
+    t.onclick=()=>{if(busy)return;cur=c;render();closeAll()};
+    x.onclick=async()=>{await DB.del(c.id);if(cur&&cur.id===c.id){cur=null;render()}openDrawer()};
+    r.append(t,x);h.appendChild(r)});
+  $("drawer").classList.add("on");$("ov").classList.add("on");
+}
+function newChat(){if(busy)return;cur=null;render();closeAll();$("q").focus()}
+$("menu").onclick=openDrawer;$("new").onclick=newChat;$("nc").onclick=newChat;$("ov").onclick=closeAll;
+$("gear").onclick=()=>{$("sheet").classList.add("on");$("ov").classList.add("on")};
+document.querySelectorAll(".seg").forEach(g=>g.onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;const k=g.dataset.k;
+  SETTINGS[k]=k==="media"?b.dataset.v==="1":b.dataset.v;DB.set("settings",SETTINGS);
+  if(k==="lang"&&b.dataset.v!=="auto")uiL=b.dataset.v;applyUI();if(k==="lang"&&!cur)render()});
+$("clr").onclick=async()=>{if(!confirm(u("confirm")))return;await DB.clear();cur=null;render();closeAll()};
+$("f").onsubmit=e=>{e.preventDefault();const v=$("q").value;$("q").value="";send(v)};
+(async()=>{
+  try{await DB.open();const s=await DB.get("settings");if(s)Object.assign(SETTINGS,s)}catch{}
+  if(SETTINGS.lang!=="auto")uiL=SETTINGS.lang;
+  applyUI();render();
+})();
+<\/script>
+</body>
+</html>
+</script>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="lb" role="dialog" aria-label="Picha kubwa"><button class="ib" id="lbx" aria-label="Funga" data-i="close"></button><img alt=""></div>
 <div id="splash" aria-hidden="true"><img src="profile.jpg" alt="" onerror="this.remove()"></div>
@@ -602,6 +1068,14 @@ addEventListener('load', () => setTimeout(() => $('#splash')?.remove(), 900));
 (async () => {
   chats = (await kvGet('chats')) || LS.get('rsa_chats', []);
   renderMsgs(); renderHist(); navigator.storage?.persist?.()
+})();
+
+// ---- R-AI Trinity (Nancy, Ivan, Aisha) imejengwa ndani ya faili hili ----
+(function(){
+  const tri=document.getElementById('tri'),f=document.getElementById('triF');
+  document.getElementById('triBtn').onclick=()=>{ if(!f.srcdoc){ f.srcdoc=document.getElementById('triSrc').textContent.replace(/<\\\/script/g,'</script'); } tri.classList.add('on'); };
+  document.getElementById('triX').onclick=()=>tri.classList.remove('on');
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') tri.classList.remove('on'); });
 })();
 </script>
 </body>
