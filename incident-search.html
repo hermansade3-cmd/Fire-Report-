@@ -305,8 +305,8 @@ const T = {
     noAnswer: "Sikupata muhtasari kamili wa hoja hii (vyanzo vimeorodheshwa na Aisha).",
     nothingNew: "Sina jambo jipya la kuongeza zaidi ya yaliyosemwa tayari.",
     none: "Hakuna jibu lililopatikana. Jaribu tena baadaye.",
-    creditImg: "Picha kutoka Pixabay: ",
-    creditVid: "Video kutoka Pixabay: ",
+    creditImg: "",
+    creditVid: "",
     lowRelevance: "Sikupata vyanzo vinavyohusiana moja kwa moja na swali hili.",
     noTranslate: "(Tafsiri haikupatikana kwa sasa; jibu limeachwa kwa lugha ya chanzo.)",
     err: { key: () => "Tavily key si sahihi (401)", limit: s => "Kikomo cha matumizi ya Tavily kimefikiwa (" + s + ")",
@@ -331,8 +331,8 @@ const T = {
     noAnswer: "I couldn't get a full summary for this one (sources are listed by Aisha).",
     nothingNew: "I have nothing new to add beyond what's already been said.",
     none: "No answer found. Please try again later.",
-    creditImg: "Images from Pixabay: ",
-    creditVid: "Videos from Pixabay: ",
+    creditImg: "",
+    creditVid: "",
     lowRelevance: "I couldn't find sources directly relevant to this question.",
     noTranslate: "(Translation unavailable right now; the answer is left in the source language.)",
     err: { key: () => "Tavily key is invalid (401)", limit: s => "Tavily usage limit reached (" + s + ")",
@@ -538,10 +538,10 @@ const NAMES={sade:"Nancy",fire:"Ivan",search:"Aisha"},INIT={sade:"N",fire:"I",se
 const $=id=>document.getElementById(id);
 function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
 const UI={
- sw:{sub:"Nancy, Ivan, Aisha · mtandaoni",ph:"Andika ujumbe...",hist:"Historia",nc:"＋ Mazungumzo mapya",empty:"Hakuna mazungumzo bado",set:"Mipangilio",lang:"Lugha ya majibu",auto:"Otomatiki",theme:"Mandhari",light:"Mwanga",dark:"Giza",media:"Picha na video (Pixabay)",on:"Washa",off:"Zima",clear:"Futa historia yote",confirm:"Futa mazungumzo yote?",
+ sw:{sub:"Nancy, Ivan, Aisha · mtandaoni",ph:"Andika ujumbe...",hist:"Historia",nc:"＋ Mazungumzo mapya",empty:"Hakuna mazungumzo bado",set:"Mipangilio",lang:"Lugha ya majibu",auto:"Otomatiki",theme:"Mandhari",light:"Mwanga",dark:"Giza",media:"Picha na video",on:"Washa",off:"Zima",clear:"Futa historia yote",confirm:"Futa mazungumzo yote?",
   joined:"Nancy, Ivan na Aisha wako kwenye mazungumzo",welcome:"Habari! Sisi ni Nancy, Ivan na Aisha. Uliza chochote, tutajadili pamoja.",note:"Historia na mipangilio vimehifadhiwa kwenye kifaa chako (IndexedDB), vinafanya kazi offline.",
   sugg:["Nawezaje kuzima moto wa jengo?","Kizima moto cha aina gani kinafaa jikoni?","What causes electrical fires at home?"]},
- en:{sub:"Nancy, Ivan, Aisha · online",ph:"Type a message...",hist:"History",nc:"＋ New chat",empty:"No chats yet",set:"Settings",lang:"Answer language",auto:"Auto",theme:"Theme",light:"Light",dark:"Dark",media:"Images & videos (Pixabay)",on:"On",off:"Off",clear:"Clear all history",confirm:"Delete all chats?",
+ en:{sub:"Nancy, Ivan, Aisha · online",ph:"Type a message...",hist:"History",nc:"＋ New chat",empty:"No chats yet",set:"Settings",lang:"Answer language",auto:"Auto",theme:"Theme",light:"Light",dark:"Dark",media:"Images & videos",on:"On",off:"Off",clear:"Clear all history",confirm:"Delete all chats?",
   joined:"Nancy, Ivan and Aisha are in the chat",welcome:"Hi! We're Nancy, Ivan and Aisha. Ask anything and we'll talk it through together.",note:"History and settings are saved on your device (IndexedDB) and work offline.",
   sugg:["What causes electrical fires at home?","How do I use a fire extinguisher?","Nawezaje kuzima moto wa jengo?"]}};
 let uiL="sw";const u=k=>UI[uiL][k];
@@ -578,11 +578,10 @@ function row(m){
   if(!me)b.appendChild(el("div","nm",NAMES[m.ai]));
   b.appendChild(el("div","tx",m.text));
   if(m.images&&m.images.length){const g=el("div","media");
-    m.images.forEach(i=>{if(!okHost(i.src)||!okHost(i.page))return;const a=el("a");a.href=i.page;a.target="_blank";a.rel="noopener noreferrer";
-      const im=el("img");im.src=i.src;im.loading="lazy";im.alt=i.alt||"";a.appendChild(im);g.appendChild(a)});b.appendChild(g)}
+    m.images.forEach(i=>{if(!okHost(i.src)||!okHost(i.page))return;const im=el("img");im.src=i.src;im.loading="lazy";im.alt="";g.appendChild(im)});b.appendChild(g)}
   if(m.videos&&m.videos.length)m.videos.forEach(v=>{if(!okHost(v.src))return;const vd=el("video");vd.controls=true;vd.preload="none";vd.playsInline=true;
     if(okHost(v.poster))vd.poster=v.poster;vd.src=v.src;b.appendChild(vd)});
-  if(m.mediaCredit)b.appendChild(el("div","cr",m.mediaCredit));
+  
   if(m.sources&&m.sources.length){const s=el("div","src");
     m.sources.forEach(r=>{if(!/^https?:\/\//.test(r.url))return;const a=el("a",null,r.title||r.url);a.href=r.url;a.target="_blank";a.rel="noopener noreferrer";s.appendChild(a);
       const meta=[r.score!=null?"score "+r.score.toFixed(2):"",r.date||""].filter(Boolean).join(" · ");if(meta)s.appendChild(el("small",null,meta))});b.appendChild(s)}
