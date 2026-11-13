@@ -1,146 +1,162 @@
-<!DOCTYPE html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Fire &amp; Incident Investigation</title>
+<!DOCTYPE html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Fire Investigation AI</title>
 <style>
-:root{--bg:#f1f2f4;--c:#fff;--t:#161c24;--m:#667085;--p:#b3202a;--n:#1b2a3a;--b:#d8dce2;--ok:#15803d;--w:#b45309;--a:#e0a100;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f141a;--c:#18202a;--t:#e8ecf1;--m:#98a2b3;--p:#e5484d;--n:#0a0e13;--b:#2a3440;color-scheme:dark}}
-*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
-header{background:var(--n);color:#fff;padding:10px 14px;display:flex;gap:8px;align-items:center;border-bottom:4px solid var(--p)}
-header b{flex:1;font-size:15px}header button{background:#ffffff22;color:#fff;border:0;border-radius:6px;padding:7px 11px;font:inherit}
-main{max-width:820px;margin:0 auto;padding:12px}
-.card{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:14px;margin-bottom:12px}
-h2{margin:6px 0 10px;font-size:18px}h3{margin:16px 0 6px;font-size:15px}
-label{display:block;margin:10px 0;font-weight:600;font-size:13px}
-input,select,textarea{width:100%;margin-top:4px;padding:10px;border:1px solid var(--b);border-radius:6px;background:var(--bg);color:var(--t);font:inherit;font-weight:400}
-.btn{background:var(--p);color:#fff;border:0;border-radius:6px;padding:10px 15px;font:inherit;font-weight:600;cursor:pointer}.btn.g{background:var(--c);color:var(--t);border:1px solid var(--b)}.btn.s{padding:5px 10px;font-size:13px}
-.nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.sp{flex:1}
-.bar{height:6px;background:var(--b);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--p);width:0;transition:width .3s}
-.chips{display:flex;gap:4px;margin:8px 0;overflow-x:auto}.chips span{flex:1;min-width:26px;text-align:center;font-size:12px;padding:3px 0;border-radius:4px;background:var(--b);color:var(--m)}.chips .on{background:var(--p);color:#fff;font-weight:700}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}.st{background:var(--c);border:1px solid var(--b);border-left:4px solid var(--p);border-radius:6px;padding:8px 10px}.st b{font-size:24px;display:block}.st span{color:var(--m);font-size:12px}
-.ai{border-left:4px solid var(--a);background:var(--bg);padding:8px 12px;border-radius:0 6px 6px 0;margin-top:14px}.ai small{color:var(--m)}
-.row{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--b);padding:9px 0;flex-wrap:wrap}.row small{color:var(--m)}
-.tag{display:inline-block;padding:1px 9px;border-radius:10px;font-size:12px;color:#fff;background:var(--m)}.tag.ok{background:var(--ok)}.tag.w{background:var(--w)}
-.item{border:1px solid var(--b);border-radius:6px;padding:8px 12px;margin:10px 0}.thumb{max-width:100px;max-height:80px;margin:3px;border-radius:4px}
-#rep{background:#fff;color:#000;padding:18px;border-radius:6px}#rep table{width:100%;border-collapse:collapse;margin:6px 0}#rep th,#rep td{border:1px solid #bbb;padding:5px 8px;text-align:left;vertical-align:top}#rep th{width:34%;background:#f0f0f0}#rep h1{color:#b3202a}#rep h2{border-bottom:2px solid #b3202a;color:#1b2a3a;margin-top:20px}
-#toast{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--n);color:#fff;padding:8px 14px;border-radius:20px;display:none;z-index:9}
-@media print{header,.no,#toast{display:none!important}body,main{background:#fff;padding:0}}
+:root{--bg:#f1f2f4;--c:#fff;--t:#161c24;--m:#667085;--p:#b3202a;--n:#1b2a3a;--b:#d8dce2;--a:#e0a100;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0f141a;--c:#18202a;--t:#e8ecf1;--m:#98a2b3;--p:#e5484d;--n:#0a0e13;--b:#2a3440;color-scheme:dark}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--n);color:#fff;padding:10px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:4px solid var(--p)}header b{flex:1}header label{font-size:12px}
+button{font:inherit;border:0;border-radius:6px;padding:9px 14px;background:var(--p);color:#fff;font-weight:600;cursor:pointer}button.g{background:var(--c);color:var(--t);border:1px solid var(--b)}button.s{padding:3px 9px;font-size:12px}
+nav{display:flex;max-width:820px;margin:8px auto 0;padding:0 12px;gap:6px}nav button{flex:1}nav .on{background:var(--n);color:#fff}
+main{max-width:820px;margin:0 auto;padding:12px}.card{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:14px;margin-bottom:12px}
+h3{margin:6px 0 10px}small{color:var(--m)}input,select,textarea{width:100%;padding:10px;border:1px solid var(--b);border-radius:6px;background:var(--bg);color:var(--t);font:inherit;margin:6px 0}
+.bar{height:7px;background:var(--b);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--p)}
+.al{border-left:4px solid var(--a);background:var(--bg);padding:7px 11px;margin:8px 0;border-radius:0 6px 6px 0;font-size:13px}.al.r{border-color:var(--p)}
+.row{border-top:1px solid var(--b);padding:7px 0;display:flex;gap:8px;justify-content:space-between}.row div{flex:1}
+.tag{padding:2px 10px;border-radius:10px;color:#fff;background:var(--p);font-size:12px}img.th{height:70px;margin:3px;border-radius:4px}
+#rp{background:#fff;color:#000;padding:20px;max-width:850px;margin:0 auto}#rp table{width:100%;border-collapse:collapse;margin:6px 0}#rp td,#rp th{border:1px solid #999;padding:5px 8px;text-align:left;vertical-align:top}#rp th{width:34%;background:#eee}#rp h2{border-bottom:2px solid #b3202a;color:#1b2a3a;margin-top:22px;font-size:17px}#rp h1{color:#b3202a;text-align:center}
+@media print{body>*:not(#rp){display:none!important}body{background:#fff}}
 </style></head><body>
-<header><b>🔥 FIRE &amp; INCIDENT INVESTIGATION</b><button data-a="home" id="bh"></button><button data-a="lang">SW/EN</button></header>
-<main id="app"></main><div id="toast"></div>
+<header><b>🔥 FIRE INVESTIGATION AI</b><label><input type="checkbox" id="ai" style="width:auto;margin:0" onchange="if(this.checked&&!localStorage.pk){const k=prompt('Weka Pollinations API key (enter.pollinations.ai):');if(k)localStorage.pk=k.trim();else this.checked=false}"> AI ya mtandao</label><button class="g s" onclick="const k=prompt('Pollinations API key:',localStorage.pk||'');if(k!==null)localStorage.pk=k.trim()">🔑</button><button onclick="rep()">📄 Ripoti</button></header>
+<nav id="tabs"></nav><main id="m"></main><div id="rp" hidden></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let lang='sw',cur=null,si=0,view='dash',DB=null,timer,mem={},fsig='';
-try{lang=localStorage.lang||'sw'}catch(e){}
-const T=s=>{const p=s.split('|');return lang=='en'&&p[1]?p[1]:p[0]};
-const YN=['y:Ndiyo|Yes','n:Hapana|No','u:Haijulikani|Unknown'];
-const TYPES=['fire:Moto|Fire','road:Ajali ya barabarani|Road accident','collapse:Jengo kuporomoka|Structural collapse','explosion:Mlipuko|Explosion','industrial:Ajali ya kiwandani|Industrial accident','natural:Janga la asili|Natural disaster','rescue:Uokoaji|Rescue'];
-const IGN=['elec:Umeme|Electrical','mech:Mitambo/joto la kifaa|Mechanical / equipment heat','open:Moto wazi/kupika/sigara|Open flame / cooking / smoking','nat:Asili (radi n.k.)|Natural (lightning etc.)','oth:Nyingine|Other','unk:Haijulikani|Unknown'];
-const S=[
-{id:'A',n:'Tukio|Incident',f:()=>[['ref','Namba ya uchunguzi|Investigation no.','t'],['inc','Namba ya tukio|Incident no.','t'],['type','Aina ya tukio|Incident type','s',TYPES],['date','Tarehe ya tukio|Incident date','d'],['time','Muda wa tukio|Incident time','tm'],['loc','Eneo|Location','t'],['owner','Mmiliki/mkazi wa eneo|Owner / occupant','t'],['inv','Mchunguzi|Investigator','t'],['unit','Kikosi|Unit','t'],['inv_date','Tarehe ya uchunguzi|Investigation date','d'],['reporter','Nani alitoa taarifa, na liligundulikaje?|Who reported and how was it discovered?','x'],['started','Muda lilipoanza (inavyokadiriwa)|Estimated start time','tm'],['firstArr','Muda kikosi cha kwanza kilifika|First crew arrival','tm'],['cas','Kulikuwa na majeruhi au vifo?|Injuries or deaths?','s',YN]]},
-{id:'B',n:'Eneo|Scene',f:()=>[['struct','Muundo wa jengo/eneo na matumizi yake|Structure and occupancy','x'],['wx','Hali ya hewa na upepo|Weather and wind','t'],['vent','Hali ya milango/madirisha ulipofika|Doors/windows state on arrival','t'],['prot','Alarm/sprinkler zilikuwepo na zilifanya kazi?|Alarms/sprinklers present and working?','s',YN],['power','Vyanzo vya umeme/gesi/mafuta|Electrical, gas, fuel sources','x'],['equip','Vifaa vilivyokuwa vinatumika|Equipment in use','x'],['worst','Sehemu yenye uharibifu mkubwa na alama za kuenea (V-pattern, kina cha makaa)|Heaviest damage and fire patterns (V-patterns, char depth)','x'],['safety','Hali ya usalama wa eneo|Scene safety','t']]},
-{id:'C',n:'Mashahidi|Witnesses'},{id:'D',n:'Vielelezo|Evidence'},
-{id:'E',n:'Asili ya moto|Origin',if:v=>v.type=='fire',f:()=>[['area','Area of Origin|Area of Origin','x'],['point','Point of Origin (ikiwa imethibitishwa)|Point of Origin (if verified)','x'],['firstMat','Item First Ignited|Item First Ignited','t'],['ign','Heat/Ignition Source|Heat/Ignition Source','s',IGN],['factor','Hali iliyowezesha kuwaka|Ignition factor','t'],['path','Jinsi moto ulivyoenea|Fire development and spread','x'],['multi','Maeneo mengi tofauti ya kuanzia?|Multiple separate origins?','s',YN],['accel','Dalili za kichocheo (accelerant)?|Signs of ignitable liquid?','s',YN],['lab','Maabara/mtaalamu amethibitisha?|Lab/expert confirmed?','s',YN]]},
-{id:'F',n:'Hypotheses|Hypotheses'},{id:'G',n:'Hitimisho|Conclusion'}];
-const WF=[['name','Jina|Name','t'],['contact','Mawasiliano (kwa ridhaa)|Contact (with consent)','t'],['role','Nafasi katika tukio|Role','t'],['where','Alikuwa wapi tukio linaanza?|Where at the start?','t'],['saw','Aliona/alisikia nini?|Saw / heard','x'],['first','Aliona kwanza|Saw first','s',['smoke:Moshi|Smoke','fire:Moto|Fire','u:Hakumbuki|Unsure']],['odd','Jambo lisilo la kawaida?|Anything unusual?','x']];
-const EF=[['desc','Kielelezo|Item','t'],['loc','Kilipatikana wapi?|Found where?','t'],['cond','Hali yake|Condition','x'],['photo','Kilipigwa picha mahali pake?|Photographed in place?','s',YN],['by','Aliyekusanya|Collected by','t'],['dt','Tarehe/muda|Date/time collected','t'],['store','Mahali pa kuhifadhi (chain of custody)|Storage (chain of custody)','t'],['lab','Kimepelekwa kwa uchunguzi wa kitaalamu?|Sent for expert analysis?','s',YN]];
-const HF=[['name','Hypothesis (chanzo kinachodhaniwa)|Hypothesis (suspected cause)','t'],['cat','Aina|Category','s',['acc:Accidental|Accidental','nat:Natural|Natural','inc:Incendiary (makusudi)|Incendiary (deliberate)']],['sup','Ushahidi unaounga mkono|Supporting evidence','x'],['ag','Ushahidi unaopinga|Contradicting evidence','x'],['test','Imejaribiwa dhidi ya ushahidi wote?|Tested against all evidence?','s',YN],['st','Hali|Status','s',['sup:Inaungwa mkono|Supported','unk:Haijathibitika|Unresolved','ref:Imekanushwa|Refuted']]];
-const ELW=/umeme|kompyuta|soketi|nyaya|electric|computer|socket|wire|cable/i;
-const R=[
-{s:'A',id:'cas',t:'x',q:'Waliojeruhiwa/waliokufa walikuwa wapi tukio linaanza na walipatikana katika hali gani?|Where were the injured/deceased when it began and how were they found?',test:v=>v.cas=='y'},
-{s:'B',id:'plug',t:'s',o:YN,q:'Je, vifaa vya umeme vilikuwa vimeunganishwa wakati tukio linaanza?|Was the electrical equipment connected when it began?',test:v=>ELW.test((v.power||'')+(v.equip||''))},
-{s:'B',id:'sock',t:'s',o:YN,q:'Je, kulikuwa na soketi au nyaya zilizoharibika?|Were sockets or wiring damaged?',test:v=>v.fu_plug},
-{s:'B',id:'tech',t:'s',o:YN,q:'Je, kuna ushahidi wa kitaalamu kuwa hitilafu hiyo ilianzisha moto?|Is there expert evidence the fault started the fire?',test:v=>v.fu_sock=='y'},
-{s:'E',id:'pt',t:'x',q:'Ni ushahidi gani unakosekana ili kuthibitisha Point of Origin?|What evidence is missing to verify the Point of Origin?',test:v=>v.area&&!v.point},
-{s:'E',id:'alt',t:'x',q:'Vyanzo mbadala gani vilichunguzwa na kuondolewa, kwa ushahidi gani?|Which alternative sources were examined and excluded, and how?',test:v=>v.ign&&v.ign!='unk'},
-{s:'E',id:'ie',t:'x',q:'Ni ushahidi gani wa kimwili unaothibitisha kichocheo?|What physical evidence supports the ignitable liquid indication?',test:v=>v.accel=='y'}];
-const FD={};S.forEach(s=>s.f&&s.f({type:'fire'}).forEach(f=>FD[f[0]]=f));[WF,EF,HF].forEach(a=>a.forEach(f=>FD[f[0]]=f));R.forEach(r=>FD['fu_'+r.id]=['fu_'+r.id,r.q,r.t,r.o]);
-const ov=(k,v)=>{const f=FD[k];if(!f||f[2]!='s')return v||'';const o=(f[3]||[]).find(x=>x.split(':')[0]==v);return o?T(o.slice(o.indexOf(':')+1)):v||''};
-const stp=()=>S.filter(s=>!s.if||s.if(cur.v)),fus=sid=>R.filter(r=>r.s==sid&&r.test(cur.v));
-const idb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('fii',1);r.onupgradeneeded=()=>r.result.createObjectStore('inv',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}});
-const tx=(m,f)=>new Promise(res=>{try{const r=f(DB.transaction('inv',m).objectStore('inv'));r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)}catch(e){res(null)}});
-const all=()=>DB?tx('readonly',q=>q.getAll()):Promise.resolve(Object.values(mem)),put=o=>DB?tx('readwrite',q=>q.put(o)):Promise.resolve(mem[o.id]=o),del=id=>DB?tx('readwrite',q=>q.delete(id)):Promise.resolve(delete mem[id]);
-const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t.h);t.h=setTimeout(()=>t.style.display='none',1800)};
-const sv=()=>{cur.upd=Date.now();put(cur);const e=$('#sv');if(e)e.textContent=T('✓ Imehifadhiwa|✓ Saved')};
-const log=w=>(cur.log=cur.log||[]).push({t:new Date().toLocaleString(),w});
-// ---- engine: scientific-method (NFPA 921 style) ----
-const CL={ACCIDENTAL:'Accidental: chanzo kimethibitishwa, hypotheses nyingine zimekanushwa.|Accidental: cause supported; all other hypotheses refuted.',NATURAL:'Natural: chanzo cha asili kimethibitishwa.|Natural: natural cause supported.',INCENDIARY:'Incendiary: moto wa makusudi unaungwa mkono na ushahidi wa kimwili/kitaalamu.|Incendiary: deliberate ignition supported by physical/expert evidence.',UNDETERMINED:'Undetermined: hypotheses zaidi ya moja zinabaki, au hakuna iliyothibitishwa.|Undetermined: more than one hypothesis remains, or none is proven.',INCONCLUSIVE:'Inconclusive: taarifa/ushahidi hautoshi kufikia hitimisho.|Inconclusive: data/evidence insufficient for any conclusion.'};
-const NOTE='Mfumo unafuata mbinu ya kisayansi (data → hypotheses → majaribio). Haitumii AI API wala haichambui picha. Cause haichaguliwi kwa kuondoa tu (negative corpus): kila hypothesis inayokubaliwa inahitaji ushahidi chanya. Si hukumu ya kisheria; uamuzi ni wa mchunguzi mwenye mamlaka.|Uses the scientific method (data → hypotheses → testing). No AI API; images are not analysed. A cause is never accepted by elimination alone (negative corpus): an accepted hypothesis needs positive evidence. Not a legal verdict; the authorised investigator decides.';
-function an(i){const v=i.v,W=i.w||[],E=i.e||[],H=(i.h||[]).filter(h=>h.name),fire=v.type=='fire',con=[],miss=[],mn=t=>t?+t.slice(0,2)*60+ +t.slice(3,5):null;
-if(v.started&&v.firstArr&&mn(v.firstArr)<mn(v.started))con.push('Kikosi cha kwanza kimerekodiwa kufika kabla tukio kuanza.|First crew arrival is before the recorded start time.');
-if(v.date&&v.inv_date&&v.inv_date<v.date)con.push('Tarehe ya uchunguzi ni kabla ya tukio.|Investigation date precedes the incident.');
-if([...new Set(W.map(w=>w.first).filter(x=>x&&x!='u'))].length>1)con.push('Mashahidi wanatofautiana kuhusu kilichoonekana kwanza.|Witnesses disagree on what was seen first.');
-if(fire&&v.ign=='elec'&&v.fu_plug=='n')con.push('Chanzo cha umeme kimetajwa ilhali kifaa hakikuunganishwa.|Electrical source named but equipment was not connected.');
-if(fire&&H.some(h=>h.cat=='acc'&&h.st=='sup')&&v.accel=='y'&&!v.fu_ie)con.push('Accidental inaungwa mkono ilhali kuna dalili za kichocheo zisizoelezwa.|Accidental supported while ignitable-liquid indicators are unexplained.');
-if(!W.length)miss.push('Hakuna shahidi.|No witness recorded.');if(!E.length)miss.push('Hakuna kielelezo.|No physical evidence.');
-if(E.some(e=>!e.by||!e.dt||!e.store))miss.push('Chain of custody haijakamilika kwa baadhi ya vielelezo.|Chain of custody incomplete for some evidence.');
-if(E.some(e=>e.photo=='n'))miss.push('Baadhi ya vielelezo havikupigwa picha mahali pake.|Some evidence not photographed in place.');
-if(!v.started||!v.firstArr)miss.push('Muda wa kuanza/kufika kikosi haujakamilika.|Start/arrival times incomplete.');
-if(fire&&!v.area)miss.push('Area of Origin haijajazwa.|Area of Origin missing.');if(fire&&v.area&&!v.point)miss.push('Point of Origin haijathibitishwa.|Point of Origin not verified.');
-if(!H.length)miss.push('Hakuna hypothesis iliyowekwa.|No hypothesis entered.');if(H.some(h=>h.test!='y'&&h.st!='ref'))miss.push('Baadhi ya hypotheses hazijajaribiwa dhidi ya ushahidi wote.|Some hypotheses not tested against all evidence.');
-const viable=H.filter(h=>h.st!='ref'),conf=H.filter(h=>h.st=='sup'&&h.test=='y'&&(h.sup||'').trim()&&!(h.ag||'').trim());
-let cls='UNDETERMINED';
-if(!H.length||!E.length||!W.length&&!(v.cause))cls='INCONCLUSIVE';
-else if(conf.length==1&&viable.length==1){const h=conf[0];
-if(h.cat=='acc')cls='ACCIDENTAL';else if(h.cat=='nat')cls='NATURAL';
-else if(h.cat=='inc'&&fire&&(v.lab=='y'||v.multi=='y')&&E.length&&!con.length)cls='INCENDIARY'}
-if(conf.length==1&&viable.length>1)miss.push('Hypothesis iliyothibitishwa ina washindani ambao hawajakanushwa.|The supported hypothesis has rivals not yet refuted.');
-return{cls,con,miss,H,rate:H.length?Math.round(H.filter(h=>h.test=='y').length/H.length*100):0}}
-// ---- UI ----
-function fld(f,val,a){const[k,l,t,o]=f;let c;val=val??'';
-if(t=='x')c=`<textarea ${a} data-k="${k}" rows="3">${esc(val)}</textarea>`;
-else if(t=='s')c=`<select ${a} data-k="${k}"><option value="">—</option>${o.map(x=>{const j=x.indexOf(':'),v=x.slice(0,j);return`<option value="${v}" ${v==val?'selected':''}>${esc(T(x.slice(j+1)))}</option>`}).join('')}</select>`;
-else c=`<input ${a} data-k="${k}" type="${{t:'text',d:'date',tm:'time'}[t]}" value="${esc(val)}">`;
-return`<label>${esc(T(l))}${c}</label>`}
-const LI={C:['w',WF,'Shahidi|Witness'],D:['e',EF,'Kielelezo|Evidence'],F:['h',HF,'Hypothesis|Hypothesis']};
-function lst(id){const[k,F,fn]=LI[id];return(id=='F'?`<div class="ai"><small>${T('Weka kila chanzo kinachowezekana. Kila moja ijaribiwe dhidi ya ushahidi; kanusha zisizo sahihi.|List every plausible cause. Test each against the evidence and refute those that fail.')}</small></div>`:'')+cur[k].map((x,n)=>`<div class="item"><b>${T(fn)} ${n+1}</b><button class="btn g s" style="float:right" data-a="rm" data-l="${k}" data-i="${n}">✕</button>${F.map(f=>fld(f,x[f[0]],`data-l="${k}" data-i="${n}"`)).join('')}${k=='e'?`<label>${T('Pakia picha/video/nyaraka|Upload photos/video/documents')}<input type="file" multiple accept="image/*,video/*,.pdf" data-up="${n}"></label>${(x.f||[]).map(f=>f.ty.startsWith('image')?`<img class="thumb" src="${f.u}">`:`<span class="tag">${esc(f.n)}</span>`).join('')}`:''}</div>`).join('')+`<button class="btn g" data-a="add" data-l="${k}">+ ${T(fn)}</button>`}
-function anHtml(r){const L=a=>a.length?'<ul>'+a.map(x=>`<li>${esc(T(x))}</li>`).join('')+'</ul>':`<p>${T('Hakuna.|None.')}</p>`;
-return`<h3>${T('Matrix ya hypotheses|Hypothesis matrix')}</h3>${r.H.length?`<table style="width:100%;border-collapse:collapse;font-size:13px">${r.H.map(h=>`<tr><td style="border:1px solid #9994;padding:4px"><b>${esc(h.name)}</b> (${ov('cat',h.cat)})</td><td style="border:1px solid #9994;padding:4px">${ov('st',h.st)||'—'} · ${T('Jaribio|Tested')}: ${ov('test',h.test)||'—'}</td></tr>`).join('')}</table>`:'<p>—</p>'}<h3>${T('Taarifa zinazokinzana|Contradictions')}</h3>${L(r.con)}<h3>${T('Kinachokosekana|Gaps')}</h3>${L(r.miss)}<h3>${T('Uainishaji wa chanzo|Cause classification')}: <span class="tag ${r.cls=='UNDETERMINED'||r.cls=='INCONCLUSIVE'?'w':'ok'}">${r.cls}</span></h3><p>${T(CL[r.cls])}</p>`}
-function pct(){const v=cur.v;let t=0,d=0;stp().forEach(s=>{if(s.f){s.f(v).forEach(f=>{t++;if(v[f[0]])d++});fus(s.id).forEach(r=>{t++;if(v['fu_'+r.id])d++})}else if(LI[s.id]){t++;if(cur[LI[s.id][0]].length)d++}});return t?Math.round(d/t*100):0}
-function wiz(){const st=stp();si=Math.min(si,st.length-1);const s=st[si];
-let h=`<div class="card"><div class="bar"><i id="pb"></i></div><div class="chips">${st.map((x,n)=>`<span class="${n==si?'on':''}">${x.id}</span>`).join('')}</div><small id="pt"></small> <small id="sv"></small><h2>${T(s.n)}</h2>`;
-if(LI[s.id])h+=lst(s.id);else if(s.id=='G'){const r=an(cur);h+=`<div class="ai"><small>${T(NOTE)}</small></div>${anHtml(r)}<label>${T('Hitimisho la mchunguzi|Investigator conclusion')}<textarea data-k="concl" rows="4">${esc(cur.v.concl||'')}</textarea></label><label>${T('Mapendekezo (kuzuia, usalama)|Recommendations (prevention, safety)')}<textarea data-k="recom" rows="3">${esc(cur.v.recom||'')}</textarea></label>`}
-else h+=s.f(cur.v).map(f=>fld(f,cur.v[f[0]],'')).join('')+'<div id="fu"></div>';
-h+=`<div class="nav">${si?`<button class="btn g" data-a="prev">← ${T('Rudi|Previous')}</button>`:''}<button class="btn g" data-a="save">${T('Hifadhi|Save')}</button><span class="sp"></span>${si<st.length-1?`<button class="btn" data-a="next">${T('Endelea|Next')} →</button>`:`<button class="btn" data-a="submit">${T('Wasilisha|Submit')}</button>`}</div></div>`;
-$('#app').innerHTML=h;fu(true);upd()}
-function fu(f){const e=$('#fu');if(!e)return;const a=fus(stp()[si].id),sig=a.map(r=>r.id).join();if(!f&&sig==fsig)return;fsig=sig;
-e.innerHTML=a.length?`<div class="ai"><b>🤖 ${T('Maswali ya ziada|Follow-up questions')}</b>${a.map(r=>fld(['fu_'+r.id,r.q,r.t,r.o],cur.v['fu_'+r.id],'')).join('')}</div>`:''}
-function upd(){if(view!='wiz')return;const p=pct();$('#pb').style.width=p+'%';$('#pt').textContent=T('Maendeleo|Progress')+': '+p+'%';fu(false)}
-async function dash(){view='dash';const A=await all(),q=($('#q')||{}).value||'';A.sort((a,b)=>b.upd-a.upd);const c=f=>A.filter(f).length;
-const L=A.filter(i=>JSON.stringify(i.v).toLowerCase().includes(q.toLowerCase()));
-$('#app').innerHTML=`<div class="grid"><div class="st"><b>${A.length}</b><span>${T('Jumla|Total')}</span></div><div class="st"><b>${c(i=>i.st!='done')}</b><span>${T('Zinasubiri|Pending')}</span></div><div class="st"><b>${c(i=>i.st=='done')}</b><span>${T('Zimekamilika|Completed')}</span></div><div class="st"><b>${c(i=>i.v.type=='fire')}</b><span>${T('Moto|Fire')}</span></div></div>
-<div class="card" style="margin-top:12px"><div class="nav" style="margin:0 0 8px"><button class="btn" data-a="new">+ ${T('Uchunguzi mpya|New investigation')}</button><button class="btn g" data-a="exp">${T('Nakala ya akiba|Backup')}</button></div><input id="q" placeholder="${T('Tafuta...|Search...')}" value="${esc(q)}">
-${L.length?L.map(i=>`<div class="row"><div><b>${esc(i.v.ref||'—')}</b> <span class="tag ${i.st=='done'?'ok':'w'}">${i.st=='done'?T('Imekamilika|Completed'):T('Inasubiri|Pending')}</span><br><small>${ov('type',i.v.type)} · ${esc(i.v.loc||'')} · ${esc(i.v.date||'')}</small></div><div><button class="btn g s" data-a="open" data-id="${i.id}">${i.st=='done'?T('Fungua|Open'):T('Endelea|Continue')}</button> ${i.st=='done'?`<button class="btn s" data-a="rep" data-id="${i.id}">${T('Ripoti|Report')}</button> `:''}<button class="btn g s" data-a="del" data-id="${i.id}">🗑</button></div></div>`).join(''):`<p>${T('Bado hakuna uchunguzi. Anza mpya.|No investigations yet. Start a new one.')}</p>`}</div>`;
-$('#bh').textContent=T('Mwanzo|Home')}
-function rep(i){const v=i.v,r=an(i),tr=(a,b)=>`<tr><th>${esc(T(a))}</th><td>${esc(b)||'—'}</td></tr>`,tb=a=>`<table>${a.join('')}</table>`,fr=(F,x)=>tb(F.map(f=>tr(f[1],ov(f[0],x[f[0]]))));
-const fa=R.filter(x=>x.test(v)&&v['fu_'+x.id]).map(x=>tr(x.q,ov('fu_'+x.id,v['fu_'+x.id])));
-const rec=[v.recom||'',...r.miss.map(m=>T(m)),T('Pata uchunguzi wa kitaalamu kabla ya hitimisho la mwisho.|Obtain expert examination before any final conclusion.')].filter(Boolean).join('\n');
-return`<h1>${T('RIPOTI YA UCHUNGUZI WA TUKIO|INCIDENT INVESTIGATION REPORT')}</h1><p><b>${T('Jeshi la Zimamoto na Uokoaji Tanzania|Tanzania Fire and Rescue Force')}</b><br>${T('Rejea|Ref')}: ${esc(v.ref)} · ${T('Mchunguzi|Investigator')}: ${esc(v.inv)} · ${esc(v.inv_date)}</p>
-<h2>1. ${T('Taarifa za Tukio|Incident Particulars')}</h2>${fr(S[0].f(),v)}<h2>2. ${T('Mbinu|Methodology')}</h2><p>${T(NOTE)}</p>
-<h2>3. ${T('Ukaguzi wa Eneo|Scene Examination')}</h2>${fr(S[1].f(),v)}${fa.length?tb(fa):''}
-${v.type=='fire'?`<h2>4. ${T('Asili ya Moto|Origin Analysis')}</h2>${fr(S[4].f(),v)}`:''}
-<h2>5. ${T('Mashahidi|Witness Statements')}</h2>${i.w.map((w,n)=>`<h3>${n+1}. ${esc(w.name)}</h3>${fr(WF.slice(1),w)}`).join('')||'<p>—</p>'}
-<h2>6. ${T('Vielelezo na Chain of Custody|Evidence and Chain of Custody')}</h2>${i.e.map((e,n)=>`<h3>${n+1}. ${esc(e.desc)}</h3>${fr(EF.slice(1),e)}${(e.f||[]).filter(f=>f.ty.startsWith('image')).map(f=>`<img src="${f.u}" style="max-width:220px;margin:3px">`).join('')}`).join('')||'<p>—</p>'}
-<h2>7. ${T('Uchambuzi wa Hypotheses|Hypothesis Analysis')}</h2>${i.h.map((h,n)=>`<h3>${n+1}. ${esc(h.name)}</h3>${fr(HF.slice(1),h)}`).join('')}${anHtml(r)}
-<h2>8. ${T('Hitimisho|Conclusion')}</h2><p><b>${r.cls}</b> — ${T(CL[r.cls])}</p><p>${esc(v.concl)}</p><h2>9. ${T('Mapendekezo|Recommendations')}</h2><p style="white-space:pre-line">${esc(rec)}</p>
-<h2>10. ${T('Mchunguzi na Saini|Investigator and Signature')}</h2>${tb([tr('Jina|Name',v.inv),tr('Kikosi|Unit',v.unit)])}<p><br>${T('Saini|Signature')}: ____________________ ${T('Tarehe|Date')}: __________</p>
-<h2>${T('Kumbukumbu ya mabadiliko|Change log')}</h2><ul>${(i.log||[]).map(l=>`<li>${esc(l.t)} — ${esc(T(l.w))}</li>`).join('')}</ul>`}
-function repView(){view='rep';$('#app').innerHTML=`<div class="nav no" style="margin:0 0 10px"><button class="btn g" data-a="open" data-id="${cur.id}">← ${T('Rudi|Back')}</button><button class="btn" data-a="pdf">PDF / Print</button><button class="btn" data-a="doc">Word</button><button class="btn g" data-a="saverep">${T('Hifadhi mabadiliko|Save edits')}</button><button class="btn g" data-a="regen">${T('Zalisha upya|Regenerate')}</button></div><small class="no">${T('Unaweza kuhariri ripoti hapa chini. PDF: chagua "Save as PDF".|You can edit the report below. PDF: choose "Save as PDF".')}</small><div id="rep" contenteditable="true">${cur.rhtml||rep(cur)}</div>`;$('#bh').textContent=T('Mwanzo|Home')}
-const A$={
-home(){if(cur&&view=='wiz')sv();cur=null;dash()},
-lang(){lang=lang=='sw'?'en':'sw';try{localStorage.lang=lang}catch(e){};cur?(view=='rep'?repView():wiz()):dash()},
-async new(){const n=(await all()).length+1;cur={id:Date.now()+'',v:{ref:'INV-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'),inv_date:new Date().toISOString().slice(0,10),type:'fire'},w:[],e:[],h:[],st:'draft',upd:Date.now(),log:[{t:new Date().toLocaleString(),w:'Uchunguzi umeanzishwa|Investigation created'}]};await put(cur);si=0;view='wiz';wiz()},
-async open(b){cur=(await all()).find(x=>x.id==b.dataset.id);cur.h=cur.h||[];si=0;view='wiz';wiz()},
-async rep(b){cur=(await all()).find(x=>x.id==b.dataset.id);cur.h=cur.h||[];repView()},
-async del(b){if(confirm(T('Futa uchunguzi huu?|Delete this investigation?'))){await del(b.dataset.id);dash()}},
-next(){sv();si++;wiz();scrollTo(0,0)},prev(){sv();si--;wiz();scrollTo(0,0)},save(){sv();toast(T('Imehifadhiwa|Saved'))},
-add(b){cur[b.dataset.l].push({});sv();wiz()},rm(b){if(confirm(T('Ondoa?|Remove?'))){cur[b.dataset.l].splice(+b.dataset.i,1);sv();wiz()}},
-submit(){const r=an(cur);if(!cur.v.inv&&!confirm(T('Jina la mchunguzi halijajazwa. Wasilisha?|Investigator name is empty. Submit?')))return;cur.st='done';cur.rhtml='';log('Imewasilishwa|Submitted ('+r.cls+')');sv();repView()},
-pdf(){window.print()},
-doc(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #888;padding:4px;text-align:left}</style></head><body>'+$('#rep').innerHTML+'</body></html>'],{type:'application/msword'}));a.download=(cur.v.ref||'report')+'.doc';a.click()},
-saverep(){cur.rhtml=$('#rep').innerHTML;log('Ripoti imehaririwa|Report edited');sv();toast(T('Imehifadhiwa|Saved'))},
-regen(){if(confirm(T('Futa mabadiliko ya mkono?|Discard manual edits?'))){cur.rhtml='';log('Ripoti imezalishwa upya|Report regenerated');sv();repView()}},
-async exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(await all())],{type:'application/json'}));a.download='investigations-backup.json';a.click()}};
-document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)A$[b.dataset.a]?.(b)});
-document.addEventListener('input',e=>{const t=e.target;if(t.id=='q')return dash();const k=t.dataset.k;if(!k||!cur)return;const l=t.dataset.l;if(l)cur[l][+t.dataset.i][k]=t.value;else cur.v[k]=t.value;clearTimeout(timer);timer=setTimeout(sv,500);upd()});
-document.addEventListener('change',async e=>{const t=e.target;if(t.dataset.up===undefined)return;const x=cur.e[+t.dataset.up];x.f=x.f||[];
-for(const f of t.files){const o=await new Promise(r=>{if(!f.type.startsWith('image/')){if(f.size>8e6){toast(T('Faili >8MB|File >8MB'));return r(null)}const fr=new FileReader;fr.onload=()=>r({n:f.name,ty:f.type||'file',u:fr.result});fr.readAsDataURL(f);return}const im=new Image;im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r({n:f.name,ty:'image/jpeg',u:c.toDataURL('image/jpeg',.75)})};im.onerror=()=>r(null);im.src=URL.createObjectURL(f)});if(o)x.f.push(o)}sv();wiz()});
-(async()=>{try{DB=await idb()}catch(e){DB=null}if(!DB)toast(T('IndexedDB haipatikani: data ya kikao hiki tu|IndexedDB unavailable: session-only data'));dash()})();
+const ST=['Taarifa za msingi','Eneo na jengo','Muda na taarifa','Asili ya moto','Mfumo wa umeme','Gesi, kemikali, mlipuko','Mashahidi','Ulinzi na kikosi','Madhara','Ushahidi','Nadharia (hypotheses)','Hitimisho'];
+const YN=['y:Ndiyo','n:Hapana','u:Haijulikani'],CAT=['acc:Accidental (ajali)','nat:Natural (asili)','inc:Incendiary (makusudi)'],STS=['sup:Inaungwa mkono','unk:Haijathibitika','ref:Imekanushwa'];
+const E=/umeme|soketi|nyaya|waya|fuse|breaker|transfoma|kompyuta|chaja|friji|pasi/,X=/mlipuko|ililipuka|ulilipuka|bomu|boom/,G=/gesi|lpg|petroli|dizeli|mafuta|kemikali|jenereta|spiriti/,O=/nje ya|uani|nje|jirani|nyasi|taka|msitu|uzio/,D=/nyaraka|karatasi|ofisi|kumbukumbu|stoo|makabati|maktaba/;
+const no=v=>/^(hakuna)?$/i.test((v||'').trim())||v=='Haijulikani';
+// [id,hatua,lebo,swali,aina,chaguo,tr(regex),sh(fn)]
+const QS=[
+['ref',0,'Namba ya uchunguzi','Namba ya uchunguzi ni ipi?','t'],['inc',0,'Namba ya tukio','Namba ya tukio ni ipi?','t'],
+['type',0,'Aina ya tukio','Aina ya tukio ni ipi?','s',['fire:Moto','exp:Mlipuko','road:Ajali ya barabarani','oth:Nyingine']],
+['date',0,'Tarehe ya tukio','Tukio lilitokea tarehe ngapi?','d'],['time',0,'Muda wa tukio','Muda wa tukio ni saa ngapi?','tm'],
+['loc',0,'Eneo','Eneo la tukio (mtaa, kata, wilaya)?','t'],['owner',0,'Mmiliki/mkazi','Mmiliki au mkazi wa eneo ni nani?','t'],
+['inv',0,'Mchunguzi','Jina na cheo cha mchunguzi?','t'],['unit',0,'Kikosi','Kikosi/kituo kilichohusika?','t'],
+['struct',1,'Aina ya jengo/eneo','Eleza aina ya jengo au eneo lililoungua (ujenzi, ghorofa, paa, ukubwa).','x'],
+['use',1,'Matumizi ya eneo','Eneo lilitumika kwa shughuli gani kabla ya moto?','x'],
+['hist',1,'Historia ya eneo','Historia ya eneo: matengenezo, mabadiliko, matukio ya moto yaliyopita, lilikuwa tupu?','x'],
+['wx',1,'Hali ya hewa','Hali ya hewa na upepo wakati wa tukio?','t'],['vent',1,'Milango/madirisha','Milango na madirisha vilikuwa katika hali gani kikosi kilipofika?','t'],
+['reporter',2,'Aliyetoa taarifa','Nani alitoa taarifa, na moto uligunduliwaje?','x'],
+['seen',2,'Moto ulionekana kwanza','Moto/moshi ulionekana kwa mara ya kwanza saa ngapi?','tm'],
+['started',2,'Muda wa kuanza (makadirio)','Moto unakadiriwa kuanza saa ngapi?','tm'],['arr',2,'Kikosi kilifika','Kikosi cha kwanza kilifika saa ngapi?','tm'],
+['pre',2,'Hatua kabla ya kikosi','Hatua gani zilichukuliwa na wananchi/wenyeji kabla ya kikosi kufika?','x'],
+['area',3,'Area of Origin','Moto ulionekana kuanzia eneo/chumba gani?','x'],
+['arch',3,'Matumizi ya chumba cha nyaraka','Chumba hicho kilitumikaje? Vifaa gani, kiasi cha karatasi/makabati, na kulikuwa na vyanzo vya joto au umeme ndani?','x',0,D],
+['out',3,'Moto kutoka nje','Moto ulianzia nje: umbali kutoka jengo, mwelekeo wa upepo, nyasi/takataka, uwezekano wa kuchoma taka au cheche kuruka?','x',0,O],
+['pat',3,'Fire patterns','Eleza fire patterns: V-pattern, kina cha makaa, sehemu yenye uharibifu mkubwa na sehemu isiyoathirika.','x'],
+['ign',3,'Chanzo cha joto','Chanzo cha joto/kuwaka kinachodhaniwa ni kipi?','x'],['firstmat',3,'Kitu cha kwanza kuwaka','Kitu gani kiliwaka kwanza?','t'],
+['fuel',3,'Vitu vinavyoweza kuwaka','Vitu gani vinavyoweza kuwaka vilikuwepo karibu na asili?','x'],['spread',3,'Kuenea kwa moto','Moto ulienea vipi (njia, kasi, vizuizi)?','x'],
+['multi',3,'Asili nyingi','Kuna maeneo mengi tofauti ya kuanzia moto?','s',YN],
+['e1',4,'Soketi/nyaya/breaker','Hali ya soketi, nyaya, circuit breakers na fuse ilikuwaje kabla na baada ya tukio?','x',0,E],
+['e2',4,'Vifaa vilivyounganishwa','Vifaa gani vya umeme vilikuwa vimeunganishwa/vinatumika wakati moto unaanza?','x',0,E],
+['e3',4,'Hitilafu ya umeme kabla','Kulikuwa na umeme kuzimika, kupanda (surge) au harufu ya kuungua kabla ya tukio?','s',YN,E],
+['e4',4,'Alama za arcing','Kuna alama za arcing au waya kuyeyuka? Fundi/mtaalamu wa umeme amekagua?','x',0,E],
+['g1',5,'Gesi/mafuta/kemikali','Gesi, mafuta au kemikali zipi zilikuwepo na zilihifadhiwa vipi?','x',0,G],
+['g2',5,'Harufu ya gesi','Kulikuwa na harufu ya gesi au mafuta kabla ya tukio?','s',YN,G],
+['x1',5,'Muda wa mlipuko','Mlipuko ulisikika kabla au baada ya moto kuonekana? Saa ngapi?','x',0,X],
+['x2',5,'Chanzo cha mlipuko','Chanzo kinachowezekana cha mlipuko ni nini? Kuta/madirisha vilitupwa ndani au nje?','x',0,X],
+['accel',5,'Dalili za kichocheo','Kuna dalili za kichocheo (ignitable liquid: harufu, madoa, mabaki)?','s',YN,0,()=>1],
+['w1',6,'Shahidi 1: jina/nafasi','Jina na nafasi ya shahidi wa kwanza (au andika "hakuna")?','t'],
+['w2',6,'Aliona/alisikia','Shahidi alikuwa wapi moto unaanza, na aliona au alisikia nini?','x',0,0,A=>!no(A.w1)],
+['w3',6,'Aliona kwanza','Aliona nini kwanza?','s',['smoke:Moshi','fire:Moto','u:Hakumbuki'],0,A=>!no(A.w1)],
+['w4',6,'Jambo lisilo la kawaida','Kuna jambo lisilo la kawaida alilolishuhudia (watu wasiojulikana, harufu, sauti)?','x',0,0,A=>!no(A.w1)],
+['w5',6,'Mashahidi wengine','Mashahidi wengine ni nani na wanasema nini?','x',0,0,A=>!no(A.w1)],
+['prot',7,'Mifumo ya ulinzi','Alarm, sprinkler au vizima moto vilikuwepo?','s',YN],
+['prot2',7,'Utendaji wa mifumo','Vilifanya kazi vipi? Vilitoa taarifa muda gani?','x',0,0,A=>A.prot=='y'],
+['crew',7,'Taarifa za kikosi','Idadi ya magari/wafanyakazi, hali walipofika, mbinu zilizotumika, muda wa kuzima?','x'],
+['cas',8,'Majeruhi/vifo','Kulikuwa na majeruhi au vifo?','s',YN],
+['cas2',8,'Hali ya majeruhi','Walikuwa wapi tukio linaanza, na walipatikana katika hali gani?','x',0,0,A=>A.cas=='y'],
+['prop',8,'Mali na hasara','Mali iliyoharibika na makadirio ya hasara?','x'],['env',8,'Mazingira','Madhara kwa mazingira (moshi, kemikali, maji)?','x'],
+['ev',9,'Vielelezo','Orodhesha vielelezo vilivyokusanywa (kitu, kilipatikana wapi, aliyekusanya, mahali pa kuhifadhi - chain of custody). Pakia picha kwenye tab ya Picha.','x'],
+['evp',9,'Picha mahali pake','Vielelezo vilipigwa picha mahali pake kabla ya kuguswa?','s',YN],['lab',9,'Uchunguzi wa kitaalamu','Vimepelekwa maabara/mtaalamu?','s',YN],
+['h1',10,'Nadharia 1','Nadharia ya kwanza ya chanzo cha moto ni ipi?','x'],['h1c',10,'Aina (1)','Aina ya nadharia hii?','s',CAT,0,A=>A.h1],
+['h1s',10,'Ushahidi unaounga mkono (1)','Ushahidi gani unaounga mkono nadharia hii?','x',0,0,A=>A.h1],['h1a',10,'Ushahidi unaopinga (1)','Ushahidi gani unaipinga (au andika "hakuna")?','x',0,0,A=>A.h1],
+['h1t',10,'Hali (1)','Hali ya nadharia hii baada ya kuijaribu dhidi ya ushahidi wote?','s',STS,0,A=>A.h1],
+['h2',10,'Nadharia 2','Nadharia mbadala ni ipi? (andika "hakuna" kama haipo)','x'],['h2c',10,'Aina (2)','Aina ya nadharia hii?','s',CAT,0,A=>!no(A.h2)],
+['h2s',10,'Ushahidi unaounga mkono (2)','Ushahidi unaounga mkono?','x',0,0,A=>!no(A.h2)],['h2a',10,'Ushahidi unaopinga (2)','Ushahidi unaopinga?','x',0,0,A=>!no(A.h2)],
+['h2t',10,'Hali (2)','Hali ya nadharia hii?','s',STS,0,A=>!no(A.h2)],
+['concl',11,'Hitimisho la mchunguzi','Hitimisho lako kama mchunguzi ni lipi?','x'],['rec',11,'Mapendekezo','Mapendekezo ya kuzuia na usalama?','x']];
+const AL=[[G,'Hatari ya gesi/mafuta/kemikali: hakikisha eneo ni salama kabla ya kuendelea.',1],[X,'Mlipuko umetajwa: chunguza chanzo, mabaki na uharibifu wa kuta/madirisha.'],[/majeruhi|kifo|amekufa|wamekufa|maiti/,'Vifo/majeruhi: shirikisha polisi na ulinde eneo la tukio.',1],[/petroli|dizeli|mafuta ya taa|kichocheo/,'Dalili za kichocheo: chukua sampuli, piga picha, tuma maabara.',1],[/makusudi|kuchomwa|wizi|ugomvi|kisasi|mtu asiyejulikana/,'Uwezekano wa moto wa makusudi: linda vielelezo na taarifa polisi.',1],[E,'Umeme umetajwa: usikague mfumo ukiwa na nishati; tumia fundi.']];
+const LS='fiiai2';let S={a:{},aq:{},pq:[],f:[],n:0,cur:null,tab:0,busy:0};try{S=Object.assign(S,JSON.parse(localStorage[LS]))}catch(e){}
+const save=()=>{try{localStorage[LS]=JSON.stringify(S)}catch(e){alert('Hifadhi imejaa: punguza picha.')}};
+const A=()=>S.a,txt=()=>Object.values(S.a).join(' ').toLowerCase(),QM={};QS.forEach(q=>QM[q[0]]=q);
+const lbl=id=>QM[id]?QM[id][2]:'Swali la ziada (AI)',qt=id=>QM[id]?QM[id][3]:S.aq[id];
+const dsp=(id,v)=>{const q=QM[id];if(q&&q[4]=='s'){const o=q[5].find(x=>x.split(':')[0]==v);return o?o.slice(o.indexOf(':')+1):v}return v||''};
+const vis=q=>q[7]?q[7](S.a):q[6]?q[6].test(txt()):true;
+const fol=()=>QS.filter(q=>(q[6]||q[7])&&vis(q)).map(q=>q[0]);
+function nextQ(){S.pq=S.pq.filter(i=>!(i in S.a));const ai=Object.keys(S.aq).find(i=>!(i in S.a));if(ai)return ai;
+if(S.pq.length&&(vis(QM[S.pq[0]]||[0,0,0,0,0,0,0,()=>1])))return S.pq[0];const q=QS.find(q=>!(q[0] in S.a)&&vis(q));return q?q[0]:null}
+function cls(){const g=n=>({n:S.a['h'+n],c:S.a['h'+n+'c'],s:S.a['h'+n+'s'],g:S.a['h'+n+'a'],t:S.a['h'+n+'t']}),H=[g(1),g(2)].filter(h=>!no(h.n)),v=H.filter(h=>h.t!='ref'),c=H.filter(h=>h.t=='sup'&&!no(h.s)&&no(h.g));
+if(!H.length||!S.a.ev||no(S.a.ev)||!S.a.area)return'INCONCLUSIVE';if(c.length==1&&v.length==1){const h=c[0];if(h.c=='acc')return S.a.multi=='y'?'UNDETERMINED':'ACCIDENTAL';if(h.c=='nat')return'NATURAL';if(h.c=='inc'&&(S.a.lab=='y'||S.a.multi=='y'))return'INCENDIARY'}return'UNDETERMINED'}
+const CD={ACCIDENTAL:'Chanzo cha ajali kimethibitishwa; nadharia nyingine zimekanushwa.',NATURAL:'Chanzo cha asili kimethibitishwa.',INCENDIARY:'Moto wa makusudi unaungwa mkono na ushahidi wa kimwili/kitaalamu.',UNDETERMINED:'Chanzo hakijabainika: nadharia zaidi ya moja zinabaki au hakuna iliyothibitishwa kikamilifu.',INCONCLUSIVE:'Taarifa/ushahidi hautoshi; uchunguzi zaidi unahitajika. Mfumo haulazimishi chanzo.'};
+function chk(){const a=S.a,t=txt(),mn=x=>x?+x.slice(0,2)*60+ +x.slice(3,5):0,c=[],m=[],al=AL.filter(r=>r[0].test(t)).map(r=>r[1]);
+if(a.started&&a.arr&&mn(a.arr)<mn(a.started))c.push('Kikosi cha kwanza kimerekodiwa kufika kabla ya moto kuanza.');
+if(a.started&&a.seen&&mn(a.seen)<mn(a.started))c.push('Moto umeonekana kabla ya muda wa kuanza uliokadiriwa.');
+if(a.multi=='y'&&cls()=='ACCIDENTAL')c.push('Asili nyingi zimetajwa lakini nadharia ya ajali moja imethibitishwa.');
+if(a.accel=='y'&&a.h1c=='acc'&&a.h1t=='sup'&&no(a.h1s)==false&&!QS.some(q=>0)&&no(a.h1a))c.push('Dalili za kichocheo zipo ilhali ajali inaungwa mkono bila maelezo ya kichocheo.');
+if(a.cas=='y'&&!a.cas2)m.push('Hali ya majeruhi/vifo haijaelezwa.');if(no(a.ev))m.push('Hakuna vielelezo vilivyorekodiwa.');if(!S.f.length)m.push('Hakuna picha/vielelezo vilivyopakiwa.');
+if(a.evp=='n')m.push('Vielelezo havikupigwa picha mahali pake.');if(a.lab=='n')m.push('Hakuna uchunguzi wa kitaalamu/maabara.');if(a.area&&!a.pat)m.push('Fire patterns hazijaelezwa.');
+Object.keys(a).filter(k=>a[k]=='Haijulikani'&&QM[k]&&QM[k][4]!='s').forEach(k=>m.push('Haijulikani: '+lbl(k)));return{c,m,al}}
+async function aiq(){const body=QS.concat([]).filter(q=>q[0] in S.a).slice(-14).map(q=>q[2]+': '+S.a[q[0]]).join('\n');
+const K=localStorage.pk||'';S.err='';try{const r=await fetch(K?'https://gen.pollinations.ai/v1/chat/completions':'https://text.pollinations.ai/openai',{method:'POST',headers:Object.assign({'Content-Type':'application/json'},K?{Authorization:'Bearer '+K}:{}),signal:AbortSignal.timeout(20000),body:JSON.stringify({model:'openai',messages:[{role:'system',content:'Wewe ni mchunguzi mtaalamu wa moto (NFPA 921). Kulingana na majibu, toa SWALI MOJA tu la ziada la kitaalamu kwa Kiswahili. Lisirudie lililojibiwa. Toa swali tu, bila utangulizi.'},{role:'user',content:body}]})});
+if(!r.ok)throw new Error('HTTP '+r.status);const j=await r.json(),q=(j.choices[0].message.content||'').trim();if(q.length>8&&q.length<400&&S.n<8){S.n++;S.aq['ai'+S.n]=q}}catch(e){S.err='AI imeshindwa: '+e.message+(K?'':' — weka API key kwa kitufe cha 🔑')}}
+async function ans(id,v){v=(v||'').trim();const q=QM[id];if(!v)return;if(q&&q[4]!='s'&&v.length<3&&!S.re){S.re=id;S.msg='Jibu ni fupi sana; tafadhali fafanua zaidi.';return ui()}
+S.re=0;S.msg='';const b=new Set(fol());S.a[id]=v;S.pq=fol().filter(i=>!b.has(i)&&!(i in S.a)).concat(S.pq);S.cur=null;save();
+if($('#ai').checked){S.busy=1;ui();await aiq();S.busy=0}ui()}
+const cq=()=>S.cur||nextQ();
+const CAUS=[['Hitilafu ya umeme',/umeme|soketi|nyaya|short|arcing|surge|breaker|fuse|transfoma/],['Kupika / moto wazi',/kupika|jiko|mkaa|kuni|mshumaa|taa ya mafuta|moto wazi|kuchoma taka/],['Gesi / LPG',/gesi|lpg|mtungi|valvu/],['Sigara / kiberiti',/sigara|kiberiti|uvutaji|bangi/],['Kichocheo / makusudi',/petroli|dizeli|kichocheo|makusudi|kuchomwa|ignitable|pour/],['Asili (radi)',/radi|ngurumo|miale/],['Mitambo / joto la kifaa',/jenereta|injini|motor|msuguano|boiler|joto kupita/],['Watoto / uchezeaji',/watoto|mtoto|kucheza/]];
+function causes(){const W={area:3,ign:3,firstmat:2,pat:1,e1:2,e2:1,e4:3,g1:2,x2:2,w2:2,w4:2,h1:2,h2:2,fuel:1,out:1,arch:1,pre:1,reporter:1},r=CAUS.map(([n,re])=>{let s=0,ev=[];for(const k in W){const m=(S.a[k]||'').toLowerCase().match(new RegExp(re.source,'g'));if(m){s+=m.length*W[k];ev.push(lbl(k))}}if(/Kichocheo/.test(n)){if(S.a.accel=='y'){s+=4;ev.push('Dalili za kichocheo')}if(S.a.multi=='y'){s+=4;ev.push('Asili nyingi')}}return{n,s,ev}}).filter(x=>x.s),T=r.reduce((a,x)=>a+x.s,0);return r.map(x=>({...x,p:Math.round(x.s/T*100)})).sort((a,b)=>b.p-a.p)}
+function conf(){const a=S.a,t=Object.keys(a).length,rm=QS.filter(q=>!(q[0] in a)&&vis(q)).length,c=Math.round(t/(t+rm)*100),e=(a.ev&&!no(a.ev)?30:0)+(S.f.length?25:0)+(a.evp=='y'?20:0)+(a.lab=='y'?25:0),h=(a.h1t?40:0)+(a.h1s&&!no(a.h1s)?40:0)+(a.h1a&&!no(a.h1a)?20:0),k=Math.max(0,100-30*chk().c.length);return{c,e,h,k,o:Math.round(c*.3+e*.3+h*.25+k*.15)}}
+const bar=(l,p)=>`<div style="margin:7px 0"><small>${l} · ${p}%</small><div class="bar"><i style="width:${p}%"></i></div></div>`;
+function tl(){const a=S.a,mn=x=>+x.slice(0,2)*60+ +x.slice(3,5),p=[['Tukio limeripotiwa',a.time],['Moto ulianza (kadirio)',a.started],['Moto ulionekana',a.seen],['Kikosi kilifika',a.arr]].filter(x=>x[1]).sort((x,y)=>mn(x[1])-mn(y[1]));return p.map((x,i)=>`<div class="row"><div><b>${x[1]}</b> ${x[0]}</div><small>${i?'+'+(mn(x[1])-mn(p[i-1][1]))+' dk':'—'}</small></div>`).join('')||'<small>Jaza nyakati ili kuona mpangilio.</small>'}
+function pats(){const t=(S.a.pat||'').toLowerCase(),R=[[/v-?pattern|umbo la v|kilele|apex/,'V-pattern: asili kwa kawaida iko chini ya kilele cha V.'],[/kina|makaa|char/,'Makaa mazito zaidi = muda mrefu wa kuungua; linganisha sehemu zote.'],[/sakafu|chini|madoa|pour/,'Uharibifu wa sakafu usio wa kawaida: angalia mabaki ya ignitable liquid (pour pattern).'],[/dari|juu|paa/,'Uharibifu wa juu: moto umepanda au flashover; usichukue kama asili moja kwa moja.'],[/kioo|glasi|crazing|kupasuka/,'Kioo kilichopasuka/crazing kinaonyesha joto la haraka; kagua mwelekeo.'],[/chuma|kuyeyuka|kupinda/,'Chuma kuyeyuka/kupinda: kadiria joto na muda; tofautisha na uharibifu wa kuzimwa.'],[/mlango|mwelekeo|ukuta/,'Mwelekeo wa kuenea kwenye kuta/milango husaidia kufuatilia njia ya moto kurudi asili.']];return R.filter(r=>r[0].test(t)).map(r=>r[1])}
+function acts(){const k=chk(),c=causes()[0],r=[];if(c){if(/umeme/.test(c.n))r.push('Mkague fundi umeme na piga picha breaker, soketi na waya zilizoyeyuka.');if(/Gesi/.test(c.n))r.push('Kagua mtungi, valvu na hose; weka kipima gesi kabla ya kuingia.');if(/Kichocheo/.test(c.n))r.push('Chukua sampuli za sakafu/udongo kwenye mikebe safi na uzitume maabara.');if(/Kupika/.test(c.n))r.push('Linganisha eneo la jiko/moto wazi na kinachodhaniwa kuwa asili.')}
+if(S.a.cas=='y')r.push('Ratibu na polisi na daktari kuhusu vifo/majeruhi.');k.m.slice(0,4).forEach(x=>r.push('Jaza pengo: '+x));if(!S.a.h2||no(S.a.h2))r.push('Weka angalau nadharia mbadala moja na uijaribu.');return r.slice(0,7)}
+function brain(){const c=conf(),cs=causes(),k=chk(),lv=c.o>=70?'JUU':c.o>=40?'WASTANI':'CHINI';
+return`<div class="card" style="text-align:center"><small>KIWANGO CHA UHAKIKA WA UCHUNGUZI</small><div style="font-size:52px;font-weight:800;color:var(--p)">${c.o}%</div><span class="tag">${lv}</span><p>Uainishaji: <b>${cls()}</b><br><small>${CD[cls()]}</small></p>${bar('Ukamilifu wa taarifa',c.c)+bar('Ubora wa ushahidi',c.e)+bar('Majaribio ya nadharia',c.h)+bar('Uthabiti (bila mgongano)',c.k)}</div>
+<div class="card"><h3>🎯 Vyanzo vinavyowezekana (kulingana na ushuhuda)</h3>${cs.length?cs.map(x=>bar(x.n,x.p)+`<small>Vyanzo vya ushahidi: ${x.ev.join(', ')}</small>`).join(''):'<small>Jibu maswali zaidi kuona nafasi za vyanzo.</small>'}<div class="al"><small>Hii ni nafasi ya ishara kutoka kwa maelezo yaliyoingizwa, si uthibitisho. Chanzo kinathibitishwa kwa ushahidi wa kimwili na majaribio ya nadharia.</small></div></div>
+<div class="card"><h3>⏱ Mpangilio wa matukio</h3>${tl()}</div>
+${pats().length?`<div class="card"><h3>🔎 Usomaji wa fire patterns</h3>${pats().map(x=>`<div class="al">${x}</div>`).join('')}</div>`:''}
+<div class="card"><h3>🚨 Hatua zinazopendekezwa</h3>${acts().map(x=>`<div class="al">${x}</div>`).join('')||'<small>Hakuna kwa sasa.</small>'}${k.al.map(x=>`<div class="al r">⚠️ ${x}</div>`).join('')}${k.c.map(x=>`<div class="al r">↯ ${x}</div>`).join('')}</div>`}
+function ui(){$('#tabs').innerHTML=['💬 Mahojiano','📋 Muhtasari','📷 Picha','🧠 Akili'].map((t,i)=>`<button class="g s ${S.tab==i?'on':''}" onclick="S.tab=${i};ui()">${t}</button>`).join('');
+const m=$('#m');if(S.tab==3)return m.innerHTML=brain();if(S.tab==1)return m.innerHTML=sum();if(S.tab==2)return m.innerHTML=pic();
+const id=cq(),tot=Object.keys(S.a).length,rem=QS.filter(q=>!(q[0] in S.a)&&vis(q)).length,p=Math.round(tot/(tot+rem)*100),k=chk();
+if(S.busy)return m.innerHTML='<div class="card">🤖 Mchunguzi msaidizi anafikiria swali linalofuata…</div>';
+let h=`<div class="card"><div class="bar"><i style="width:${p}%"></i></div><small>Maendeleo: ${p}% · Majibu ${tot}</small>`;
+if(!id)h+=`<h3>✅ Maswali yamekamilika</h3><p>Chanzo: <span class="tag">${cls()}</span><br>${CD[cls()]}</p><button onclick="rep()">Tengeneza Ripoti</button> <button class="g" onclick="S.tab=1;ui()">Muhtasari</button></div>`;
+else{const q=QM[id],st=q?q[1]:S.n?10:0;h+=`<br><small>Hatua ${st+1}/${ST.length}: ${ST[st]}${q?'':' · 🤖 swali la ziada'}</small><h3>${esc(qt(id))}</h3>`;
+if(S.msg)h+=`<div class="al">${S.msg}</div>`;if(S.err)h+=`<div class="al r">🤖 ${esc(S.err)}</div>`;
+const ty=q?q[4]:'x',v=S.cur?S.a[id]||'':'';
+h+=ty=='s'?`<select id="in"><option value="">—</option>${q[5].map(o=>{const j=o.indexOf(':');return`<option value="${o.slice(0,j)}" ${o.slice(0,j)==v?'selected':''}>${o.slice(j+1)}</option>`}).join('')}</select>`:ty=='x'?`<textarea id="in" rows="4">${esc(v)}</textarea>`:`<input id="in" type="${{t:'text',d:'date',tm:'time'}[ty]}" value="${esc(v)}">`;
+h+=`<button onclick="ans('${id}',$('#in').value)">Jibu →</button> <button class="g" onclick="ans('${id}','Haijulikani')">Sijui</button></div>`}
+if(k.al.length)h+=k.al.map(x=>`<div class="al r">⚠️ ${x}</div>`).join('');if(k.c.length)h+=k.c.map(x=>`<div class="al r">↯ Mgongano: ${x}</div>`).join('');
+const last=QS.filter(q=>q[0] in S.a).slice(-3).reverse();if(last.length)h+=`<div class="card"><small>Muhtasari wa majibu ya hivi karibuni</small>${last.map(q=>`<div class="row"><div><small>${q[2]}</small><br>${esc(dsp(q[0],S.a[q[0]]))}</div></div>`).join('')}</div>`;m.innerHTML=h}
+function sum(){const k=chk();let h=`<div class="card"><h3>Hali ya uchunguzi</h3>Chanzo: <span class="tag">${cls()}</span><p>${CD[cls()]}</p></div>`;
+const L=(t,a)=>a.length?`<div class="card"><h3>${t}</h3>${a.map(x=>`<div class="al">${x}</div>`).join('')}</div>`:'';h+=L('⚠️ Tahadhari',k.al)+L('↯ Taarifa zinazokinzana',k.c)+L('❓ Kinachokosekana',k.m);
+ST.forEach((s,i)=>{const r=QS.concat(Object.keys(S.aq).map(x=>[x,i,0])).filter(q=>q[1]==i&&q[0] in S.a);if(r.length)h+=`<div class="card"><h3>${s}</h3>${r.map(q=>`<div class="row"><div><small>${lbl(q[0])}</small><br>${esc(dsp(q[0],S.a[q[0]]))}</div><button class="g s" onclick="S.cur='${q[0]}';S.tab=0;ui()">Hariri</button></div>`).join('')}</div>`});
+return h+`<button class="g" onclick="if(confirm('Futa uchunguzi wote na kuanza upya?')){S={a:{},aq:{},pq:[],f:[],n:0,cur:null,tab:0};save();ui()}">🗑 Anza upya</button>`}
+function pic(){return`<div class="card"><h3>Picha, video na vielelezo</h3><input type="file" accept="image/*" multiple onchange="up(this.files)"><div>${S.f.map((f,i)=>`<span><img class="th" src="${f.u}"><button class="g s" onclick="S.f.splice(${i},1);save();ui()">✕</button></span>`).join('')}</div><small>Picha hupunguzwa ukubwa ili zihifadhiwe kwenye kifaa. AI haichambui picha.</small></div>`}
+function up(fl){[...fl].forEach(f=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas'),s=Math.min(1,700/i.width);c.width=i.width*s;c.height=i.height*s;c.getContext('2d').drawImage(i,0,0,c.width,c.height);S.f.push({u:c.toDataURL('image/jpeg',.6),n:f.name});save();ui()};i.src=r.result};r.readAsDataURL(f)})}
+function rep(){const a=S.a,k=chk(),v=id=>esc(dsp(id,a[id])||'—'),T=ids=>`<table>${ids.map(i=>`<tr><th>${lbl(i)}</th><td>${v(i)}</td></tr>`).join('')}</table>`,
+H=n=>no(a['h'+n])?'':`<tr><td><b>${v('h'+n)}</b><br>${v('h'+n+'c')}</td><td>${v('h'+n+'s')}</td><td>${v('h'+n+'a')}</td><td>${v('h'+n+'t')}</td></tr>`,
+ex=Object.keys(S.aq).filter(x=>x in a).map(x=>`<tr><th>${esc(S.aq[x])}</th><td>${esc(a[x])}</td></tr>`).join('');
+$('#rp').innerHTML=`<button class="no" onclick="window.print()">⬇ Pakua PDF / Chapisha</button> <button class="g no" onclick="$('#rp').hidden=true;document.querySelector('main').hidden=false">✕ Funga</button>
+<h1>JESHI LA ZIMAMOTO NA UOKOAJI TANZANIA<br>FIRE INVESTIGATION REPORT</h1>
+<h2>1. Incident Information</h2>${T(['ref','inc','type','date','time','loc','owner','unit'])}
+<h2>2. Executive Summary</h2><p>Tarehe ${v('date')} saa ${v('time')}, tukio la ${v('type')} lilitokea ${v('loc')}. Eneo la kuanzia lililotambuliwa: ${v('area')}. Kikosi cha kwanza kilifika saa ${v('arr')}. Majeruhi/vifo: ${v('cas')}. Uainishaji wa chanzo: <b>${cls()}</b> — ${CD[cls()]}</p>
+<h2>3. Incident Background</h2>${T(['struct','use','hist','reporter','pre'])}
+<h2>4. Scene Description</h2>${T(['wx','vent','prot','prot2'])}
+<h2>5. Investigation Methodology</h2><p>Uchunguzi ulifanyika kwa mbinu ya kisayansi (NFPA 921): ukusanyaji wa data, uundaji wa nadharia, kuzijaribu dhidi ya ushahidi wote, na kuhitimisha. Chanzo hakikubaliwi kwa kuondoa nadharia nyingine pekee.</p>
+<h2>6. Witness Statements</h2>${T(['w1','w2','w3','w4','w5'])}
+<h2>7. Physical Evidence</h2>${T(['ev','evp','lab'])}
+<h2>8. Scene Examination Findings</h2>${T(['pat','spread','multi','e1','e2','e3','e4','g1','g2','x1','x2','accel','crew'])}${ex?`<table>${ex}</table>`:''}
+<h2>9. Fire Origin Analysis</h2>${T(['area','seen','started','firstmat','fuel'])}
+<h2>10. Fire Cause Analysis</h2>${T(['ign'])}<p>Uainishaji: <b>${cls()}</b>. ${CD[cls()]}</p>
+<h2>11. Evidence Assessment</h2><p><b>Ushahidi wa kimwili:</b> ${v('ev')}<br><b>Ushuhuda wa mashahidi:</b> ${v('w2')}</p><p><b>Mgongano:</b> ${k.c.join('; ')||'Hakuna'}<br><b>Kinachokosekana:</b> ${k.m.join('; ')||'Hakuna'}</p>
+<p><b>Kiwango cha uhakika wa uchunguzi:</b> ${conf().o}% (taarifa ${conf().c}%, ushahidi ${conf().e}%, nadharia ${conf().h}%, uthabiti ${conf().k}%)</p><p><b>Vyanzo vilivyotathminiwa kwa ushuhuda:</b> ${causes().map(x=>x.n+' '+x.p+'%').join('; ')||'—'} <i>(kielekezi, si uthibitisho)</i></p><table>${tl().replace(/<div class="row"><div>/g,'<tr><td>').replace(/<\/div><small>/g,'</td><td>').replace(/<\/small><\/div>/g,'</td></tr>')}</table>
+<h2>12. Alternative Hypotheses</h2><table><tr><th>Nadharia</th><th>Inaunga</th><th>Inapinga</th><th>Hali</th></tr>${H(1)+H(2)||'<tr><td colspan=4>—</td></tr>'}</table>
+<h2>13. Findings and Conclusion</h2><p><b>${cls()}</b>: ${CD[cls()]}</p><p>${v('concl')}</p><p>Madhara: ${v('prop')} · ${v('env')}</p>
+<h2>14. Recommendations</h2><p>${v('rec')}</p>
+<h2>15. Investigator's Details</h2>${T(['inv','unit'])}
+<h2>16. Attachments and Photographic Evidence</h2>${S.f.map(f=>`<img src="${f.u}" style="max-width:48%;margin:3px">`).join('')||'<p>Hakuna.</p>'}
+<p style="margin-top:30px">Sahihi ya mchunguzi: ____________ Tarehe: ________</p>`;$('#rp').hidden=false;document.querySelector('main').hidden=true;scrollTo(0,0)}
+ui();
 </script></body></html>
