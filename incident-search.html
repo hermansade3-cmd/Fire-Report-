@@ -1,1253 +1,177 @@
-<!doctype html>
-<html lang="sw">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>R-Search</title>
-<link rel="icon" href="profile.jpg">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<!DOCTYPE html><html lang="sw"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>AI Fire &amp; Incident Investigation Assistant</title>
 <style>
-:root{--bg:#eef1f3;--panel:#fff;--ink:#14202b;--mute:#5d6b78;--line:#d9e0e5;--red:#c8321e;--red-ink:#fff;--hi:#e8f04a;--bubble:#14202b;--bubble-ink:#fff;--r:14px;--f:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-[data-theme=dark]{--bg:#0e151b;--panel:#16212a;--ink:#e8eef2;--mute:#93a3b0;--line:#26343f;--red:#ff5a40;--red-ink:#10161b;--bubble:#e8f04a;--bubble-ink:#14202b}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
-body{font-family:var(--f);background:var(--bg);color:var(--ink);transition:background .2s,color .2s}
-button,textarea{font:inherit;color:inherit}button{cursor:pointer}
-:focus-visible{outline:3px solid var(--red);outline-offset:2px}
-#app{display:flex;height:100dvh}
-#side{width:25%;min-width:260px;max-width:340px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px;gap:10px}
-.brand{font-weight:800;font-size:22px;letter-spacing:-.02em}.brand b{background:var(--red);color:var(--red-ink);padding:0 7px;border-radius:7px;margin-right:6px}
-.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:9px 12px;transition:background .15s}
-.btn:hover{background:var(--bg)}.btn.pri{background:var(--red);color:var(--red-ink);border-color:var(--red);font-weight:600}
-#hist{overflow:auto;flex:1}.grp{font-size:13px;color:var(--mute);margin:14px 6px 4px}
-.it{display:flex;align-items:flex-start;border-radius:9px;gap:2px}.it:hover,.it.on{background:var(--bg)}
-.it .t{flex:1;text-align:left;background:none;border:0;padding:9px 8px;overflow-wrap:anywhere;line-height:1.3}
-.it .a{background:none;border:0;padding:6px;opacity:.55}.it .a:hover{opacity:1}
-main{flex:1;display:flex;flex-direction:column;min-width:0}
-header{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
-#menu{display:none}
-#tabs{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
-.tab{white-space:nowrap;border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:8px 14px}
-.tab[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink);font-weight:600}
-#feed{flex:1;overflow:auto;padding:18px 14px 8px}
-.wrap{max-width:780px;margin:0 auto}
-.hero{text-align:center;margin-top:12vh}.hero h1{font-size:clamp(34px,7vw,56px);margin:0 0 8px;letter-spacing:-.03em;font-weight:800}
-.hero p{color:var(--mute);margin:0 auto;max-width:440px}
-.msg{margin:14px 0;display:flex}.msg.u{justify-content:flex-end}
-.bub{background:var(--bubble);color:var(--bubble-ink);padding:10px 14px;border-radius:var(--r) var(--r) 4px var(--r);max-width:85%;white-space:pre-wrap;word-break:break-word}
-.ai{width:100%}.ai .body{line-height:1.6}.ai .body h2,.ai .body h3,.ai .body h4,.ai .body h5{margin:14px 0 6px}
-.ai .body p{margin:8px 0}.ai a{color:var(--red)}.ai code{background:var(--bg);padding:1px 5px;border-radius:5px}
-.code{position:relative;background:var(--bg);border:1px solid var(--line);border-radius:10px;margin:10px 0}.code pre{margin:0;padding:12px;overflow:auto}
-.cp{position:absolute;top:6px;right:6px;font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:7px;background:var(--panel)}
-.tw{overflow:auto}table{border-collapse:collapse}th,td{border:1px solid var(--line);padding:6px 10px}
-.status{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:14px}
-.status summary{cursor:pointer}.dots span{display:inline-block;width:7px;height:7px;margin-right:4px;border-radius:50%;background:var(--red);animation:b 1s infinite}
-.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}@keyframes b{50%{opacity:.2}}
-.sk{height:14px;border-radius:7px;background:linear-gradient(90deg,var(--line),var(--bg),var(--line));background-size:200% 100%;animation:s 1.2s infinite;margin:10px 0}@keyframes s{to{background-position:-200% 0}}
-.src{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));margin:6px 0 12px}
-.card{display:block;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px 12px;text-decoration:none;color:var(--ink);transition:border-color .15s}
-.card:hover{border-color:var(--red)}.card b{display:block;font-size:14px;line-height:1.3;overflow-wrap:anywhere}.card small{color:var(--mute)}.card p{margin:4px 0 0;font-size:13px;color:var(--mute);overflow-wrap:anywhere}
-.lab{font-size:14px;color:var(--mute);margin:12px 0 4px;font-weight:600}
-.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:7px 12px;font-size:14px}.chip:hover{border-color:var(--red)}
-.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
-.m{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
-.m img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--line)}.m .i{padding:8px 10px;font-size:13px;flex:1}.m .i b{display:block;overflow-wrap:anywhere}
-.m a{margin:0 10px 10px;text-align:center;text-decoration:none;color:var(--red-ink);background:var(--red);border-radius:8px;padding:6px;font-size:13px;font-weight:600}
-.au{display:flex;gap:10px;align-items:center;border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:10px;margin:8px 0}.au .ic{font-size:26px}.au .x{flex:1;min-width:0}.au .x b{display:block;overflow-wrap:anywhere}
-.au .bar{height:4px;background:var(--line);border-radius:4px;margin-top:6px}.au .bar i{display:block;width:0;height:100%;background:var(--red);border-radius:4px}
-.au a{background:var(--red);color:var(--red-ink);border-radius:99px;padding:8px 14px;text-decoration:none;font-weight:600}
-.err{border:1px solid var(--red);border-radius:12px;padding:12px;background:var(--panel)}
-footer{padding:8px 14px calc(10px + env(safe-area-inset-bottom));background:var(--bg)}
-.box{max-width:780px;margin:0 auto;display:flex;align-items:flex-end;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:6px 8px;box-shadow:0 2px 10px rgba(20,32,43,.08)}
-.box:focus-within{border-color:var(--red)}
-textarea{flex:1;border:0;background:none;resize:none;max-height:140px;padding:9px 4px;outline:none;line-height:1.4}
-.ib{border:0;background:none;font-size:20px;padding:8px;border-radius:50%}.ib:hover{background:var(--bg)}.ib.rec{background:var(--red)}
-#send{background:var(--red);color:var(--red-ink);border-radius:50%;width:40px;height:40px;font-size:18px}
-.note{max-width:780px;margin:4px auto 0;font-size:12px;color:var(--mute);text-align:center}
-.sec{font-weight:800;font-size:18px;margin:24px 0 8px;letter-spacing:-.01em}
-.m video{width:100%;aspect-ratio:16/9;background:#000;display:block}.grid.v{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.m .dl{margin:0 10px 10px;border:0;color:var(--red-ink);background:var(--red);border-radius:8px;padding:6px;font-size:13px;font-weight:600}
-.m.off .i::after{content:"📴 Offline";display:block;color:var(--red);font-weight:600;margin-top:2px}
-.yp{position:relative;aspect-ratio:16/9;background:#000;cursor:pointer;overflow:hidden}.yp img{position:absolute;inset:0;height:100%;aspect-ratio:auto;cursor:pointer}
-.yp .pb{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(0,0,0,.62);color:#fff;display:flex;align-items:center;justify-content:center;pointer-events:none}.yp .pb svg.i{width:26px;height:26px;fill:#fff;stroke:#fff}
-.yp iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.wrap.vw{max-width:1180px}
-.vtabs{display:flex;gap:10px;position:sticky;top:-18px;z-index:4;margin:-18px -14px 16px;padding:12px 14px;background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
-.vtb{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px 12px;border-radius:14px;border:1px solid var(--line);background:var(--panel);font-weight:700;font-size:14px;transition:background var(--t),transform var(--t),color var(--t)}
-.vtb:active{transform:scale(.97)}.vtb svg.i{width:18px;height:18px}
-.vtb .n{font-size:12px;font-weight:700;background:var(--bg);color:var(--mute);border-radius:99px;padding:2px 8px}
-.vtb[aria-selected=true]{background:linear-gradient(135deg,var(--red),var(--red2));border-color:transparent;color:#fff;box-shadow:var(--sh)}
-.vtb[aria-selected=true] .n{background:rgba(255,255,255,.25);color:#fff}
-.vgrid{display:grid;gap:26px 16px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.vc{display:flex;flex-direction:column;min-width:0}
-.vc .yp,.vc .vpx{border-radius:14px;overflow:hidden;box-shadow:var(--sh);background:#000}
-.vc .yp img{transition:transform .3s}.vc:hover .yp img{transform:scale(1.04)}
-.vpx video{width:100%;aspect-ratio:16/9;background:#000;display:block}
-.dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.82);color:#fff;font-size:12px;font-weight:700;padding:2px 7px;border-radius:7px;letter-spacing:.2px}
-.vm{display:flex;gap:12px;padding:12px 4px 0}
-.av{flex:none;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:15px}
-.av svg.i{width:18px;height:18px}
-.vt{min-width:0}.vt b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:14.5px;line-height:1.35;font-weight:700;overflow-wrap:anywhere}
-.vt small{display:block;color:var(--mute);font-size:12.5px;margin-top:3px}
-.vc.off .vt::after{content:"Imehifadhiwa kwa offline";display:block;color:var(--ok);font-size:11.5px;font-weight:700;margin-top:3px}
-.vc .vdl{margin:12px 4px 0;border:0;border-radius:99px;padding:10px;background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:700;font-size:13.5px;display:flex;align-items:center;justify-content:center;gap:6px}
-.vc .vdl:active{transform:scale(.98)}
-.vmore{display:flex;justify-content:center;margin:26px 0 8px}.vmore .btn{padding:11px 22px;border-radius:99px;font-weight:700}
-@media(max-width:520px){.vgrid{grid-template-columns:1fr;gap:26px}.vtb{font-size:13px;padding:10px 8px}}
-#scrim{display:none}
-@media(max-width:800px){
-#side{position:fixed;inset:0 auto 0 0;width:84%;max-width:320px;z-index:20;transform:translateX(-102%);transition:transform .2s}
-#side.open{transform:none}#scrim.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:15}
-#menu{display:block}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-body{font-size:14px}
-svg.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.tab{padding:8px 13px;display:flex;align-items:center;justify-content:center}
-.btn{display:inline-flex;align-items:center;gap:6px}
-.ib{display:flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0}.ib svg.i{width:20px;height:20px}#send svg.i{width:18px;height:18px}
-.ai .body{font-size:14px;line-height:1.55}.ai .body p{margin:6px 0}.ai .body h2,.ai .body h3,.ai .body h4,.ai .body h5{font-size:15px;margin:10px 0 4px}
-.bub{font-size:14px;padding:8px 12px}.hero p{font-size:14px}
-.card b{font-size:13px}.card p{font-size:12px}.card small{font-size:11.5px}
-.m .i{font-size:12px}.m .i b{font-size:12.5px}.m .dl{font-size:12px;display:flex;align-items:center;justify-content:center;gap:5px}
-.au .x b{font-size:13px}.au .ic svg.i{width:24px;height:24px}.au a{display:inline-flex;align-items:center;gap:5px;font-size:13px}
-.m.off .i::after{content:"Offline";font-size:11px}
-.qh{font-size:12px;color:var(--mute);margin:16px 0 6px;font-weight:600;overflow-wrap:anywhere}
-.it .t{font-size:13px}.it .a{display:flex}.note{min-height:0}.status{font-size:13px}
-.brand{display:flex;align-items:center;gap:10px}.brand img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid var(--line);flex:none}
-.au .pl{width:38px;height:38px;border-radius:50%;border:0;background:var(--red);color:var(--red-ink);display:flex;align-items:center;justify-content:center;flex:none}
-.au .dl{border:1px solid var(--line);background:none;color:var(--ink);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;padding:0}
-.au .bar{height:8px;margin-top:6px;background:var(--line);border-radius:4px;cursor:pointer}.au .bar i{display:block;height:100%;width:0;background:var(--red);border-radius:4px}
-.au .tm{color:var(--mute);font-size:11.5px}.au.ld .pl{opacity:.5}
-.hero{margin-top:6vh}.sg{margin-top:22px}.sgh{display:flex;align-items:center;justify-content:space-between;color:var(--mute);font-size:12px;font-weight:600;margin-bottom:8px}
-.sgh button{width:32px;height:32px;border:0;background:none;border-radius:50%;display:flex;align-items:center;justify-content:center}.sgh button:hover{background:var(--panel)}
-.chip{font-size:13px;text-align:left;overflow-wrap:anywhere}
-/* ===== Design system v2 ===== */
-:root{--bg:#f1f3f5;--panel:#fff;--elev:#fff;--ink:#101a24;--mute:#5b6a78;--line:#dde3e8;--red:#d2381f;--red2:#ff7a45;--ok:#1f9d63;--warn:#d9a000;--glass:rgba(255,255,255,.74);--sh:0 1px 2px rgba(16,26,36,.06),0 8px 24px rgba(16,26,36,.06);--ring:0 0 0 4px rgba(210,56,31,.16);--t:.16s ease}
-[data-theme=dark]{--bg:#0a1016;--panel:#111a23;--elev:#17222d;--ink:#e9eff4;--mute:#8fa1b0;--line:#223140;--red:#ff6a4d;--red2:#ffb36b;--glass:rgba(17,26,35,.74);--sh:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);--ring:0 0 0 4px rgba(255,106,77,.22)}
-body{background:radial-gradient(900px 480px at 75% -8%,rgba(255,122,69,.11),transparent 60%),var(--bg)}
-main{position:relative}
-header{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
-#side{background:var(--panel)}
-.tab{min-height:40px;min-width:44px;transition:background var(--t),color var(--t),transform var(--t)}.tab:active{transform:scale(.94)}.tab:hover{border-color:var(--red)}
-.btn{transition:background var(--t),transform var(--t)}.btn:active{transform:scale(.97)}
-.btn.pri{background:linear-gradient(135deg,var(--red),var(--red2));border-color:transparent}
-.box{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-radius:24px;box-shadow:var(--sh);transition:box-shadow var(--t),border-color var(--t),transform var(--t)}
-.box:focus-within{box-shadow:var(--ring),var(--sh);border-color:var(--red);transform:translateY(-1px)}
-#send{background:linear-gradient(135deg,var(--red),var(--red2));transition:transform var(--t)}#send:hover{transform:scale(1.07)}#send:active{transform:scale(.93)}
-.msg{animation:in .22s ease both}@keyframes in{from{opacity:0;transform:translateY(6px)}}
-.card,.m,.au,.chip{box-shadow:var(--sh);transition:transform var(--t),border-color var(--t),box-shadow var(--t)}
-.card:hover,.m:hover{transform:translateY(-2px)}.chip:hover{transform:translateY(-1px)}.chip:active,.card:active{transform:scale(.98)}
-.m img{cursor:zoom-in;transition:transform .25s}.m:hover img{transform:scale(1.02)}.m{overflow:hidden}
-.hero .lg{width:72px;height:72px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 6px rgba(255,122,69,.16),var(--sh);margin-bottom:14px}
-.hero h1{background:linear-gradient(135deg,var(--ink) 30%,var(--red));-webkit-background-clip:text;background-clip:text;color:transparent}
-.act{display:flex;gap:4px;margin-top:2px}.act button{border:0;background:none;color:var(--mute);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center}.act button:hover{background:var(--panel);color:var(--ink)}
-#hs{width:100%;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 12px;color:var(--ink);outline:none;font:inherit;font-size:13px}#hs:focus{border-color:var(--red);box-shadow:var(--ring)}
-.kb{font-size:11px;color:var(--mute);text-align:center;padding-top:6px}
-.net{width:9px;height:9px;border-radius:50%;background:var(--ok);flex:none;box-shadow:0 0 0 3px rgba(31,157,99,.18)}.net.off{background:var(--warn);box-shadow:0 0 0 3px rgba(217,160,0,.22)}
-#toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translate(-50%,10px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50;max-width:90vw;text-align:center}#toast.on{opacity:1;transform:translate(-50%,0)}
-#lb{position:fixed;inset:0;background:rgba(5,10,15,.88);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:60;padding:16px}#lb.on{display:flex;animation:in .18s}
-#lb img{max-width:100%;max-height:88dvh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)}#lbx{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;color:#fff;background:rgba(255,255,255,.14)}
-#sb{position:absolute;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));transform:translateX(-50%);width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--elev);box-shadow:var(--sh);display:none;align-items:center;justify-content:center;z-index:5}#sb.on{display:flex}
-#splash{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;pointer-events:none;animation:sp .45s .3s ease forwards}
-#splash img{width:84px;height:84px;border-radius:50%;object-fit:cover;animation:pu .8s ease infinite alternate}@keyframes sp{to{opacity:0;visibility:hidden}}@keyframes pu{to{transform:scale(1.07)}}
-@media(prefers-reduced-motion:reduce){#splash{display:none}.msg{animation:none}}
-@media(max-width:520px){#triBtn{font-size:0;min-width:44px}#triBtn::before{content:"🤝";font-size:17px}}
-#tri{position:fixed;inset:0;z-index:9999;background:var(--bg,#fff);display:none;flex-direction:column}#tri.on{display:flex}#tri iframe{flex:1;border:0;width:100%}#triX{position:absolute;top:calc(8px + env(safe-area-inset-top));right:8px;z-index:2;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--panel);font-size:18px}
-</style>
-</head>
-<body>
-<div id="app">
-<aside id="side" aria-label="Historia">
-  <div class="brand"><img src="profile.jpg" alt="R-Search" width="34" height="34"><span>R-Search</span></div>
-  <button class="btn pri" id="new" aria-label="Mazungumzo mapya" data-i="plus" data-t="New Chat"></button>
-  <input id="hs" type="search" placeholder="Tafuta kwenye historia" aria-label="Tafuta kwenye historia" autocomplete="off">
-  <div id="hist"></div>
-  <div class="kb">Ctrl K chat mpya · / andika · Alt 1-5 maoneo</div>
-</aside>
-<div id="scrim"></div>
-<main>
-  <header>
-    <button class="btn" id="menu" aria-label="Fungua menyu" data-i="menu"></button>
-    <nav id="tabs" role="tablist" aria-label="Maoneo">
-      <button class="tab" role="tab" data-m="chat" data-i="chat" aria-label="Jibu la AI" title="Jibu" aria-selected="true"></button>
-      <button class="tab" role="tab" data-m="web" data-i="web" aria-label="Wavuti" title="Wavuti" aria-selected="false"></button>
-      <button class="tab" role="tab" data-m="images" data-i="images" aria-label="Picha" title="Picha" aria-selected="false"></button>
-      <button class="tab" role="tab" data-m="videos" data-i="videos" aria-label="Video" title="Video" aria-selected="false"></button>
-      <button class="tab" role="tab" data-m="audio" data-i="audio" aria-label="Audio" title="Audio" aria-selected="false"></button>
-      <button class="tab" id="triBtn" type="button" aria-label="R-AI Trinity" title="R-AI Trinity">🤝 Trinity</button>
-    </nav>
-    <span class="net" id="net" role="img" aria-label="Hali ya mtandao" title="Uko mtandaoni"></span>
-    <button class="btn" id="theme" aria-label="Badilisha mwonekano"></button>
-  </header>
-  <section id="feed" aria-live="polite"><div class="wrap" id="msgs"></div></section>
-  <footer>
-    <div class="box">
-      <button class="ib" id="attach" aria-label="Ambatisha faili la maandishi" data-i="attach"></button>
-      <input type="file" id="file" accept=".txt,.md,.csv" hidden>
-      <textarea id="q" rows="1" placeholder="Uliza chochote..." aria-label="Uliza chochote"></textarea>
-      <button class="ib" id="mic" aria-label="Sauti" data-i="mic"></button>
-      <button id="send" class="ib" aria-label="Tuma" data-i="send"></button>
-    </div>
-    <div class="note" id="note"></div>
-  </footer>
-<button id="sb" aria-label="Shuka chini" data-i="arrowdown"></button>
-</main>
-</div>
-<div id="tri" role="dialog" aria-label="R-AI Trinity"><button id="triX" type="button" aria-label="Funga">✕</button><iframe id="triF" title="R-AI Trinity" allow="microphone"></iframe></div>
-<script type="text/plain" id="triSrc"><!DOCTYPE html>
-<html lang="sw">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#2f6df6">
-<title>R-AI Trinity</title>
-<style>
-:root{--bg:#eaeef6;--panel:#fff;--txt:#141a29;--mut:#6b7691;--bd:#dfe5f1;--me:#2f6df6;--sade:#3b82f6;--fire:#f97316;--search:#16a34a;--sh:0 1px 2px rgba(20,30,60,.1)}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0a0f1a;--panel:#151c2b;--txt:#e8ecf4;--mut:#8a96ad;--bd:#243049;--sh:none}}
-:root[data-theme=dark]{--bg:#0a0f1a;--panel:#151c2b;--txt:#e8ecf4;--mut:#8a96ad;--bd:#243049;--sh:none}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--txt);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
-button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-#top{display:flex;align-items:center;gap:6px;padding:8px 8px 8px 6px;padding-top:calc(8px + env(safe-area-inset-top));background:var(--panel);border-bottom:1px solid var(--bd);box-shadow:var(--sh)}
-.ib{width:40px;height:40px;border-radius:50%;font-size:20px;display:grid;place-items:center;flex:none}.ib:active{background:var(--bd)}
-.grp{flex:1;display:flex;align-items:center;gap:10px;min-width:0}
-.stack{display:flex}.stack .av{width:34px;height:34px;margin-left:-10px;border:2px solid var(--panel);position:relative}.stack .av:first-child{margin-left:0}
-.stack .av.on::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid var(--c);animation:pulse 1s infinite}
-.gi{min-width:0}.gi b{display:block;font-size:16px}.gi small{display:block;color:var(--mut);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.gi small.live{color:var(--search)}
-.av{width:32px;height:32px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:700;font-size:14px;flex:none;font-style:normal;align-self:flex-end}
-.sade{--c:var(--sade)}.fire{--c:var(--fire)}.search{--c:var(--search)}
-#chat{flex:1;overflow-y:auto;padding:12px 10px 6px;display:flex;flex-direction:column;gap:8px}
-.pill{align-self:center;background:var(--panel);color:var(--mut);font-size:12px;padding:3px 12px;border-radius:999px;box-shadow:var(--sh);text-align:center}
-.row{display:flex;gap:8px;max-width:100%;animation:in .25s ease}.row.me{justify-content:flex-end}
-.bub{background:var(--panel);border-radius:4px 16px 16px 16px;padding:7px 11px 5px;max-width:86%;box-shadow:var(--sh);min-width:0}
-.row.me .bub{background:var(--me);color:#fff;border-radius:16px 4px 16px 16px}.row.err .bub{border:1px solid #ef4444}
-.nm{font-weight:700;font-size:13px;color:var(--c)}.tx{white-space:pre-wrap;overflow-wrap:anywhere}
-.tm{font-size:10.5px;color:var(--mut);text-align:right;margin-top:2px}.row.me .tm{color:rgba(255,255,255,.75)}
-.src{margin-top:7px;padding-top:6px;border-top:1px dashed var(--bd);font-size:12px}.src a{display:block;color:var(--c);word-break:break-word;margin-top:3px}.src small{color:var(--mut)}
-.media{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px}.media img{width:100%;height:92px;object-fit:cover;border-radius:8px;display:block}
-video{width:100%;max-height:230px;border-radius:10px;margin-top:8px;background:#000}.cr{font-size:11px;color:var(--mut);margin-top:4px}
-.dots{display:flex;gap:4px;padding:6px 2px}.dots i{width:7px;height:7px;border-radius:50%;background:var(--mut);animation:bl 1.2s infinite}.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
-.welcome{margin:auto;text-align:center;max-width:340px;padding:10px}.welcome .stack{justify-content:center;margin-bottom:10px}.welcome .av{width:54px;height:54px;font-size:20px;align-self:auto}
-.welcome p{color:var(--mut);margin:6px 0 14px}.chips{display:flex;flex-direction:column;gap:8px}.chip{background:var(--panel);border-radius:14px;padding:10px 12px;box-shadow:var(--sh);text-align:left}
-#f{display:flex;gap:8px;align-items:center;padding:8px 10px;padding-bottom:calc(8px + env(safe-area-inset-bottom));background:var(--bg)}
-#q{flex:1;border:0;border-radius:24px;padding:12px 16px;background:var(--panel);color:var(--txt);font-size:16px;box-shadow:var(--sh);outline:none;min-width:0}
-#b{width:46px;height:46px;border-radius:50%;background:var(--me);color:#fff;font-size:18px;flex:none}#b:disabled{opacity:.45}
-#ov{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:.2s;z-index:5}#ov.on{opacity:1;pointer-events:auto}
-#drawer{position:fixed;top:0;bottom:0;left:0;width:82%;max-width:330px;background:var(--panel);z-index:6;transform:translateX(-100%);transition:.25s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}#drawer.on{transform:none}
-.dh{padding:14px}.dh h3{margin:0}#nc{margin:0 14px 10px;padding:12px;border-radius:12px;background:var(--me);color:#fff;font-weight:600}
-#hist{flex:1;overflow-y:auto;padding:0 8px 12px}.hi{display:flex;align-items:center;gap:4px;padding:6px 6px 6px 10px;border-radius:12px}.hi.cur{background:var(--bg)}
-.hi .t{flex:1;min-width:0;text-align:left}.hi b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hi small{color:var(--mut)}.empty{color:var(--mut);text-align:center;padding:20px}
-#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--panel);z-index:7;border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));transform:translateY(105%);transition:.25s;max-height:85%;overflow-y:auto}#sheet.on{transform:none}
-#sheet h3{margin:0 0 6px}.set{margin:14px 0}.set>b{display:block;margin-bottom:6px;font-size:13px;color:var(--mut)}
-.seg{display:flex;background:var(--bg);border-radius:12px;padding:3px}.seg button{flex:1;padding:8px 4px;border-radius:10px;font-size:14px}.seg button.on{background:var(--me);color:#fff}
-.danger{width:100%;padding:12px;border-radius:12px;background:#ef444422;color:#ef4444;font-weight:600}.note{font-size:12px;color:var(--mut);margin-top:10px}
-@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes bl{0%,60%,100%{opacity:.25}30%{opacity:1}}@keyframes pulse{0%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.35)}}
-</style>
-</head>
-<body>
-<header id="top">
-  <button class="ib" id="menu" aria-label="Menu">☰</button>
-  <div class="grp">
-    <div class="stack"><i class="av sade" data-ai="sade">N</i><i class="av fire" data-ai="fire">I</i><i class="av search" data-ai="search">A</i></div>
-    <div class="gi"><b>R-AI Trinity</b><small id="sub"></small></div>
-  </div>
-  <button class="ib" id="new" aria-label="New chat">＋</button>
-  <button class="ib" id="gear" aria-label="Settings">⚙</button>
-</header>
-<main id="chat"></main>
-<form id="f"><input id="q" autocomplete="off" required><button id="b" aria-label="Send">➤</button></form>
-<div id="ov"></div>
-<aside id="drawer">
-  <div class="dh"><h3 data-i="hist"></h3></div>
-  <button id="nc" data-i="nc"></button>
-  <div id="hist"></div>
-</aside>
-<section id="sheet">
-  <h3 data-i="set"></h3>
-  <div class="set"><b data-i="lang"></b><div class="seg" data-k="lang"><button data-v="auto" data-i="auto"></button><button data-v="sw">Kiswahili</button><button data-v="en">English</button></div></div>
-  <div class="set"><b data-i="theme"></b><div class="seg" data-k="theme"><button data-v="auto" data-i="auto"></button><button data-v="light" data-i="light"></button><button data-v="dark" data-i="dark"></button></div></div>
-  <div class="set"><b data-i="media"></b><div class="seg" data-k="media"><button data-v="1" data-i="on"></button><button data-v="0" data-i="off"></button></div></div>
-  <button class="danger" id="clr" data-i="clear"></button>
-  <div class="note" data-i="note"></div>
-</section>
+:root{--bg:#eef0f3;--c:#fff;--t:#17202b;--m:#667085;--p:#b3202a;--n:#1b2a3a;--b:#d9dde3;--ok:#15803d;--w:#b45309;--a:#e0a100;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#10151b;--c:#19212a;--t:#e8ecf1;--m:#98a2b3;--p:#e5484d;--n:#0b0f14;--b:#2b3541;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#10151b;--c:#19212a;--t:#e8ecf1;--m:#98a2b3;--p:#e5484d;--n:#0b0f14;--b:#2b3541;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--n);color:#fff;padding:10px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:4px solid var(--p)}
+header b{flex:1;font-size:15px;min-width:150px}header button{background:#ffffff22;color:#fff;border:0;border-radius:6px;padding:6px 10px}
+main{max-width:860px;margin:0 auto;padding:12px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:8px;padding:14px;margin-bottom:12px}
+h2{margin:4px 0 12px;font-size:18px}h3{margin:14px 0 6px;font-size:15px}
+label{display:block;margin:10px 0;font-weight:600;font-size:13px}
+input,select,textarea{width:100%;margin-top:4px;padding:9px;border:1px solid var(--b);border-radius:6px;background:var(--bg);color:var(--t);font:inherit;font-weight:400}
+.btn{background:var(--p);color:#fff;border:0;border-radius:6px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}.btn.g{background:var(--c);color:var(--t);border:1px solid var(--b)}.btn.s{padding:5px 9px;font-size:13px}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.nav .sp{flex:1}
+.bar{height:8px;background:var(--b);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--p);width:0;transition:width .3s}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.st{background:var(--c);border:1px solid var(--b);border-left:4px solid var(--p);border-radius:6px;padding:10px}.st b{font-size:24px;display:block}.st span{color:var(--m);font-size:12px}
+.ai{border-left:4px solid var(--a);background:var(--bg);padding:8px 12px;border-radius:0 6px 6px 0;margin-top:14px}.ai small{color:var(--m)}
+.row{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid var(--b);padding:9px 0;flex-wrap:wrap}.row small{color:var(--m)}
+.tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px;color:#fff;background:var(--m)}.tag.ok{background:var(--ok)}.tag.w{background:var(--w)}
+.warn{color:var(--w)}.item{border:1px solid var(--b);border-radius:6px;padding:8px 12px;margin:10px 0}
+.thumb{max-width:110px;max-height:90px;margin:4px;border-radius:4px}
+#rep{background:#fff;color:#000;padding:18px;border-radius:6px}#rep table{width:100%;border-collapse:collapse;margin:6px 0}#rep th,#rep td{border:1px solid #bbb;padding:5px 8px;text-align:left;vertical-align:top}#rep th{width:34%;background:#f0f0f0}#rep h1{color:#b3202a}#rep h2{border-bottom:2px solid #b3202a;color:#1b2a3a;margin-top:22px}
+#toast{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--n);color:#fff;padding:8px 14px;border-radius:20px;display:none;z-index:9}
+@media print{header,.no,#toast{display:none!important}body,main{background:#fff;padding:0}.card{border:0;padding:0}}
+</style></head><body>
+<header><b id="ttl">🔥 AI FIRE &amp; INCIDENT INVESTIGATION ASSISTANT</b><button data-a="home" id="bh"></button><button data-a="lang">SW/EN</button><button data-a="theme">◐</button></header>
+<main id="app"></main><div id="toast"></div>
 <script>
-// ===== R-AI TRINITY: utafutaji na AI za BURE (Wikipedia + Pollinations), hakuna Tavily wala LLM key =====
-// AI tatu wanachati kama watu watatu; kila mmoja ana pembe yake ya swali ili majibu yasifanane.
-// Lugha ya jibu inafuata lugha ya mtumiaji (Kiswahili au Kiingereza).
-// R-AI Search ndiye mwenye vyanzo; Sade na R-AI Fire wanatoa majibu tu.
-const SETTINGS = { lang: "auto", theme: "auto", media: true };   // vinabadilishwa kwenye Mipangilio
-const CFG = { MAX_QUERY: 380, TIMEOUT: 20000, CACHE_TTL: 10 * 60 * 1000, SIMILARITY_MAX: 0.7, MIN_SCORE: 0.3 };
-const cache = new Map();
-
-const CHAIN = [
-  { ai: "sade",   name: "Nancy",        topic: "general" },
-  { ai: "fire",   name: "Ivan",   topic: "general" },
-  { ai: "search", name: "Aisha", topic: "news" },
-];
-
-const T = {
-  sw: {
-    angle: { sade: "",
-             fire: "usalama, hatari na mbinu za kiufundi",
-             search: "takwimu, ushahidi na vyanzo" },
-    alt:   { sade: "historia na muktadha",
-             fire: "vifaa na hatua za vitendo",
-             search: "habari mpya na ushahidi wa nyongeza" },
-    ref: "rejea",
-    intro: { sade: ["Habari! Nimeangalia swali lako, hiki ndicho nilichopata:", "Nianze mimi na picha ya jumla:"],
-             fire: ["Asante Nancy. Kwa mtazamo wa kiufundi:", "Sawa Nancy, nikiongezea upande wa usalama na hatari:"],
-             search: ["Sawa Ivan. Nimetafuta ushahidi na taarifa mpya:", "Nimepitia vyanzo vya wavuti, hivi ndivyo vinavyojitokeza:"] },
-    hand:  { sade: ["Ivan, unaonaje kwa upande wa kiufundi na usalama?"],
-             fire: ["Aisha, tafadhali tuletee ushahidi na vyanzo."],
-             search: ["Vyanzo vyote tulivyotumia vimeorodheshwa hapa chini."] },
-    working: n => n + " anatafuta...",
-    fail: (n, e) => n + " ameshindwa kupata jibu: " + e,
-    noAnswer: "Sikupata muhtasari kamili wa hoja hii (vyanzo vimeorodheshwa na Aisha).",
-    nothingNew: "Sina jambo jipya la kuongeza zaidi ya yaliyosemwa tayari.",
-    none: "Hakuna jibu lililopatikana. Jaribu tena baadaye.",
-    creditImg: "",
-    creditVid: "",
-    lowRelevance: "Sikupata vyanzo vinavyohusiana moja kwa moja na swali hili.",
-    noTranslate: "(Tafsiri haikupatikana kwa sasa; jibu limeachwa kwa lugha ya chanzo.)",
-    err: { key: () => "Utafutaji haujasanidiwa vizuri", limit: s => "Kikomo cha matumizi ya utafutaji kimefikiwa (" + s + ")",
-           http: s => "Utafutaji umerudisha hitilafu " + s, timeout: () => "Utafutaji umechelewa (timeout)", net: m => "Utafutaji haupatikani: " + m },
-  },
-  en: {
-    angle: { sade: "",
-             fire: "safety, risks and technical methods",
-             search: "statistics, evidence and sources" },
-    alt:   { sade: "history and context",
-             fire: "equipment and practical steps",
-             search: "latest news and additional evidence" },
-    ref: "context",
-    intro: { sade: ["Hi! I looked into your question, here's what I found:", "Let me start with the big picture:"],
-             fire: ["Thanks Nancy. From a technical angle:", "Building on that, here's the safety and risk side:"],
-             search: ["Thanks Ivan. I looked for evidence and recent info:", "I went through the web sources, and here's what stands out:"] },
-    hand:  { sade: ["Ivan, what's your take on the technical and safety side?"],
-             fire: ["Aisha, can you back this up with evidence and sources?"],
-             search: ["All the sources we used are listed below."] },
-    working: n => n + " is searching...",
-    fail: (n, e) => n + " couldn't get an answer: " + e,
-    noAnswer: "I couldn't get a full summary for this one (sources are listed by Aisha).",
-    nothingNew: "I have nothing new to add beyond what's already been said.",
-    none: "No answer found. Please try again later.",
-    creditImg: "",
-    creditVid: "",
-    lowRelevance: "I couldn't find sources directly relevant to this question.",
-    noTranslate: "(Translation unavailable right now; the answer is left in the source language.)",
-    err: { key: () => "Search is not configured properly", limit: s => "Search usage limit reached (" + s + ")",
-           http: s => "Search returned error " + s, timeout: () => "Search timed out", net: m => "Search unreachable: " + m },
-  },
-};
-
-// Lugha: Kiswahili au Kiingereza (sare au maneno yasiyojulikana = Kiswahili)
-const SW = new Set("na ya wa kwa ni hii huu hizi katika kuhusu nini nani vipi gani je ambao lakini sana jinsi naomba tafadhali nifanye ninaweza una nina yangu wako chake mimi wewe sisi hapa pale kwamba pia au kama kwanini mbona jengo kuzima moto".split(" "));
-const EN = new Set("the is are of to and a in for what how why who when where can do does should about with this that it be on as you i my your was were will would could".split(" "));
-function detectLang(t) {
-  let s = 0, e = 0;
-  (String(t).toLowerCase().match(/\p{L}+/gu) || []).forEach(w => { if (SW.has(w)) s++; if (EN.has(w)) e++; });
-  return e > s ? "en" : "sw";
-}
-const pick = a => a[Math.floor(Math.random() * a.length)];
-const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
-const words = t => new Set((String(t).toLowerCase().match(/\p{L}{4,}/gu) || []));
-function similarity(a, b) {
-  const A = words(a), B = words(b);
-  if (!A.size || !B.size) return 0;
-  let i = 0; A.forEach(w => { if (B.has(w)) i++; });
-  return i / (A.size + B.size - i);
-}
-const firstSentence = t => (String(t).split(/(?<=[.!?])\s/)[0] || "").slice(0, 140);
-
-/* ===== UTAFUTAJI WA BURE (bila API key): Wikipedia kwa vyanzo + Pollinations AI kwa jibu ===== */
-const FS_STOP = new Set(("na ya wa kwa ni hii huu hizi katika kuhusu nini nani vipi gani je ambao lakini sana jinsi naomba tafadhali " +
-  "ninaweza una nina yangu wako chake mimi wewe sisi hapa pale kwamba pia au kama kwanini mbona nawezaje inafanya kazi kuna " +
-  "the is are of to and a in for what how why who when where can do does should about with this that it be on as you i my your was were will would could").split(" "));
-const FS_SW = new Set("na ya wa kwa ni hii huu hizi katika kuhusu nini nani vipi gani je ambao lakini sana jinsi naomba tafadhali nawezaje kuzima moto jengo kwamba pia au kama kwanini".split(" "));
-const FS_EN = new Set("the is are of to and a in for what how why who when where can do does should about with this that it be on as you i my your was were will would could".split(" "));
-const fsSleep = ms => new Promise(r => setTimeout(r, ms));
-function fsLang(t) {
-  let s = 0, e = 0;
-  (String(t).toLowerCase().match(/\p{L}+/gu) || []).forEach(w => { if (FS_SW.has(w)) s++; if (FS_EN.has(w)) e++; });
-  return e > s ? "en" : "sw";
-}
-const fsTerms = (q, n = 5) => [...new Set((String(q).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).filter(w => w.length > 2 && !FS_STOP.has(w)))].slice(0, n);
-
-async function fsFetch(url, opt, ms) {
-  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
-  try { return await fetch(url, Object.assign({}, opt, { signal: ctl.signal })); } finally { clearTimeout(t); }
-}
-/* Wikipedia: inatupa hitilafu ikishindwa (ili tujue ni kushindwa, si "hakuna matokeo") */
-async function fsWiki(lang, terms, signal) {
-  if (!terms.length) return [];
-  const u = "https://" + lang + ".wikipedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*" +
-    "&generator=search&gsrlimit=5&gsrsearch=" + encodeURIComponent(terms.join(" ")) +
-    "&prop=extracts|info&exintro=1&explaintext=1&exchars=1000&exlimit=max&inprop=url&redirects=1";
-  const r = await fetch(u, { signal });
-  if (!r.ok) throw new Error("wiki " + r.status);
-  const d = await r.json();
-  return ((d.query && d.query.pages) || [])
-    .sort((a, b) => (a.index || 0) - (b.index || 0))
-    .filter(p => p.extract && p.fullurl)
-    .map(p => ({ title: p.title, url: p.fullurl, content: p.extract.trim() }));
-}
-
-let fsLast = 0;
-const fsClean = t => String(t || "").trim().split(/\n\s*---+\s*\n/)[0]            // ondoa tangazo la mtoa huduma
-  .split(/\n{2,}/).filter(p => !/pollinations/i.test(p)).join("\n\n").trim();
-/* AI ya bure: njia 3 (POST openai, GET openai, GET mistral). GET haina preflight ya CORS, kwa hiyo ni mbadala imara. */
-async function fsAI(q, ctx, lang, avoid) {
-  const sys = (lang === "en"
-    ? "You are R-Search, a helpful assistant. Answer the user's question clearly in English, using the sources when they are relevant. Write 2 to 4 short plain paragraphs. No markdown, no lists, no headings, no citation numbers. If the question ends with a focus hint, emphasise that angle."
-    : "Wewe ni R-Search, msaidizi mwenye manufaa. Jibu swali la mtumiaji kwa Kiswahili sanifu kinachoeleweka, ukitumia vyanzo vilivyotolewa pale vinapofaa. Andika aya 2 hadi 4 fupi za kawaida. Usitumie markdown, orodha, vichwa wala namba za rejea. Swali likiisha kwa mwelekeo maalum, sisitiza mwelekeo huo.")
-    + (avoid && avoid.length ? (lang === "en" ? " Do not repeat points already made: " : " Usirudie hoja zilizokwisha tolewa: ") + avoid.join(" | ").slice(0, 500) : "");
-  const src = ctx.map((x, i) => "[" + (i + 1) + "] " + x.title + ": " + x.content.slice(0, 450)).join("\n");
-  const user = (src ? "Sources:\n" + src + "\n\n" : "") + "Question: " + q;
-  const post = async () => {
-    const r = await fsFetch("https://text.pollinations.ai/openai", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model: "openai", temperature: 0.5, messages: [{ role: "system", content: sys }, { role: "user", content: user }] }) }, 22000);
-    if (r.status === 429) return 429;
-    if (!r.ok) return "";
-    const d = await r.json();
-    return fsClean(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content);
-  };
-  const get = model => async () => {
-    const r = await fsFetch("https://text.pollinations.ai/" + encodeURIComponent(user.slice(0, 1400)) + "?model=" + model + "&system=" + encodeURIComponent(sys.slice(0, 600)), {}, 22000);
-    if (r.status === 429) return 429;
-    if (!r.ok) return "";
-    return fsClean(await r.text());
-  };
-  for (const attempt of [post, get("openai"), get("mistral")]) {
-    const wait = fsLast + 2500 - Date.now();           // pengo kati ya maombi (kikomo cha anonymous)
-    if (wait > 0) await fsSleep(wait);
-    fsLast = Date.now();
-    try {
-      const out = await attempt();
-      if (out === 429) { await fsSleep(4000); continue; }
-      if (out && out.length > 20) return out;
-    } catch { /* jaribu njia inayofuata */ }
-  }
-  return "";
-}
-
-/* opt: { variant: nambari ya AI (kwa mbadala tofauti), avoid: majibu ya awali, stage: callback ya hatua } */
-async function fsSearch(query, opt) {
-  opt = opt || {};
-  const q = String(query || "").slice(0, 380), lang = fsLang(q);
-  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
-  let results = [], failed = false;
-  try {
-    let terms = fsTerms(q); if (!terms.length) terms = [q.slice(0, 60)];
-    const run = t => Promise.all([fsWiki(lang, t, ctl.signal).catch(() => null), lang === "en" ? Promise.resolve([]) : fsWiki("en", t, ctl.signal).catch(() => null)]);
-    let [a, b] = await run(terms);
-    failed = a === null && b === null; a = a || []; b = b || [];
-    if (!failed && !a.length && !b.length && terms.length > 2) { [a, b] = await run(terms.slice(0, 2)); a = a || []; b = b || []; }
-    const seen = new Set();
-    results = [...a, ...b].filter(x => !seen.has(x.url) && seen.add(x.url)).slice(0, 6);
-  } finally { clearTimeout(timer); }
-  if (opt.stage) try { opt.stage("ai"); } catch {}
-  let answer = await fsAI(q, results.slice(0, 4), lang, opt.avoid), ai = !!answer;
-  if (!answer && results.length) {                      // mbadala usio na AI: muhtasari wa Wikipedia (tofauti kwa kila AI)
-    answer = results[(opt.variant || 0) % results.length].content.split(/(?<=[.!?])\s/).slice(0, 3).join(" ");
-  }
-  return { answer, results, diag: { wikiFailed: failed, ai } };
-}
-
-async function tavilyOnce(query, topic, exclude, opt) {
-  opt = opt || {};
-  const key = query.toLowerCase() + "|" + (opt.variant || 0);
-  const hit = cache.get(key);
-  if (hit && Date.now() - hit.t < CFG.CACHE_TTL) return hit.v;
-  try {
-    const d = await fsSearch(query, opt);
-    if (d.diag.wikiFailed && !d.answer) return { ok: false, code: "net", arg: "Wikipedia/AI" };
-    const v = { ok: true, answer: (d.answer || "").trim(),
-      results: d.results.map(x => ({ title: x.title, url: x.url, score: 1, date: null })) };
-    cache.set(key, { t: Date.now(), v });
-    return v;
-  } catch (e) {
-    return e && e.name === "AbortError" ? { ok: false, code: "timeout" } : { ok: false, code: "net", arg: e && e.message };
-  }
-}
-async function tavily(query, topic, exclude, opt) {
-  let r = await tavilyOnce(query, topic, exclude, opt);
-  if (r.ok && !r.results.length && topic !== "general") r = await tavilyOnce(query, "general", exclude, opt);
-  return r;
-}
-
-// ===== Tafsiri (MyMemory, bure, bila key): jibu likiwa lugha tofauti na ya mtumiaji =====
-// Hiari: weka barua pepe yako hapa kuongeza kikomo cha kila siku cha MyMemory.
-const MYMEMORY_EMAIL = "";
-function chunkText(text, max = 450) {
-  const parts = text.split(/(?<=[.!?])\s+/), out = [];
-  let cur = "";
-  for (let p of parts) {
-    while (p.length > max) { if (cur) { out.push(cur); cur = ""; } out.push(p.slice(0, max)); p = p.slice(max); }
-    if ((cur + " " + p).trim().length > max) { out.push(cur); cur = p; } else cur = (cur + " " + p).trim();
-  }
-  if (cur) out.push(cur);
-  return out.filter(Boolean);
-}
-async function translateChunk(q, from, to) {
-  const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), 12000);
-  try {
-    const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(q) +
-      "&langpair=" + from + "|" + to + (MYMEMORY_EMAIL ? "&de=" + encodeURIComponent(MYMEMORY_EMAIL) : "");
-    const r = await fetch(url, { signal: ctl.signal });
-    if (!r.ok) return null;
-    const d = await r.json();
-    const t = d && d.responseData && d.responseData.translatedText;
-    if (!t || Number(d.responseStatus) !== 200 || /MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(t)) return null;
-    return t;
-  } catch { return null; } finally { clearTimeout(timer); }
-}
-async function translate(text, from, to) {
-  const parts = await Promise.all(chunkText(text).map(c => translateChunk(c, from, to)));
-  return parts.every(Boolean) ? parts.join(" ") : null;   // kama kipande chochote kimeshindwa, rudisha null
-}
-
-// ===== Picha na video kutoka Pixabay (Nancy = picha, Ivan = video) =====
-const PIXABAY_API_KEY = "57792634-5e89dd610e4c1c840f815c524";
-const pixCache = new Map();
-
-// Pixabay haisaidii Kiswahili: swali la Kiswahili linatafsiriwa kwa Kiingereza kisha maneno muhimu yanachukuliwa
-function mediaKeywords(text) {
-  const stop = new Set([...SW, ...EN, "please", "make", "made", "best", "very"]);
-  const ws = (String(text).toLowerCase().match(/\p{L}{4,}/gu) || []).filter(w => !stop.has(w));
-  return [...new Set(ws)].slice(0, 4).join(" ").slice(0, 100);
-}
-async function mediaQuery(question, lang) {
-  let t = question;
-  if (lang === "sw") { const tr = await translate(question, "sw", "en"); if (tr) t = tr; }
-  return mediaKeywords(t) || mediaKeywords(question) || question.slice(0, 40);
-}
-async function pixabay(kind, q) {
-  if (!q) return [];
-  const key = kind + "|" + q;
-  if (pixCache.has(key)) return pixCache.get(key);
-  const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), 10000);
-  try {
-    const url = "https://pixabay.com/api/" + (kind === "video" ? "videos/" : "") +
-      "?key=" + PIXABAY_API_KEY + "&q=" + encodeURIComponent(q) + "&per_page=3&safesearch=true" +
-      (kind === "image" ? "&image_type=photo&orientation=horizontal" : "");
-    const r = await fetch(url, { signal: ctl.signal });
-    if (!r.ok) return [];
-    const d = await r.json();
-    const out = (d.hits || []).slice(0, kind === "video" ? 2 : 3).map(h => {
-      if (kind === "video") {
-        const v = (h.videos && (h.videos.tiny || h.videos.small)) || {};
-        return { src: v.url || "", poster: v.thumbnail || "", page: h.pageURL || "", user: h.user || "" };
-      }
-      return { src: h.webformatURL || "", page: h.pageURL || "", user: h.user || "", alt: h.tags || "" };
-    }).filter(x => x.src && x.page);
-    pixCache.set(key, out);
-    return out;
-  } catch { return []; } finally { clearTimeout(timer); }
-}
-
-
-const NEWS_RE = /habari|hivi karibuni|\bleo\b|\bjana\b|news|latest|recent|today|yesterday|breaking/i;
-
-async function runDebate(question, emit) {
-  question = question.slice(0, 300);
-  const lang = SETTINGS.lang === "auto" ? detectLang(question) : SETTINGS.lang, L = T[lang];
-  const topic = NEWS_RE.test(question) ? "news" : "general";
-  const givenAnswers = [], seenUrls = new Set(), usedDomains = new Set(), allSources = [];
-  let shown = 0;
-  const mediaQP = mediaQuery(question, lang);   // inaanza mapema, inasubiriwa pale tu inapohitajika
-
-  for (const [ci, c] of CHAIN.entries()) {
-    const sourcesFor = c.ai === "search" ? allSources : undefined;   // Aisha pekee ndiye mwenye vyanzo
-    emit("status", { text: L.working(c.name), ai: c.ai });
-    let finished = false;
-
-    for (let attempt = 0; attempt < 2 && !finished; attempt++) {
-      // Swali la mtumiaji ndilo msingi wa kila utafutaji (hakuna kuteleza mada);
-      // pembe ya kila AI inaongezwa kama kiambishi kifupi tu.
-      const suffix = attempt ? L.alt[c.ai] : L.angle[c.ai];
-      const query = (question.slice(0, 250) + " " + suffix).trim().slice(0, CFG.MAX_QUERY);
-      const r = await tavily(query, topic, attempt ? [...usedDomains] : [], { variant: ci + attempt, avoid: givenAnswers.map(a => a.slice(0, 200)) });
-
-      if (!r.ok) {
-        emit("message", { ai: c.ai, text: L.fail(c.name, L.err[r.code](r.arg)), error: true, sources: sourcesFor });
-        finished = true; break;
-      }
-      // Ulinzi wa mada: kama vyanzo vyote vina alama ya uhusiano ndogo, usionyeshe jibu la mada nyingine
-      const top = r.results.length ? Math.max(...r.results.map(x => x.score == null ? 1 : x.score)) : 0;
-      const relevant = top >= CFG.MIN_SCORE;
-      const fresh = r.results.filter(x => x.url && !seenUrls.has(x.url));
-      const repeated = r.answer && givenAnswers.some(a => similarity(a, r.answer) > CFG.SIMILARITY_MAX);
-      const useful = relevant && ((r.answer && !repeated) || (!r.answer && fresh.length));
-
-      if (useful) {
-        fresh.forEach(x => { seenUrls.add(x.url); allSources.push(x); const h = host(x.url); if (h) usedDomains.add(h); });
-        let shownAnswer = r.answer, note = "";
-        if (r.answer) {
-          const from = detectLang(r.answer);
-          if (from !== lang) {              // jibu lipo kwa lugha nyingine: tafsiri kwa lugha ya mtumiaji
-            const tr = await translate(r.answer, from, lang);
-            if (tr) shownAnswer = tr; else note = "\n\n" + L.noTranslate;
-          }
-          givenAnswers.push(r.answer);
-        }
-        let text = pick(L.intro[c.ai]) + "\n\n" + (shownAnswer || L.noAnswer) + note;
-        if (c.ai !== "search" || allSources.length) text += "\n\n" + pick(L.hand[c.ai]);
-        let media = {};
-        if ((c.ai === "sade" || c.ai === "fire") && SETTINGS.media) {          // Nancy: picha, Ivan: video
-          const items = await pixabay(c.ai === "sade" ? "image" : "video", await mediaQP);
-          if (items.length) {
-            const users = [...new Set(items.map(x => x.user).filter(Boolean))].join(", ");
-            media = c.ai === "sade"
-              ? { images: items, mediaCredit: L.creditImg + users }
-              : { videos: items, mediaCredit: L.creditVid + users };
-          }
-        }
-        emit("message", { ai: c.ai, text, sources: sourcesFor, ...media });
-        shown++; finished = true;
-      } else if (attempt === 1) {
-        emit("message", { ai: c.ai, text: relevant ? L.nothingNew : L.lowRelevance, sources: sourcesFor });
-        finished = true;
-      }
-    }
-  }
-  if (!shown) emit("message", { ai: "sade", text: L.none, error: true });
-}
-
-const NAMES={sade:"Nancy",fire:"Ivan",search:"Aisha"},INIT={sade:"N",fire:"I",search:"A"};
-const $=id=>document.getElementById(id);
-function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
-const UI={
- sw:{sub:"Nancy, Ivan, Aisha · mtandaoni",ph:"Andika ujumbe...",hist:"Historia",nc:"＋ Mazungumzo mapya",empty:"Hakuna mazungumzo bado",set:"Mipangilio",lang:"Lugha ya majibu",auto:"Otomatiki",theme:"Mandhari",light:"Mwanga",dark:"Giza",media:"Picha na video",on:"Washa",off:"Zima",clear:"Futa historia yote",confirm:"Futa mazungumzo yote?",
-  joined:"Nancy, Ivan na Aisha wako kwenye mazungumzo",welcome:"Habari! Sisi ni Nancy, Ivan na Aisha. Uliza chochote, tutajadili pamoja.",note:"Historia na mipangilio vimehifadhiwa kwenye kifaa chako (IndexedDB), vinafanya kazi offline.",
-  sugg:["Nawezaje kuzima moto wa jengo?","Kizima moto cha aina gani kinafaa jikoni?","What causes electrical fires at home?"]},
- en:{sub:"Nancy, Ivan, Aisha · online",ph:"Type a message...",hist:"History",nc:"＋ New chat",empty:"No chats yet",set:"Settings",lang:"Answer language",auto:"Auto",theme:"Theme",light:"Light",dark:"Dark",media:"Images & videos",on:"On",off:"Off",clear:"Clear all history",confirm:"Delete all chats?",
-  joined:"Nancy, Ivan and Aisha are in the chat",welcome:"Hi! We're Nancy, Ivan and Aisha. Ask anything and we'll talk it through together.",note:"History and settings are saved on your device (IndexedDB) and work offline.",
-  sugg:["What causes electrical fires at home?","How do I use a fire extinguisher?","Nawezaje kuzima moto wa jengo?"]}};
-let uiL="sw";const u=k=>UI[uiL][k];
-
-// ---- IndexedDB (historia na mipangilio, offline) ----
-const DB={db:null,
- open(){return new Promise((ok,no)=>{const r=indexedDB.open("rai-trinity",1);r.onupgradeneeded=()=>{r.result.createObjectStore("chats",{keyPath:"id"});r.result.createObjectStore("kv")};r.onsuccess=()=>{this.db=r.result;ok()};r.onerror=()=>no(r.error)})},
- tx(s,m,f){if(!this.db)return Promise.resolve(null);return new Promise((ok,no)=>{const t=this.db.transaction(s,m),q=f(t.objectStore(s));t.oncomplete=()=>ok(q&&q.result);t.onerror=()=>no(t.error)}).catch(()=>null)},
- all(){return this.tx("chats","readonly",s=>s.getAll()).then(r=>r||[])},
- put(c){return this.tx("chats","readwrite",s=>s.put(JSON.parse(JSON.stringify(c))))},
- del(id){return this.tx("chats","readwrite",s=>s.delete(id))},
- clear(){return this.tx("chats","readwrite",s=>s.clear())},
- get(k){return this.tx("kv","readonly",s=>s.get(k))},
- set(k,v){return this.tx("kv","readwrite",s=>s.put(v,k))}};
-
-let cur=null,busy=false;
-const chat=$("chat");
-const tm=t=>new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
-const scroll=()=>chat.scrollTo({top:chat.scrollHeight,behavior:"smooth"});
-function setSub(t){const s=$("sub");s.textContent=t||u("sub");s.className=t?"live":""}
-function setOn(ai){document.querySelectorAll("#top .stack .av").forEach(a=>a.classList.toggle("on",a.dataset.ai===ai))}
-function applyUI(){
-  document.querySelectorAll("[data-i]").forEach(e=>e.textContent=u(e.dataset.i));
-  $("q").placeholder=u("ph");if(!busy)setSub();
-  if(SETTINGS.theme==="auto")delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=SETTINGS.theme;
-  document.querySelectorAll(".seg").forEach(g=>g.querySelectorAll("button").forEach(b=>{
-    const v=g.dataset.k==="media"?(SETTINGS.media?"1":"0"):SETTINGS[g.dataset.k];b.classList.toggle("on",b.dataset.v===v)}));
-}
-const okHost=x=>{try{return new URL(x).hostname.endsWith("pixabay.com")}catch{return false}};
-function row(m){
-  const me=m.role==="me",w=el("div","row "+(me?"me":m.ai)+(m.error?" err":""));
-  if(!me){const a=el("i","av",INIT[m.ai]);w.appendChild(a)}
-  const b=el("div","bub");
-  if(!me)b.appendChild(el("div","nm",NAMES[m.ai]));
-  b.appendChild(el("div","tx",m.text));
-  if(m.images&&m.images.length){const g=el("div","media");
-    m.images.forEach(i=>{if(!okHost(i.src)||!okHost(i.page))return;const im=el("img");im.src=i.src;im.loading="lazy";im.alt="";g.appendChild(im)});b.appendChild(g)}
-  if(m.videos&&m.videos.length)m.videos.forEach(v=>{if(!okHost(v.src))return;const vd=el("video");vd.controls=true;vd.preload="none";vd.playsInline=true;
-    if(okHost(v.poster))vd.poster=v.poster;vd.src=v.src;b.appendChild(vd)});
-  
-  if(m.sources&&m.sources.length){const s=el("div","src");
-    m.sources.forEach(r=>{if(!/^https?:\/\//.test(r.url))return;const a=el("a",null,r.title||r.url);a.href=r.url;a.target="_blank";a.rel="noopener noreferrer";s.appendChild(a);
-      const meta=[r.score!=null?"score "+r.score.toFixed(2):"",r.date||""].filter(Boolean).join(" · ");if(meta)s.appendChild(el("small",null,meta))});b.appendChild(s)}
-  b.appendChild(el("div","tm",tm(m.t||Date.now())));
-  w.appendChild(b);chat.appendChild(w);return w;
-}
-function removeTyping(){const t=$("typing");if(t)t.remove()}
-function showTyping(ai){removeTyping();if(!ai)return;
-  const w=el("div","row "+ai);w.id="typing";w.appendChild(el("i","av",INIT[ai]));
-  const b=el("div","bub");b.append(el("div","nm",NAMES[ai]));const d=el("div","dots");d.innerHTML="<i></i><i></i><i></i>";b.appendChild(d);
-  w.appendChild(b);chat.appendChild(w);scroll()}
-function intro(t){chat.appendChild(el("div","pill",new Date(t).toLocaleDateString([],{weekday:"long",day:"numeric",month:"long"})));chat.appendChild(el("div","pill",u("joined")))}
-function render(){
-  chat.innerHTML="";
-  if(!cur||!cur.messages.length){
-    chat.appendChild(el("div","pill",u("joined")));
-    const w=el("div","welcome"),st=el("div","stack");
-    ["sade","fire","search"].forEach(a=>st.appendChild(el("i","av "+a,INIT[a])));
-    w.appendChild(st);w.appendChild(el("p",null,u("welcome")));
-    const ch=el("div","chips");u("sugg").forEach(s=>{const c=el("button","chip",s);c.onclick=()=>send(s);ch.appendChild(c)});
-    w.appendChild(ch);chat.appendChild(w);return;
-  }
-  intro(cur.created);cur.messages.forEach(row);chat.scrollTop=chat.scrollHeight;
-}
-function add(m){cur.messages.push(m);cur.updated=Date.now();row(m);DB.put(cur);scroll()}
-async function send(text){
-  text=String(text||"").trim();if(!text||busy)return;busy=true;$("b").disabled=true;closeAll();
-  uiL=SETTINGS.lang==="auto"?detectLang(text):SETTINGS.lang;applyUI();
-  if(!cur||!cur.messages.length){
-    cur={id:Date.now()+"-"+Math.random().toString(36).slice(2,6),title:text.slice(0,42),created:Date.now(),updated:Date.now(),messages:[]};
-    chat.innerHTML="";intro(cur.created);
-  }
-  add({role:"me",text,t:Date.now()});
-  try{
-    await runDebate(text,(ev,d)=>{
-      if(ev==="status"){setSub(d.text);setOn(d.ai);showTyping(d.ai)}
-      else if(ev==="message"){removeTyping();add({...d,t:Date.now()})}
-    });
-  }catch(e){removeTyping();add({ai:"sade",text:String(e&&e.message||e),error:true,t:Date.now()})}
-  removeTyping();setOn(null);busy=false;setSub();$("b").disabled=false;$("q").focus();
-}
-// ---- Drawer, settings ----
-function closeAll(){["drawer","sheet","ov"].forEach(i=>$(i).classList.remove("on"))}
-async function openDrawer(){
-  const list=(await DB.all()).sort((a,b)=>b.updated-a.updated),h=$("hist");h.innerHTML="";
-  if(!list.length)h.appendChild(el("div","empty",u("empty")));
-  list.forEach(c=>{
-    const r=el("div","hi"+(cur&&cur.id===c.id?" cur":"")),t=el("button","t"),x=el("button","ib","🗑");
-    t.append(el("b",null,c.title),el("small",null,new Date(c.updated).toLocaleString([],{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})));
-    t.onclick=()=>{if(busy)return;cur=c;render();closeAll()};
-    x.onclick=async()=>{await DB.del(c.id);if(cur&&cur.id===c.id){cur=null;render()}openDrawer()};
-    r.append(t,x);h.appendChild(r)});
-  $("drawer").classList.add("on");$("ov").classList.add("on");
-}
-function newChat(){if(busy)return;cur=null;render();closeAll();$("q").focus()}
-$("menu").onclick=openDrawer;$("new").onclick=newChat;$("nc").onclick=newChat;$("ov").onclick=closeAll;
-$("gear").onclick=()=>{$("sheet").classList.add("on");$("ov").classList.add("on")};
-document.querySelectorAll(".seg").forEach(g=>g.onclick=e=>{
-  const b=e.target.closest("button");if(!b)return;const k=g.dataset.k;
-  SETTINGS[k]=k==="media"?b.dataset.v==="1":b.dataset.v;DB.set("settings",SETTINGS);
-  if(k==="lang"&&b.dataset.v!=="auto")uiL=b.dataset.v;applyUI();if(k==="lang"&&!cur)render()});
-$("clr").onclick=async()=>{if(!confirm(u("confirm")))return;await DB.clear();cur=null;render();closeAll()};
-$("f").onsubmit=e=>{e.preventDefault();const v=$("q").value;$("q").value="";send(v)};
-(async()=>{
-  try{await DB.open();const s=await DB.get("settings");if(s)Object.assign(SETTINGS,s)}catch{}
-  if(SETTINGS.lang!=="auto")uiL=SETTINGS.lang;
-  applyUI();render();
-})();
-<\/script>
-</body>
-</html>
-</script>
-<div id="toast" role="status" aria-live="polite"></div>
-<div id="lb" role="dialog" aria-label="Picha kubwa"><button class="ib" id="lbx" aria-label="Funga" data-i="close"></button><img alt=""></div>
-<div id="splash" aria-hidden="true"><img src="profile.jpg" alt="" onerror="this.remove()"></div>
-<script>
-/* ===== FUNGUO ZA API (picha na video tu; Tavily imeondolewa) ===== */
-const PIXABAY_KEY = "57792634-5e89dd610e4c1c840f815c524";
-const YT_KEY = "AIzaSyADf6dE8F9z9AVuOpK-foWYkfEDR6-VTw4";
-
-const $ = s => document.querySelector(s);
-const LS = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} } };
-let chats = [], cur = null, mode = 'chat', busy = false, pend = null, hq = '';
-const MODES = { web: 'Wavuti', images: 'Picha', videos: 'Video', audio: 'Audio' };
-/* IndexedDB: historia (kv) + picha/video zilizohifadhiwa kwenye simu (media, kama Blob) */
-const DB = new Promise((ok, no) => { const r = indexedDB.open('rsa', 1); r.onupgradeneeded = () => { r.result.createObjectStore('kv'); r.result.createObjectStore('media') }; r.onsuccess = () => ok(r.result); r.onerror = () => no(r.error) });
-const tx = (st, m, fn) => DB.then(db => new Promise((ok, no) => { const t = db.transaction(st, m), q = fn(t.objectStore(st)); t.oncomplete = () => ok(q && q.result); t.onerror = () => no(t.error) }));
-const kvGet = k => tx('kv', 'readonly', s => s.get(k)).catch(() => undefined);
-const kvSet = (k, v) => tx('kv', 'readwrite', s => s.put(v, k)).catch(() => {});
-const mGet = k => tx('media', 'readonly', s => s.get(k)).catch(() => undefined);
-const mPut = (k, b) => tx('media', 'readwrite', s => s.put(b, k)).catch(() => {});
-const save = () => kvSet('chats', JSON.parse(JSON.stringify(chats)));
-const urls = new Map();
-async function res(k) { if (!k) return ['', 0]; const b = await mGet(k); if (b) { let u = urls.get(k); if (!u) { u = URL.createObjectURL(b); urls.set(k, u) } return [u, 1] } return [navigator.onLine ? k : '', 0] }
-async function hydrate() {
-  for (const el of document.querySelectorAll('[data-k],[data-p]')) {
-    const card = el.closest('.m,.vc');
-    if (el.dataset.k) { const [u, c] = await res(el.dataset.k); if (u && el.getAttribute('src') !== u) el.src = u; if (c) card?.classList.add('off') }
-    if (el.dataset.p) { const [u] = await res(el.dataset.p); if (u) el.poster = u }
-  }
-}
-async function cacheOne(u) { if (!u || await mGet(u)) return; try { const r = await fetch(u); if (r.ok) await mPut(u, await r.blob()) } catch {} }
-async function cacheMsg(m) {
-  const jobs = []; (m.images || []).forEach(i => jobs.push(i.thumb));
-  [...(m.videos || []), ...(m.videos2 || [])].forEach(v => jobs.push(v.thumb)); (m.videos2 || []).slice(0, 4).forEach(v => v.file && jobs.push(v.file));
-  for (let k = 0; k < jobs.length; k += 6) await Promise.all(jobs.slice(k, k + 6).map(cacheOne)); hydrate()
-}
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const dom = u => { try { return new URL(u).hostname.replace(/^www\./, '') } catch { return '' } };
-const I = {
-  chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',
-  web: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
-  images: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M3 17l5-5 4 4 3-3 6 6"/>',
-  videos: '<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-3v10l-6-3"/>',
-  audio: '<path d="M4 16v-3a8 8 0 0 1 16 0v3"/><rect x="3" y="14" width="4" height="7" rx="1.5"/><rect x="17" y="14" width="4" height="7" rx="1.5"/>',
-  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
-  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
-  moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>',
-  mic: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
-  attach: '<path d="M20 11l-8 8a5 5 0 0 1-7-7l8-8a3.5 3.5 0 0 1 5 5l-8 8a2 2 0 0 1-3-3l7-7"/>',
-  send: '<path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>',
-  edit: '<path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/>',
-  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
-  download: '<path d="M12 4v11M7 11l5 5 5-5M5 20h14"/>',
-  refresh: '<path d="M20 11a8 8 0 0 0-14-4L4 9M4 4v5h5M4 13a8 8 0 0 0 14 4l2-2M20 20v-5h-5"/>',
-  close: '<path d="M6 6l12 12M18 6L6 18"/>',
-  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>',
-  arrowdown: '<path d="M12 5v14M6 13l6 6 6-6"/>',
-  play: '<path d="M8 5v14l11-7z"/>',
-  pause: '<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
-  plus: '<path d="M12 5v14M5 12h14"/>',
-  alert: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16.5v.5"/>',
-  check: '<path d="M5 12l5 5 9-10"/>',
-  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>'
-};
-const ic = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
-document.querySelectorAll('[data-i]').forEach(e => e.innerHTML = ic(e.dataset.i) + (e.dataset.t ? ' ' + e.dataset.t : ''));
-const safeUrl = u => /^https?:\/\//i.test(u) ? esc(u) : '#';
-
-/* ---------- Markdown ---------- */
-function inline(s) {
-  s = esc(s).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[^*])\*([^*\s][^*]*)\*/g, '$1<i>$2</i>')
-    .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-  return s;
-}
-function md(t) {
-  const out = [], L = (t || '').split('\n'); let i = 0, list = null;
-  const close = () => { if (list) { out.push('</' + list + '>'); list = null } };
-  const isRow = l => /^\|.*\|$/.test((l || '').trim());
-  while (i < L.length) {
-    const l = L[i]; let m;
-    if (l.startsWith('```')) { close(); const c = []; i++; while (i < L.length && !L[i].startsWith('```')) c.push(L[i++]); i++; out.push('<div class="code"><button class="cp" aria-label="Nakili msimbo">Copy</button><pre>' + esc(c.join('\n')) + '</pre></div>'); continue }
-    if (isRow(l) && /^\|[\s:|-]+\|$/.test((L[i + 1] || '').trim())) {
-      close(); const row = r => r.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim()); const h = row(l); i += 2; const rs = [];
-      while (i < L.length && isRow(L[i])) rs.push(row(L[i++]));
-      out.push('<div class="tw"><table><tr>' + h.map(c => '<th>' + inline(c) + '</th>').join('') + '</tr>' + rs.map(r => '<tr>' + r.map(c => '<td>' + inline(c) + '</td>').join('') + '</tr>').join('') + '</table></div>'); continue
-    }
-    if (m = l.match(/^(#{1,4})\s+(.*)/)) { close(); const n = m[1].length + 1; out.push(`<h${n}>${inline(m[2])}</h${n}>`) }
-    else if (m = l.match(/^\s*[-*•]\s+(.*)/)) { if (list != 'ul') { close(); out.push('<ul>'); list = 'ul' } out.push('<li>' + inline(m[1]) + '</li>') }
-    else if (m = l.match(/^\s*\d+[.)]\s+(.*)/)) { if (list != 'ol') { close(); out.push('<ol>'); list = 'ol' } out.push('<li>' + inline(m[1]) + '</li>') }
-    else if (!l.trim()) close();
-    else { close(); out.push('<p>' + inline(l) + '</p>') }
-    i++
-  }
-  close(); return out.join('')
-}
-
-/* ---------- Theme / drawer ---------- */
-function setTheme(t) { document.documentElement.dataset.theme = t; $('#theme').innerHTML = ic(t === 'dark' ? 'sun' : 'moon'); LS.set('rsa_theme', t) }
-setTheme(LS.get('rsa_theme', matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'));
-$('#theme').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
-const drawer = o => { $('#side').classList.toggle('open', o); $('#scrim').classList.toggle('show', o) };
-$('#menu').onclick = () => drawer(true); $('#scrim').onclick = () => drawer(false);
-
-/* ---------- Modes ---------- */
-document.querySelectorAll('.tab').forEach(b => b.onclick = () => setMode(b.dataset.m));
-function setMode(m) {
-  mode = m; document.querySelectorAll('.tab').forEach(b => b.setAttribute('aria-selected', b.dataset.m === m)); renderMsgs()
-}
-
-/* ---------- History ---------- */
-function renderHist() {
-  const day = 864e5, now = new Date().setHours(0, 0, 0, 0), g = { 'Today': [], 'Yesterday': [], 'Earlier': [] };
-  chats.filter(c => c.title.toLowerCase().includes(hq)).sort((a, b) => b.createdAt - a.createdAt).forEach(c => (c.createdAt >= now ? g.Today : c.createdAt >= now - day ? g.Yesterday : g.Earlier).push(c));
-  $('#hist').innerHTML = Object.entries(g).filter(([, v]) => v.length).map(([k, v]) => `<div class="grp">${k}</div>` + v.map(c =>
-    `<div class="it ${c.id === cur ? 'on' : ''}"><button class="t" data-open="${c.id}">${esc(c.title)}</button><button class="a" data-ren="${c.id}" aria-label="Badilisha jina">${ic('edit')}</button><button class="a" data-del="${c.id}" aria-label="Futa">${ic('trash')}</button></div>`).join('')).join('')
-    || `<div class="grp">${hq ? 'Hakuna mazungumzo yanayolingana.' : 'Hakuna historia bado. Maswali yako yatahifadhiwa hapa.'}</div>`
-}
-$('#hist').onclick = e => {
-  const t = e.target.closest('button'); if (!t) return;
-  if (t.dataset.open) { openChat(t.dataset.open); drawer(false) }
-  if (t.dataset.ren) { const c = chats.find(x => x.id === t.dataset.ren), n = prompt('Jina jipya la mazungumzo:', c.title); if (n && n.trim()) { c.title = n.trim(); save(); renderHist() } }
-  if (t.dataset.del && confirm('Futa mazungumzo haya?')) { chats = chats.filter(x => x.id !== t.dataset.del); save(); if (cur === t.dataset.del) newChat(); else renderHist() }
-};
-function newChat() { cur = null; sugg = shuffle(QBANK).slice(0, 16); setMode('chat'); renderHist(); $('#q').focus() }
-$('#new').onclick = () => { newChat(); drawer(false) };
-function openChat(id) { const c = chats.find(x => x.id === id); if (!c) return; cur = id; setMode('chat'); renderHist() }
-function makeTitle(q) {
-  let t = q.replace(/[?!.]+$/g, '').trim(); const m = t.match(/^how does (.+) work$/i); if (m) t = 'How ' + m[1] + ' Works';
-  t = t.charAt(0).toUpperCase() + t.slice(1); return t
-}
-
-/* ---------- Render messages ---------- */
-const dur = d => Math.floor(d / 60) + ':' + String(d % 60).padStart(2, '0');
-const nm = t => esc(String(t || 'media').replace(/"/g, ''));
-const imgsHTML = it => `<div class="grid">` + it.map(i => `<div class="m"><img loading="lazy" data-k="${esc(i.thumb)}" alt="${esc(i.title)}"><div class="i"><b>${esc(i.title)}</b></div><button class="dl" data-dl="${esc(i.thumb)}" data-name="${nm(i.title)}" aria-label="Pakua picha">${ic('download')} Pakua</button></div>`).join('') + `</div>`;
-const vidsHTML = it => `<div class="grid v">` + it.map(i => i.vid ? `<div class="m"><div class="yp" role="button" tabindex="0" data-vid="${esc(i.vid)}" aria-label="Cheza video: ${esc(i.title)}"><img src="${esc(i.thumb)}" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(i.vid)}/hqdefault.jpg'" data-k="${esc(i.thumb)}" alt="${esc(i.title)}"><span class="pb">${ic('play')}</span></div><div class="i"><b>${esc(i.title)}</b>${esc(i.user || '')}</div></div>` : `<div class="m"><video controls preload="none" playsinline data-k="${esc(i.file || '')}" data-p="${esc(i.thumb)}" aria-label="${esc(i.title)}"></video><div class="i"><b>${esc(i.title)}</b>${dur(i.duration || 0)}</div>${i.file ? `<button class="dl" data-dl="${esc(i.file)}" data-name="${nm(i.title)}" aria-label="Pakua video">${ic('download')} Pakua</button>` : ''}</div>`).join('') + `</div>`;
-const audHTML = it => it.filter(i => i.id).map(i => `<div class="au" data-id="${esc(i.id)}"><button class="pl" aria-label="Cheza">${ic('play')}</button><div class="x"><b>${esc(i.title)}</b><div class="bar" role="progressbar" aria-label="Maendeleo ya sauti"><i></i></div><small class="tm">0:00</small></div><button class="dl" data-adl="${esc(i.id)}" data-name="${nm(i.title)}" aria-label="Pakua audio">${ic('download')}</button></div>`).join('');
-const srcHTML = a => `<div class="src">` + a.map((s, i) => `<a class="card" href="${safeUrl(s.url)}" target="_blank" rel="noopener noreferrer"><small>[${i + 1}] ${esc(dom(s.url))}</small><b>${esc(s.title)}</b><p>${esc(s.content)}</p></a>`).join('') + `</div>`;
-/* Jibu kama essay: ondoa vichwa, orodha na alama; kila aya iwe maandishi ya kawaida */
-function essay(t) {
-  return String(t || '').replace(/\r/g, '').split(/\n\s*\n/).map(b => b.split('\n').map(l => l.trim()).filter(l => l && !/^#{1,6}\s/.test(l))
-    .map(l => l.replace(/^([-*•]|\d+[.)])\s+/, '').replace(/\*\*|__/g, '').replace(/\s*\[\d+\]/g, '')).map(l => /[.!?:;…]$/.test(l) ? l : l + '.').join(' ')).filter(Boolean).join('\n\n')
-}
-/* Mapendekezo ya maswali: sayansi ya moto na zimamoto (yanachanganywa kila unapoingia au kufungua New Chat) */
-const QBANK = [
-  'Fire triangle ni nini?', 'Fire tetrahedron ni nini?', 'Classes za moto ni zipi?', 'Flashover ni nini na hutokeaje?', 'Backdraft ni nini?',
-  'Hatua za ukuaji wa moto ni zipi?', 'Joto husambaa kwa njia gani? (conduction, convection, radiation)', 'Ni nini chanzo kikuu cha moto wa nyumba?',
-  'SCBA inafanya kazi vipi?', 'Vifaa vya kujikinga (PPE) vya mzimamoto ni vipi?', 'Mbinu ya PASS ya kutumia kizima moto ni ipi?',
-  'Aina za vizima moto na matumizi yake ni zipi?', 'Maji hayatumiki kuzima moto wa aina gani na kwa nini?', 'Povu la kuzimia moto (foam) hufanya kazi vipi?',
-  'Jinsi ya kuzima moto wa mafuta ya kupikia jikoni', 'Moto wa umeme huzimwaje kwa usalama?', 'Moto wa gesi ya LPG huzuiwaje na kuzimwaje?',
-  'Hatari za moshi wa moto kwa mwili ni zipi?', 'Sumu ya kaboni monoksaidi (CO) ni nini?', 'Jinsi ya kutoka kwenye jengo linaloungua kwa usalama',
-  'Mpango wa kuondoka kwenye jengo wakati wa moto unaandaliwaje?', 'Kengele ya moshi (smoke detector) inafanya kazi vipi?', 'Sprinkler za kuzimia moto hufanya kazi vipi?',
-  'Hydrant ya maji ya zimamoto ni nini?', 'Mfumo wa kuzimia moto wa majengo marefu ukoje?', 'Ni nini maana ya fire load?',
-  'Uchunguzi wa chanzo cha moto (fire investigation) unafanywaje?', 'Ishara za moto uliosababishwa kwa makusudi ni zipi?', 'Moto wa msituni hutokeaje na hudhibitiwaje?',
-  'Mbinu za kuingia kwenye jengo lililojaa moshi', 'Search and rescue kwenye jengo linaloungua hufanywaje?', 'Ngazi za zimamoto na matumizi yake',
-  'Kamba na mafundo ya uokoaji (rescue knots) ni yapi?', 'Uokoaji wa gari lililopata ajali (vehicle extrication) unafanywaje?', 'Vifaa vya hydraulic vya uokoaji (Jaws of Life) hutumikaje?',
-  'Uokoaji katika nafasi finyu (confined space) una hatari gani?', 'Uokoaji wa majini na mafuriko unafanywaje?', 'Uokoaji kutoka urefu (rope rescue) hufanywaje?',
-  'Huduma ya kwanza kwa mtu aliyeungua moto', 'Daraja za kuungua kwa ngozi (burns) ni zipi?', 'CPR inafanywaje hatua kwa hatua?',
-  'Mbinu ya triage katika matukio ya maafa ni ipi?', 'Vifaa hatari (hazmat) ni nini na vinashughulikiwaje?', 'Moto wa kemikali huzimwaje?',
-  'Moto wa betri ya lithiamu huzimwaje?', 'Hatari za moto kwenye vituo vya mafuta ni zipi?', 'Kuzima moto wa gari kunafanywaje?',
-  'Msongo wa joto kwa mzimamoto (heat stress) unazuiwaje?', 'Mzimamoto anapaswa kuwa na mazoezi gani ya mwili?', 'Mawasiliano ya redio kwenye tukio la moto yanafanywaje?',
-  'Mfumo wa amri kwenye tukio (Incident Command System) ni nini?', 'Kiwango cha mtiririko wa maji (flow rate) kinakokotolewaje?', 'Shinikizo la maji kwenye hose (friction loss) ni nini?',
-  'Aina za hose na nozzle za zimamoto ni zipi?', 'Njia za kuzuia moto kwenye masoko na maeneo ya biashara', 'Ukaguzi wa usalama wa moto wa jengo unafanywaje?',
-  'Njia za dharura za kutoka (fire exits) zinapaswa kuwaje?', 'Mlipuko wa vumbi (dust explosion) hutokeaje?', 'BLEVE ni nini?',
-  'Moshi mweusi na mweupe unaashiria nini kwenye moto?', 'Kwa nini moto huenea haraka kwenye ngazi na mashimo ya lifti?', 'Historia ya zimamoto na uokoaji Tanzania',
-  'Elimu ya usalama wa moto kwa watoto shuleni', 'Mazoezi ya kuzima moto (fire drill) yanaandaliwaje?'
-];
-const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a };
-let sugg = shuffle(QBANK).slice(0, 16);
-const suggHTML = () => `<div class="sg"><div class="sgh"><span>Maswali unayoweza kuuliza</span><button data-shuf="1" aria-label="Changanya mapendekezo">${ic('refresh')}</button></div><div class="chips">` + sugg.map(r => `<button class="chip" data-ask="${esc(r)}">${esc(r)}</button>`).join('') + `</div></div>`;
-const greet = () => { const h = new Date().getHours(); return h < 12 ? 'Habari za asubuhi.' : h < 16 ? 'Habari za mchana.' : 'Habari za jioni.' };
-const pnd = () => pend && pend.chat === cur ? pend : null;
-const skel = `<div class="sk"></div><div class="sk" style="width:80%"></div>`;
-function pendHTML() {
-  const p = pnd(); if (!p) return '';
-  return p.text ? `<div class="msg"><div class="ai"><div class="body">${md(p.text)}</div>${p.media ? `<div class="status"><span class="dots"><span></span><span></span><span></span></span> Inaandaa picha, video na audio...</div>` : ''}</div></div>`
-    : `<div class="msg"><div class="ai"><div class="status"><span class="dots"><span></span><span></span><span></span></span> ${ic('search')} ${p.stage === 'ai' ? 'Inaandaa jibu la AI...' : 'Inatafuta vyanzo...'}<br><small>“${esc(p.q)}”</small></div>${skel}</div></div>`
-}
-function msgHTML(m) {
-  if (m.role === 'user') return `<div class="msg u"><div class="bub">${esc(m.text)}</div></div>`;
-  const h = `<div class="msg"><div class="ai">`;
-  if (m.error) return h + `<div class="err">${ic('alert')} ${esc(m.error)}<br>${m.retry ? `<button class="btn" data-retry="${esc(m.retry)}" style="margin-top:8px">Jaribu tena</button>` : ''}</div></div></div>`;
-  if (m.type === 'web') return h + `<div class="body">${md(essay(m.text))}</div><div class="act"><button data-copy="1" aria-label="Nakili jibu" title="Nakili jibu">${ic('copy')}</button></div></div></div>`;
-  return h + `<div class="body" style="color:var(--mute)">${ic(m.type)}</div></div></div>`
-}
-const vidsSecHTML = it => { const yt = it.filter(i => i.vid), px = it.filter(i => !i.vid); return (yt.length ? `<div class="sec">Video za kutazama</div>` + vidsHTML(yt) : '') + (px.length ? `<div class="sec">Video za kupakua</div>` + vidsHTML(px) : '') };
-const VK = { web: 'sources', images: 'images', videos: 'videos', audio: 'audio' };
-const DRAW = { web: srcHTML, images: imgsHTML, videos: vidsSecHTML, audio: audHTML };
-let vsub = 'watch';
-const initial = t => (String(t || '?').trim().charAt(0) || '?').toUpperCase();
-const ytCard = i => `<article class="vc"><div class="yp" role="button" tabindex="0" data-vid="${esc(i.vid)}" aria-label="Cheza video: ${esc(i.title)}"><img src="${esc(i.thumb)}" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/${esc(i.vid)}/hqdefault.jpg'" data-k="${esc(i.thumb)}" alt="${esc(i.title)}">${i.duration ? `<span class="dur">${fdur(i.duration)}</span>` : ''}<span class="pb">${ic('play')}</span></div><div class="vm"><span class="av">${esc(initial(i.user))}</span><div class="vt"><b>${esc(i.title)}</b><small>${esc(i.user || '')}</small><small>${[i.views ? 'Watazamaji ' + cnt(i.views) : '', ago(i.at)].filter(Boolean).join(' · ')}</small></div></div></article>`;
-const pxCard = i => `<article class="vc"><div class="vpx"><video controls preload="none" playsinline data-k="${esc(i.file || '')}" data-p="${esc(i.thumb)}" aria-label="${esc(i.title)}"></video></div><div class="vm"><span class="av">${ic('download')}</span><div class="vt"><b>${esc(i.title)}</b><small>${esc(i.user || '')}</small><small>${dur(i.duration || 0)}</small></div></div>${i.file ? `<button class="dl vdl" data-dl="${esc(i.file)}" data-name="${nm(i.title)}" aria-label="Pakua video">${ic('download')} Pakua</button>` : ''}</article>`;
-const vskel = `<div class="vgrid">` + '<div><div class="sk" style="aspect-ratio:16/9;height:auto;border-radius:14px;margin:0"></div><div class="sk" style="width:85%"></div><div class="sk" style="width:55%"></div></div>'.repeat(6) + `</div>`;
-function videosView(c) {
-  const bl = []; c.messages.forEach((m, idx) => { if (m.role === 'ai' && !m.error && m.type === 'web') { const all = [...(m.videos || []), ...(m.videos2 || [])]; bl.push({ q: m.q, m, idx, yt: all.filter(v => v.vid), px: all.filter(v => !v.vid) }) } });
-  bl.reverse(); const nY = bl.reduce((n, b) => n + b.yt.length, 0), nP = bl.reduce((n, b) => n + b.px.length, 0);
-  const tb = (k, icn, lab, n) => `<button class="vtb" role="tab" data-vsub="${k}" aria-selected="${vsub === k}">${ic(icn)} ${lab} <span class="n">${n}</span></button>`;
-  const bar = `<div class="vtabs" role="tablist" aria-label="Aina ya video">${tb('watch', 'play', 'Kutazama', nY)}${tb('dl', 'download', 'Kupakua', nP)}</div>`;
-  let h = bar; if (pnd()) h += `<div class="qh">${esc(pnd().q)}</div>${vskel}`;
-  const key = vsub === 'watch' ? 'yt' : 'px', n = vsub === 'watch' ? nY : nP;
-  bl.forEach(b => { const a = b[key]; if (!a.length) return;
-    h += `<div class="qh">${esc(b.q)}</div><div class="vgrid">${a.map(vsub === 'watch' ? ytCard : pxCard).join('')}</div>` + (vsub === 'watch' && b.m.ytNext ? `<div class="vmore"><button class="btn" data-vmore="${b.idx}">Ona video zaidi</button></div>` : '') });
-  if (!n && !pnd()) { const o = vsub === 'watch' ? nP : nY; h += `<div class="hero"><p>${bl.length ? (vsub === 'watch' ? 'Hakuna video za kutazama kwa utafutaji huu.' : 'Hakuna video za kupakua kwa utafutaji huu.') : 'Bado hakuna video. Uliza swali kwanza.'}</p>${o ? `<p><button class="btn" style="margin-top:12px" data-vsub="${vsub === 'watch' ? 'dl' : 'watch'}">${vsub === 'watch' ? 'Ona video za kupakua (' + o + ')' : 'Ona video za kutazama (' + o + ')'}</button></p>` : ''}</div>` }
-  return h
-}
-async function loadMore(i, btn) {
-  const c = chats.find(x => x.id === cur), m = c?.messages[i]; if (!m?.ytNext) return;
-  if (!navigator.onLine) { toast('Hauna intaneti.'); return }
-  btn.disabled = true; btn.textContent = 'Inapakia...';
-  const r = await vidSearch(m.q, m.ytNext);
-  if (!r.items.length) { toast('Hakuna video zaidi kwa sasa.'); btn.disabled = false; btn.textContent = 'Ona video zaidi'; return }
-  const have = new Set((m.videos || []).map(v => v.vid)); m.videos = (m.videos || []).concat(r.items.filter(v => !have.has(v.vid))); m.ytNext = r.next;
-  save(); const f = $('#feed'), y = f.scrollTop; renderMsgs(); f.scrollTop = y; cacheMsg(m)
-}
-function viewHTML(c) {
-  if (mode === 'videos') return videosView(c);
-  let h = pnd() ? `<div class="qh">${esc(pnd().q)}</div>${skel}` : '';
-  [...c.messages].reverse().forEach((m, i) => {
-    if (m.role !== 'ai') return;
-    if (m.error) { if (i === 0 && !pnd()) h += msgHTML(m); return }
-    const a = (m.type === 'web' ? (mode === 'videos' ? [...(m.videos || []), ...(m.videos2 || [])] : m[VK[mode]]) : (m.type === mode ? m.items : null))?.filter(i => mode !== 'audio' || i.id);
-    if (a?.length) h += (m.q ? `<div class="qh">${esc(m.q)}</div>` : '') + DRAW[mode](a)
-  });
-  return h || `<div class="hero"><p>Bado hakuna matokeo. Uliza swali kwanza.</p></div>`
-}
-function renderMsgs() {
-  const c = chats.find(x => x.id === cur) || { messages: [] }; let h;
-  if (mode === 'chat') h = c.messages.length || pnd() ? c.messages.map(msgHTML).join('') + `<div id="pend">${pendHTML()}</div>` : `<div class="hero"><img class="lg" src="profile.jpg" alt="" onerror="this.remove()"><h1>R-Search</h1><p>${greet()} Uliza chochote. Tafuta, elewa na pata majibu yenye vyanzo.</p></div>` + suggHTML();
-  else h = viewHTML(c);
-  $('#msgs').classList.toggle('vw', mode === 'videos'); $('#msgs').innerHTML = h; if (mode === 'chat') scrollEnd(); else $('#feed').scrollTop = 0; hydrate(); players.forEach((_, id) => paint(id))
-}
-const scrollEnd = () => { const f = $('#feed'); f.scrollTop = f.scrollHeight };
-$('#msgs').onclick = e => {
-  const yp = e.target.closest('.yp'); if (yp) { playVid(yp); return }
-  const im = e.target.closest('.m img'); if (im && im.getAttribute('src')) { openLB(im); return }
-  const bar = e.target.closest('.au .bar');
-  if (bar) { const id = bar.closest('.au').dataset.id, a = players.get(id); if (a?.duration) { const r = bar.getBoundingClientRect(); a.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * a.duration; paint(id) } return }
-  const t = e.target.closest('button'); if (!t) return;
-  if (t.classList.contains('pl')) togglePlay(t);
-  if (t.dataset.shuf) { sugg = shuffle(QBANK).slice(0, 16); renderMsgs() }
-  if (t.dataset.ask) { $('#q').value = t.dataset.ask; send() }
-  if (t.dataset.retry) { const c = chats.find(x => x.id === cur); c.messages.pop(); c.messages.pop(); save(); $('#q').value = t.dataset.retry; send() }
-  if (t.dataset.vsub) { vsub = t.dataset.vsub; renderMsgs() }
-  if (t.dataset.vmore) loadMore(+t.dataset.vmore, t);
-  if (t.dataset.dl || t.dataset.adl) dl(t);
-  if (t.dataset.copy) { navigator.clipboard?.writeText(t.closest('.ai').querySelector('.body').innerText); toast('Jibu limenakiliwa') }
-  if (t.classList.contains('cp')) { toast('Msimbo umenakiliwa');  navigator.clipboard?.writeText(t.nextElementSibling.textContent); t.textContent = 'Copied ✓'; setTimeout(() => t.textContent = 'Copy', 1500) }
-};
-
-/* ---------- Video: utafutaji + kucheza ---------- */
-const unesc = s => { const t = document.createElement('textarea'); t.innerHTML = s || ''; return t.value };
-const isoSec = t => { const m = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/.exec(t || ''); return m ? (+m[1] || 0) * 3600 + (+m[2] || 0) * 60 + (+m[3] || 0) : 0 };
-const fdur = d => { d = Math.floor(d || 0); const h = Math.floor(d / 3600), m = Math.floor(d % 3600 / 60), x = String(d % 60).padStart(2, '0'); return h ? `${h}:${String(m).padStart(2, '0')}:${x}` : `${m}:${x}` };
-const cnt = n => new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
-function ago(iso) {
-  const t = Date.parse(iso); if (!t) return ''; const m = Math.max(1, Math.floor((Date.now() - t) / 6e4));
-  if (m < 60) return `dakika ${m} zilizopita`; const h = Math.floor(m / 60); if (h < 24) return `saa ${h} zilizopita`;
-  const d = Math.floor(h / 24); if (d < 7) return `siku ${d} zilizopita`; if (d < 30) return `wiki ${Math.floor(d / 7)} zilizopita`;
-  if (d < 365) return `miezi ${Math.floor(d / 30)} iliyopita`; const y = Math.floor(d / 365); return y === 1 ? 'mwaka 1 uliopita' : `miaka ${y} iliyopita`
-}
-async function vidSearch(q, token) {
-  const none = { items: [], next: '' };
-  try {
-    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=50&safeSearch=moderate&videoEmbeddable=true&q=${encodeURIComponent(q.slice(0, 100))}${token ? '&pageToken=' + encodeURIComponent(token) : ''}&key=${YT_KEY}`);
-    if (!r.ok) return none; const d = await r.json();
-    const items = (d.items || []).filter(x => /^[\w-]{11}$/.test(x.id?.videoId || '')).map(x => {
-      const t = x.snippet.thumbnails || {};
-      return { title: unesc(x.snippet.title), thumb: (t.high || t.medium || t.default || {}).url || '', vid: x.id.videoId, user: unesc(x.snippet.channelTitle), at: x.snippet.publishedAt }
-    });
-    if (items.length) try {
-      const r2 = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,statistics&id=${items.map(i => i.vid).join(',')}&key=${YT_KEY}`);
-      if (r2.ok) { const mp = new Map(((await r2.json()).items || []).map(v => [v.id, v])); items.forEach(i => { const v = mp.get(i.vid); if (v) { i.duration = isoSec(v.contentDetails?.duration); i.views = +v.statistics?.viewCount || 0 } }) }
-    } catch {}
-    return { items, next: d.nextPageToken || '' }
-  } catch { return none }
-}
-function playVid(el) {
-  const id = el.dataset.vid; if (!/^[\w-]{11}$/.test(id || '')) return;
-  if (el.querySelector('iframe')) return;
-  if (!navigator.onLine) { toast('Video inahitaji mtandao. Picha na maelezo vimehifadhiwa.'); return }
-  const f = document.createElement('iframe');
-  f.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-  f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'; f.allowFullscreen = true; f.title = 'Video';
-  el.querySelector('.pb')?.remove(); el.appendChild(f); el.style.cursor = 'default'
-}
-
-/* ---------- Download ---------- */
-async function dl(btn) {
-  const lab = btn.innerHTML, small = !btn.textContent.trim(); btn.innerHTML = small ? '…' : 'Inapakua...';
-  try {
-    const u = btn.dataset.dl || await audioUrl(btn.dataset.adl);
-    let b = await mGet(u); if (!b) { const r = await fetch(u); if (!r.ok) throw 0; b = await r.blob(); mPut(u, b) }
-    const a = document.createElement('a'), ext = (b.type.split('/')[1] || u.split('.').pop() || 'bin').replace('jpeg', 'jpg').replace('mpeg', 'mp3');
-    a.href = URL.createObjectURL(b); a.download = 'R-Search-' + (btn.dataset.name || 'faili').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').slice(0, 40) + '.' + ext;
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); btn.innerHTML = ic('check') + (small ? '' : ' Imepakuliwa'); toast('Imepakuliwa')
-  } catch { btn.innerHTML = small ? ic('alert') : 'Imeshindikana, jaribu tena'; toast('Imeshindikana kupakua. Jaribu tena.') }
-  setTimeout(() => btn.innerHTML = lab, 2500)
-}
-
-/* ===== UTAFUTAJI WA BURE (bila API key): Wikipedia kwa vyanzo + Pollinations AI kwa jibu ===== */
-const FS_STOP = new Set(("na ya wa kwa ni hii huu hizi katika kuhusu nini nani vipi gani je ambao lakini sana jinsi naomba tafadhali " +
-  "ninaweza una nina yangu wako chake mimi wewe sisi hapa pale kwamba pia au kama kwanini mbona nawezaje inafanya kazi kuna " +
-  "the is are of to and a in for what how why who when where can do does should about with this that it be on as you i my your was were will would could").split(" "));
-const FS_SW = new Set("na ya wa kwa ni hii huu hizi katika kuhusu nini nani vipi gani je ambao lakini sana jinsi naomba tafadhali nawezaje kuzima moto jengo kwamba pia au kama kwanini".split(" "));
-const FS_EN = new Set("the is are of to and a in for what how why who when where can do does should about with this that it be on as you i my your was were will would could".split(" "));
-const fsSleep = ms => new Promise(r => setTimeout(r, ms));
-function fsLang(t) {
-  let s = 0, e = 0;
-  (String(t).toLowerCase().match(/\p{L}+/gu) || []).forEach(w => { if (FS_SW.has(w)) s++; if (FS_EN.has(w)) e++; });
-  return e > s ? "en" : "sw";
-}
-const fsTerms = (q, n = 5) => [...new Set((String(q).toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).filter(w => w.length > 2 && !FS_STOP.has(w)))].slice(0, n);
-
-async function fsFetch(url, opt, ms) {
-  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
-  try { return await fetch(url, Object.assign({}, opt, { signal: ctl.signal })); } finally { clearTimeout(t); }
-}
-/* Wikipedia: inatupa hitilafu ikishindwa (ili tujue ni kushindwa, si "hakuna matokeo") */
-async function fsWiki(lang, terms, signal) {
-  if (!terms.length) return [];
-  const u = "https://" + lang + ".wikipedia.org/w/api.php?action=query&format=json&formatversion=2&origin=*" +
-    "&generator=search&gsrlimit=5&gsrsearch=" + encodeURIComponent(terms.join(" ")) +
-    "&prop=extracts|info&exintro=1&explaintext=1&exchars=1000&exlimit=max&inprop=url&redirects=1";
-  const r = await fetch(u, { signal });
-  if (!r.ok) throw new Error("wiki " + r.status);
-  const d = await r.json();
-  return ((d.query && d.query.pages) || [])
-    .sort((a, b) => (a.index || 0) - (b.index || 0))
-    .filter(p => p.extract && p.fullurl)
-    .map(p => ({ title: p.title, url: p.fullurl, content: p.extract.trim() }));
-}
-
-let fsLast = 0;
-const fsClean = t => String(t || "").trim().split(/\n\s*---+\s*\n/)[0]            // ondoa tangazo la mtoa huduma
-  .split(/\n{2,}/).filter(p => !/pollinations/i.test(p)).join("\n\n").trim();
-/* AI ya bure: njia 3 (POST openai, GET openai, GET mistral). GET haina preflight ya CORS, kwa hiyo ni mbadala imara. */
-async function fsAI(q, ctx, lang, avoid) {
-  const sys = (lang === "en"
-    ? "You are R-Search, a helpful assistant. Answer the user's question clearly in English, using the sources when they are relevant. Write 2 to 4 short plain paragraphs. No markdown, no lists, no headings, no citation numbers. If the question ends with a focus hint, emphasise that angle."
-    : "Wewe ni R-Search, msaidizi mwenye manufaa. Jibu swali la mtumiaji kwa Kiswahili sanifu kinachoeleweka, ukitumia vyanzo vilivyotolewa pale vinapofaa. Andika aya 2 hadi 4 fupi za kawaida. Usitumie markdown, orodha, vichwa wala namba za rejea. Swali likiisha kwa mwelekeo maalum, sisitiza mwelekeo huo.")
-    + (avoid && avoid.length ? (lang === "en" ? " Do not repeat points already made: " : " Usirudie hoja zilizokwisha tolewa: ") + avoid.join(" | ").slice(0, 500) : "");
-  const src = ctx.map((x, i) => "[" + (i + 1) + "] " + x.title + ": " + x.content.slice(0, 450)).join("\n");
-  const user = (src ? "Sources:\n" + src + "\n\n" : "") + "Question: " + q;
-  const post = async () => {
-    const r = await fsFetch("https://text.pollinations.ai/openai", { method: "POST", headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model: "openai", temperature: 0.5, messages: [{ role: "system", content: sys }, { role: "user", content: user }] }) }, 22000);
-    if (r.status === 429) return 429;
-    if (!r.ok) return "";
-    const d = await r.json();
-    return fsClean(d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content);
-  };
-  const get = model => async () => {
-    const r = await fsFetch("https://text.pollinations.ai/" + encodeURIComponent(user.slice(0, 1400)) + "?model=" + model + "&system=" + encodeURIComponent(sys.slice(0, 600)), {}, 22000);
-    if (r.status === 429) return 429;
-    if (!r.ok) return "";
-    return fsClean(await r.text());
-  };
-  for (const attempt of [post, get("openai"), get("mistral")]) {
-    const wait = fsLast + 2500 - Date.now();           // pengo kati ya maombi (kikomo cha anonymous)
-    if (wait > 0) await fsSleep(wait);
-    fsLast = Date.now();
-    try {
-      const out = await attempt();
-      if (out === 429) { await fsSleep(4000); continue; }
-      if (out && out.length > 20) return out;
-    } catch { /* jaribu njia inayofuata */ }
-  }
-  return "";
-}
-
-/* opt: { variant: nambari ya AI (kwa mbadala tofauti), avoid: majibu ya awali, stage: callback ya hatua } */
-async function fsSearch(query, opt) {
-  opt = opt || {};
-  const q = String(query || "").slice(0, 380), lang = fsLang(q);
-  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 15000);
-  let results = [], failed = false;
-  try {
-    let terms = fsTerms(q); if (!terms.length) terms = [q.slice(0, 60)];
-    const run = t => Promise.all([fsWiki(lang, t, ctl.signal).catch(() => null), lang === "en" ? Promise.resolve([]) : fsWiki("en", t, ctl.signal).catch(() => null)]);
-    let [a, b] = await run(terms);
-    failed = a === null && b === null; a = a || []; b = b || [];
-    if (!failed && !a.length && !b.length && terms.length > 2) { [a, b] = await run(terms.slice(0, 2)); a = a || []; b = b || []; }
-    const seen = new Set();
-    results = [...a, ...b].filter(x => !seen.has(x.url) && seen.add(x.url)).slice(0, 6);
-  } finally { clearTimeout(timer); }
-  if (opt.stage) try { opt.stage("ai"); } catch {}
-  let answer = await fsAI(q, results.slice(0, 4), lang, opt.avoid), ai = !!answer;
-  if (!answer && results.length) {                      // mbadala usio na AI: muhtasari wa Wikipedia (tofauti kwa kila AI)
-    answer = results[(opt.variant || 0) % results.length].content.split(/(?<=[.!?])\s/).slice(0, 3).join(" ");
-  }
-  return { answer, results, diag: { wikiFailed: failed, ai } };
-}
-
-/* ---------- API ---------- */
-const DOWN = { msg: 'Samahani, tumeshindwa kupata majibu kwa sasa. Jaribu tena baada ya muda mfupi.', retry: true };
-async function tav(body) {
-  const stage = s => { if (pend) { pend.stage = s; const el = $('#pend'); if (el && !pend.text) el.innerHTML = pendHTML() } };
-  try { return await fsSearch(body.query, { stage }); } catch { throw DOWN; }
-}
-async function pix(kind, q) {
-  if (!PIXABAY_KEY) throw { msg: 'Huduma ya utafutaji haijasanidiwa kikamilifu.' };
-  let r; try { r = await fetch(`https://pixabay.com/api/${kind === 'videos' ? 'videos/' : ''}?key=${PIXABAY_KEY}&q=${encodeURIComponent(q.slice(0, 100))}&per_page=${kind === 'videos' ? 50 : 24}&safesearch=true`) } catch { throw DOWN }
-  if (!r.ok) throw DOWN; const d = await r.json();
-  return (d.hits || []).map(h => kind === 'videos' ? { title: h.tags, thumb: `https://i.vimeocdn.com/video/${h.picture_id}_640x360.jpg`, file: h.videos?.tiny?.url || h.videos?.small?.url || h.videos?.medium?.url || '', url: h.pageURL, duration: h.duration, user: h.user } : { title: h.tags, thumb: h.webformatURL, url: h.pageURL, user: h.user })
-}
-/* Audio: maktaba ya sauti ya wazi; inachezwa papo hapo ndani ya R-Search */
-const IA = 'https://archive.org', aurl = new Map(), players = new Map();
-async function audioSearch(q) {
-  let w = q.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []; const long = w.filter(x => x.length > 3); w = (long.length ? long : w).slice(0, 6); if (!w.length) return [];
-  const p = new URLSearchParams(); p.append('q', 'mediatype:audio AND (' + w.join(' OR ') + ')'); p.append('fl[]', 'identifier'); p.append('fl[]', 'title'); p.append('sort[]', 'downloads desc'); p.append('rows', '8'); p.append('output', 'json');
-  try { const r = await fetch(`${IA}/advancedsearch.php?${p}`); if (!r.ok) return []; const d = await r.json();
-    return (d.response?.docs || []).map(x => ({ id: x.identifier, title: String(Array.isArray(x.title) ? x.title[0] : x.title || x.identifier) })) } catch { return [] }
-}
-async function audioUrl(id) {
-  if (aurl.has(id)) return aurl.get(id);
-  const r = await fetch(`${IA}/metadata/${encodeURIComponent(id)}`); if (!r.ok) throw 0; const d = await r.json(), fl = d.files || [];
-  const f = fl.filter(x => /\.mp3$/i.test(x.name)).sort((a, b) => (+a.size || 1e12) - (+b.size || 1e12))[0] || fl.find(x => /\.(ogg|m4a|wav)$/i.test(x.name));
-  if (!f) throw 0; const u = `${IA}/download/${encodeURIComponent(id)}/${f.name.split('/').map(encodeURIComponent).join('/')}`; aurl.set(id, u); return u
-}
-const card = id => document.querySelector(`.au[data-id="${CSS.escape(id)}"]`);
-function paint(id) {
-  const c = card(id), a = players.get(id); if (!c || !a) return;
-  c.querySelector('.pl').innerHTML = ic(a.paused ? 'play' : 'pause');
-  c.querySelector('.bar i').style.width = (a.duration ? a.currentTime / a.duration * 100 : 0) + '%';
-  c.querySelector('.tm').textContent = dur(Math.floor(a.currentTime || 0)) + (a.duration ? ' / ' + dur(Math.floor(a.duration)) : '')
-}
-async function togglePlay(btn) {
-  const c = btn.closest('.au'), id = c.dataset.id; let a = players.get(id);
-  if (a && !a.paused) { a.pause(); return }
-  players.forEach((p, k) => { if (k !== id) p.pause() });
-  if (!a) {
-    c.classList.add('ld'); c.querySelector('.tm').textContent = 'Inapakia...';
-    try {
-      a = new Audio(await audioUrl(id)); a.preload = 'auto'; players.set(id, a);
-      ['timeupdate', 'play', 'pause', 'ended', 'loadedmetadata'].forEach(ev => a.addEventListener(ev, () => paint(id)));
-      a.addEventListener('error', () => { players.delete(id); aurl.delete(id); const x = card(id); if (x) { x.querySelector('.tm').textContent = 'Haipatikani'; x.querySelector('.pl').innerHTML = ic('play') } })
-    } catch { c.classList.remove('ld'); c.querySelector('.tm').textContent = 'Haipatikani'; return }
-    c.classList.remove('ld')
-  }
-  try { await a.play() } catch { const x = card(id); if (x) x.querySelector('.tm').textContent = 'Haipatikani' }
-}
-
-/* ---------- Send ---------- */
-async function send() {
-  const q = $('#q').value.trim(); if (busy) return;
-  if (!q) { $('.box').animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-6px)' }, { transform: 'translateX(6px)' }, { transform: 'translateX(0)' }], { duration: 220 }); return }
-  busy = true; $('#q').value = ''; autosize();
-  let c = chats.find(x => x.id === cur);
-  if (!c) { c = { id: uid(), title: makeTitle(q), mode: 'chat', messages: [], createdAt: Date.now() }; chats.push(c); cur = c.id }
-  c.messages.push({ role: 'user', text: q }); pend = { q, text: '', chat: c.id }; save(); renderMsgs(); renderHist();
-  let reply, mp = null; const none = { msg: 'Hakuna taarifa zinazolingana zilizopatikana.' };
-  try {
-    if (!navigator.onLine) throw { msg: 'Hauna intaneti. Unaweza kusoma historia yako (pamoja na picha na video zilizohifadhiwa), lakini utafutaji mpya unahitaji mtandao.', retry: true };
-    mp = Promise.allSettled([pix('images', q), vidSearch(q), audioSearch(q), pix('videos', q)]);
-    const d = await tav({ query: q });
-    const srcs = (d.results || []).map(r => ({ title: r.title, url: r.url, content: r.content || '' }));
-    if (!srcs.length && !d.answer) throw (d.diag && d.diag.wikiFailed ? { msg: 'Huduma za bure za utafutaji (Wikipedia na AI) hazipatikani kutoka kwenye mtandao wako kwa sasa. Jaribu tena baada ya muda mfupi.', retry: true } : none);
-    reply = { role: 'ai', type: 'web', q, text: essay(d.answer) || 'Hakuna muhtasari uliopatikana.', sources: srcs, images: [], videos: [], videos2: [], audio: [] };
-    const full = reply.text;
-    for (let n = 0; n < full.length; n += 8) { pend.text = full.slice(0, n + 8); const el = $('#pend'); if (el) { el.innerHTML = pendHTML(); if (mode === 'chat' && nearBottom()) scrollEnd() } await new Promise(r => setTimeout(r, 12)) }
-    pend.media = true; { const el = $('#pend'); if (el) el.innerHTML = pendHTML() }
-    const [im, vi, au, pv] = await mp;
-    reply.images = (im.value || []).slice(0, 12); { const yv = vi.value || {}; reply.videos = yv.items || []; reply.ytNext = yv.next || '' } reply.audio = (au.value || []).slice(0, 6); reply.videos2 = (pv.value || []).slice(0, 50);
-  } catch (e) { reply = { role: 'ai', error: e.msg || 'Hitilafu imetokea.', retry: e.retry ? q : null } }
-  pend = null; c.messages.push(reply); save(); renderMsgs(); busy = false;
-  if (reply.type === 'web') cacheMsg(reply)
-}
-
-/* ---------- Input ---------- */
-const autosize = () => { const t = $('#q'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 140) + 'px' };
-$('#q').addEventListener('input', autosize);
-$('#q').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } });
-$('#send').onclick = send;
-$('#attach').onclick = () => $('#file').click();
-$('#file').onchange = e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { $('#q').value = (($('#q').value ? $('#q').value + '\n' : '') + r.result).slice(0, 380); autosize() }; r.readAsText(f); e.target.value = '' };
-const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-if (!SR) $('#mic').style.display = 'none'; else {
-  const rec = new SR(); rec.lang = 'sw-TZ'; let on = false;
-  rec.onresult = e => { $('#q').value = e.results[0][0].transcript; autosize() };
-  rec.onend = () => { on = false; $('#mic').classList.remove('rec') };
-  $('#mic').onclick = () => { if (on) rec.stop(); else { try { rec.start(); on = true; $('#mic').classList.add('rec') } catch {} } }
-}
-var tt; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2400) }
-const net = () => { $('#net').classList.toggle('off', !navigator.onLine); $('#net').title = navigator.onLine ? 'Uko mtandaoni' : 'Hauko mtandaoni' };
-addEventListener('offline', () => { net(); toast('Hauko mtandaoni. Historia na vilivyohifadhiwa vinasomeka.') });
-addEventListener('online', () => { net(); toast('Mtandao umerudi') }); net();
-const fd = $('#feed'), nearBottom = () => fd.scrollHeight - fd.scrollTop - fd.clientHeight < 140;
-fd.addEventListener('scroll', () => $('#sb').classList.toggle('on', mode === 'chat' && !nearBottom()), { passive: true });
-$('#sb').onclick = () => fd.scrollTo({ top: fd.scrollHeight, behavior: 'smooth' });
-$('#hs').addEventListener('input', e => { hq = e.target.value.trim().toLowerCase(); renderHist() });
-function openLB(im) { const l = $('#lb'), x = l.querySelector('img'); x.src = im.src; x.alt = im.alt; l.classList.add('on'); $('#lbx').focus() }
-$('#lb').onclick = e => { if (e.target.id === 'lb' || e.target.closest('#lbx')) $('#lb').classList.remove('on') };
-addEventListener('keydown', e => {
-  if ((e.key === 'Enter' || e.key === ' ') && document.activeElement?.classList.contains('yp')) { e.preventDefault(); playVid(document.activeElement) }
-  if (e.key === 'Escape') { $('#lb').classList.remove('on'); drawer(false) }
-  const typing = /INPUT|TEXTAREA/.test(document.activeElement.tagName);
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); newChat() }
-  else if (e.key === '/' && !typing) { e.preventDefault(); $('#q').focus() }
-  else if (e.altKey && /^[1-5]$/.test(e.key)) { e.preventDefault(); setMode(['chat', 'web', 'images', 'videos', 'audio'][e.key - 1]) }
-});
-addEventListener('load', () => setTimeout(() => $('#splash')?.remove(), 900));
-(async () => {
-  chats = (await kvGet('chats')) || LS.get('rsa_chats', []);
-  renderMsgs(); renderHist(); navigator.storage?.persist?.()
-})();
-
-// ---- R-AI Trinity (Nancy, Ivan, Aisha) imejengwa ndani ya faili hili ----
-(function(){
-  const tri=document.getElementById('tri'),f=document.getElementById('triF');
-  document.getElementById('triBtn').onclick=()=>{ if(!f.srcdoc){ f.srcdoc=document.getElementById('triSrc').textContent.replace(/<\\\/script/g,'</script'); } tri.classList.add('on'); };
-  document.getElementById('triX').onclick=()=>tri.classList.remove('on');
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape') tri.classList.remove('on'); });
-})();
-</script>
-</body>
-</html>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let lang='sw',cur=null,si=0,view='dash',DB=null,timer,mem={},fsig='';
+try{lang=localStorage.lang||'sw';if(localStorage.th)document.documentElement.dataset.theme=localStorage.th}catch(e){}
+const T=s=>{const p=s.split('|');return lang=='en'&&p[1]?p[1]:p[0]};
+const YN=['y:Ndiyo|Yes','n:Hapana|No','u:Haijulikani|Unknown'];
+const TYPES=['fire:Moto|Fire','road:Ajali ya barabarani|Road accident','collapse:Jengo kuporomoka|Building collapse','explosion:Mlipuko|Explosion','industrial:Ajali ya kiwandani|Industrial accident','natural:Janga la asili|Natural disaster','rescue:Tukio la uokoaji|Rescue incident'];
+const IGN=['elec:Umeme|Electrical','mech:Mitambo|Mechanical','human:Shughuli za binadamu|Human activity','nat:Asili|Natural','oth:Nyingine|Other','unk:Haijulikani|Unknown'];
+const GQ={road:[['g1','Magari/vyombo vilivyohusika|Vehicles involved','x'],['g2','Hali ya barabara na hewa|Road and weather','x'],['g3','Mwenendo wa madereva/mwendo|Driver conduct / speed','x']],collapse:[['g1','Umri na muundo wa jengo|Building age and structure','x'],['g2','Kilichosababisha kuporomoka (kinachodhaniwa)|Suspected trigger','x'],['g3','Watu waliokwama/waliookolewa|Trapped / rescued people','x']],explosion:[['g1','Chanzo cha nishati/gesi/kemikali|Energy / gas / chemical source','x'],['g2','Kituo cha mlipuko na uharibifu|Blast centre and damage','x'],['g3','Vifaa vya usalama vilivyokuwepo|Safety systems present','x']],industrial:[['g1','Mchakato/mashine zilizohusika|Process / machinery involved','x'],['g2','Taratibu za usalama kazini|Workplace safety procedures','x'],['g3','Mafunzo ya wafanyakazi|Worker training','x']],natural:[['g1','Aina na ukubwa wa janga|Hazard type and scale','x'],['g2','Maeneo na watu walioathirika|Areas and people affected','x'],['g3','Tahadhari zilizotolewa kabla|Warnings issued','x']],rescue:[['g1','Hali ya waathirika|Victims condition','x'],['g2','Mbinu na vifaa vya uokoaji|Rescue methods and equipment','x'],['g3','Changamoto zilizojitokeza|Challenges faced','x']]};
+const S=[
+{id:'A',n:'A. Taarifa za Tukio|A. Incident Particulars',f:()=>[['ref','Investigation reference number|Investigation reference number','t'],['inc','Incident number|Incident number','t'],['type','Aina ya tukio|Incident type','s',TYPES],['date','Tarehe ya tukio|Incident date','d'],['time','Muda wa tukio|Incident time','tm'],['loc','Eneo lilipotokea|Location','t'],['owner','Jina la mmiliki wa eneo|Owner of premises','t'],['inv','Jina la mchunguzi|Investigator name','t'],['unit','Kikosi kilichohusika|Unit involved','t'],['inv_date','Tarehe ya uchunguzi|Investigation date','d']]},
+{id:'B',n:'B. Mandhari ya Tukio|B. Incident Background',f:()=>[['reporter','Nani alitoa taarifa?|Who reported?','t'],['disc','Tukio liligundulikaje?|How was it discovered?','x'],['present','Nani alikuwa eneo la tukio?|Who was present?','x'],['started','Tukio lilianza muda gani?|Time incident started','tm'],['before','Nini kilitokea kabla ya tukio?|What happened before?','x'],['after','Nini kilitokea baada ya tukio?|What happened after?','x'],['firstArr','Kikosi cha kwanza kilifika muda gani?|First crew arrival time','tm'],['cas','Kulikuwa na majeruhi au vifo?|Injuries or deaths?','s',YN]]},
+{id:'C',n:'C. Ukaguzi wa Eneo|C. Scene Examination',f:()=>[['struct','Muundo wa jengo/eneo|Building / area structure','x'],['activity','Aina ya shughuli zinazofanyika|Activities carried out','t'],['precond','Hali ya eneo kabla ya tukio|Condition before incident','x'],['damaged','Vitu vilivyoharibika|Items damaged','x'],['worst','Sehemu yenye uharibifu mkubwa|Most heavily damaged part','x'],['spread','Alama za kuenea kwa moto/uharibifu|Spread patterns observed','x'],['power','Vyanzo vya umeme|Electrical sources','x'],['equip','Vifaa vilivyokuwa vinatumika|Equipment in use','x'],['safety','Hali ya usalama wa eneo|Site safety condition','x']]},
+{id:'D',n:'D. Mahojiano ya Mashahidi|D. Witness Interviews'},
+{id:'E',n:'E. Vielelezo|E. Physical Evidence'},
+{id:'F',n:'F. Chanzo cha Moto|F. Fire Origin & Cause',if:v=>v.type=='fire',f:()=>[['area','Area of Origin|Area of Origin','x'],['point','Point of Origin (ikiwa imethibitishwa)|Point of Origin (if verified)','x'],['firstMat','First Material Ignited|First Material Ignited','t'],['ign','Heat/Ignition Source|Heat/Ignition Source','s',IGN],['heat','Form of Heat Transfer|Form of Heat Transfer','s',['cond:Conduction|Conduction','conv:Convection|Convection','rad:Radiation|Radiation','direct:Direct flame|Direct flame contact']],['dev','Fire Development|Fire Development','x'],['elecF','Dalili za hitilafu ya umeme?|Signs of electrical fault?','s',YN],['mechF','Dalili za hitilafu ya mitambo?|Signs of mechanical failure?','s',YN],['hum','Shughuli za binadamu zilizohusika|Human activities involved','x'],['multi','Maeneo mengi ya kuanzia moto?|Multiple origins?','s',YN],['accel','Dalili za kichocheo (accelerant)?|Signs of accelerant?','s',YN],['intent','Tathmini ya awali|Preliminary view','s',['acc:Accidental|Accidental','int:Intentional|Intentional','unk:Undetermined|Undetermined']],['lab','Uchunguzi wa kitaalamu/maabara umethibitisha chanzo?|Expert/lab testing confirmed cause?','s',YN]]},
+{id:'G',n:'G. Uchunguzi wa Tukio Jingine|G. Other Incident Details',if:v=>v.type!='fire',f:v=>(GQ[v.type]||[]).concat([['cause','Chanzo kinachodhaniwa|Suspected cause','x'],['ver','Chanzo kimethibitishwa kitaalamu?|Cause verified by expert examination?','s',YN]])},
+{id:'R',n:'Uchambuzi wa AI na Hitimisho|AI Analysis & Conclusion'}];
+const ELW=/umeme|kompyuta|soketi|nyaya|electric|computer|socket|wire|cable/i;
+const R=[
+{s:'B',id:'cas',t:'x',q:'Waliojeruhiwa/waliokufa walikuwa wapi tukio linaanza, na walipatikana katika hali gani?|Where were the injured/deceased when it began and in what condition were they found?',test:v=>v.cas=='y'},
+{s:'C',id:'plug',t:'s',o:YN,q:'Je, vifaa vya umeme vilikuwa vimeunganishwa wakati tukio linaanza?|Was the electrical equipment connected to power when it began?',test:v=>ELW.test((v.power||'')+(v.equip||''))},
+{s:'C',id:'sock',t:'s',o:YN,q:'Je, kulikuwa na soketi au nyaya zilizoharibika?|Were there damaged sockets or wiring?',test:v=>v.fu_plug},
+{s:'C',id:'tech',t:'s',o:YN,q:'Je, kuna ushahidi wa kitaalamu unaothibitisha hitilafu hiyo ilianzisha moto?|Is there expert evidence that this fault started the fire?',test:v=>v.fu_sock=='y'},
+{s:'F',id:'pt',t:'x',q:'Ni ushahidi gani unakosekana ili kuthibitisha Point of Origin?|What evidence is missing to verify the Point of Origin?',test:v=>v.area&&!v.point},
+{s:'F',id:'alt',t:'x',q:'Ni vyanzo mbadala gani vimechunguzwa na kuondolewa, kwa ushahidi gani?|Which alternative causes were examined and excluded, and on what evidence?',test:v=>v.ign&&v.ign!='unk'},
+{s:'F',id:'ie',t:'x',q:'Ni ushahidi gani wa kitaalamu unaothibitisha dalili za makusudi?|What expert evidence supports the indicators of intentional ignition?',test:v=>v.intent=='int'||v.accel=='y'}];
+const FD={};S.forEach(s=>s.f&&[{type:'fire'},{type:'road'}].forEach(x=>s.f(x).forEach(f=>FD[f[0]]=f)));
+Object.values(GQ).flat().forEach(f=>FD[f[0]]=f);R.forEach(r=>FD['fu_'+r.id]=['fu_'+r.id,r.q,r.t,r.o]);
+const ov=(k,v)=>{const f=FD[k];if(!f||f[2]!='s')return v||'';const o=(f[3]||[]).find(x=>x.split(':')[0]==v);return o?T(o.slice(o.indexOf(':')+1)):v||''};
+const stp=()=>S.filter(s=>!s.if||s.if(cur.v));
+const fus=sid=>R.filter(r=>r.s==sid&&r.test(cur.v));
+// storage
+const idb=()=>new Promise((res,rej)=>{try{const r=indexedDB.open('afiia',1);r.onupgradeneeded=()=>r.result.createObjectStore('inv',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej()}catch(e){rej()}});
+const tx=(m,f)=>new Promise(res=>{try{const r=f(DB.transaction('inv',m).objectStore('inv'));r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)}catch(e){res(null)}});
+const all=()=>DB?tx('readonly',q=>q.getAll()):Promise.resolve(Object.values(mem));
+const put=o=>DB?tx('readwrite',q=>q.put(o)):Promise.resolve(mem[o.id]=o);
+const del=id=>DB?tx('readwrite',q=>q.delete(id)):Promise.resolve(delete mem[id]);
+const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(t.h);t.h=setTimeout(()=>t.style.display='none',1800)};
+const sv=()=>{cur.upd=Date.now();put(cur);const e=$('#sv');if(e)e.textContent=T('✓ Imehifadhiwa|✓ Saved')};
+const log=w=>(cur.log=cur.log||[]).push({t:new Date().toLocaleString(),w});
+// analysis engine (rule-based)
+function an(i){const v=i.v,W=i.w||[],E=i.e||[],fire=v.type=='fire',con=[],miss=[],hyp=[];
+const mn=t=>t?+t.slice(0,2)*60+ +t.slice(3,5):null;
+if(v.started&&v.firstArr&&mn(v.firstArr)<mn(v.started))con.push('Kikosi cha kwanza kimerekodiwa kufika kabla ya tukio kuanza.|First crew arrival is recorded before the incident start time.');
+if(v.date&&v.inv_date&&v.inv_date<v.date)con.push('Tarehe ya uchunguzi ni kabla ya tarehe ya tukio.|Investigation date is earlier than the incident date.');
+const sm=[...new Set(W.map(w=>w.first).filter(x=>x&&x!='u'))];if(sm.length>1)con.push('Mashahidi wanatofautiana kuhusu kilichoonekana kwanza (moshi au moto).|Witnesses disagree on what was seen first (smoke or fire).');
+if(fire){if(v.ign=='elec'&&v.fu_plug=='n')con.push('Chanzo cha umeme kimetajwa ilhali vifaa vilikuwa havijaunganishwa; inahitaji maelezo.|An electrical source is named although equipment was not connected; needs explanation.');
+if(v.intent=='acc'&&v.accel=='y')con.push('Tathmini ya "accidental" inakinzana na dalili za kichocheo.|An "accidental" view conflicts with indicators of accelerant.');
+if(v.ign=='unk'&&v.lab=='y')con.push('Uchunguzi wa kitaalamu umethibitisha chanzo lakini Ignition Source imewekwa haijulikani.|Expert testing confirmed a cause but the ignition source is "unknown".');}
+if(!W.length)miss.push('Hakuna shahidi aliyerekodiwa.|No witness recorded.');if(!E.length)miss.push('Hakuna kielelezo kilichorekodiwa.|No physical evidence recorded.');
+if(E.some(e=>e.photo=='n'))miss.push('Baadhi ya vielelezo havikupigwa picha.|Some evidence was not photographed.');
+if(E.some(e=>e.photo!='n'&&!(e.f||[]).length))miss.push('Baadhi ya vielelezo havina picha/nyaraka zilizopakiwa.|Some evidence items have no uploaded files.');
+if(!v.started)miss.push('Muda tukio lilipoanza haujajazwa.|Incident start time missing.');if(!v.firstArr)miss.push('Muda wa kufika kikosi cha kwanza haujajazwa.|First crew arrival time missing.');if(!v.inv)miss.push('Jina la mchunguzi halijajazwa.|Investigator name missing.');
+const ver=fire?v.lab=='y'||v.fu_tech=='y':v.ver=='y';
+if(fire){if(!v.area)miss.push('Area of Origin haijajazwa.|Area of Origin missing.');else if(!v.point)miss.push('Point of Origin haijathibitishwa.|Point of Origin not verified.');
+if(v.ign&&v.ign!='unk'&&!ver)miss.push('Chanzo kinachodhaniwa hakijathibitishwa kitaalamu.|Suspected cause lacks expert confirmation.');
+const sc={elec:0,mech:0,human:0,int:0,nat:0,oth:0};if(sc[v.ign]!==undefined)sc[v.ign]+=3;if(v.elecF=='y')sc.elec++;if(v.mechF=='y')sc.mech++;if((v.hum||'').trim())sc.human++;
+if(v.accel=='y')sc.int+=2;if(v.multi=='y')sc.int+=2;if(v.intent=='int')sc.int++;if(ver&&sc[v.ign]!==undefined)sc[v.ign]+=2;
+const nm={elec:'Hitilafu ya umeme|Electrical fault',mech:'Hitilafu ya mitambo|Mechanical failure',human:'Shughuli za binadamu|Human activity',int:'Makusudi (hypothesis tu)|Intentional (hypothesis only)',nat:'Sababu za asili|Natural cause',oth:'Nyingine|Other'};
+Object.entries(sc).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>hyp.push([nm[k],n>=5?'Juu|High':n>=3?'Wastani|Medium':'Chini|Low']));}
+else if(v.cause&&!ver)miss.push('Chanzo kinachodhaniwa hakijathibitishwa kitaalamu.|Suspected cause lacks expert confirmation.');
+const enough=E.length&&W.length&&(fire?v.area:v.cause);let cls,conf;
+if(fire&&v.accel=='y'&&v.lab=='y'&&(v.multi=='y'||v.fu_ie)&&E.length&&!con.length)cls='INTENTIONAL';
+else if(ver&&!con.length&&E.length&&W.length&&(fire?v.ign&&v.ign!='unk'&&v.accel!='y'&&v.multi!='y':v.cause))cls='ACCIDENTAL';
+else cls=enough?'UNDETERMINED':'INCONCLUSIVE';
+conf=cls=='ACCIDENTAL'||cls=='INTENTIONAL'?(W.length>1&&E.length>1?'Juu|High':'Wastani|Medium'):enough?'Wastani|Medium':'Chini|Low';
+return{cls,conf,con,miss,hyp,ver}}
+const CL={ACCIDENTAL:'Tukio la bahati mbaya limethibitishwa kwa ushahidi wa kutosha.|Accidental: confirmed by sufficient evidence.',INTENTIONAL:'Tukio la makusudi linaungwa mkono na ushahidi wa kutosha.|Intentional: supported by sufficient evidence.',UNDETERMINED:'Chanzo hakijaweza kubainishwa.|Cause could not be determined.',INCONCLUSIVE:'Ushahidi hautoshi kutoa hitimisho.|Evidence insufficient for a conclusion.'};
+const NOTE='Injini hii ni ya kanuni (rule-based): haitumii AI API wala haichambui picha. Inaonyesha uwezekano, si ukweli uliothibitishwa wala hukumu ya kisheria; uamuzi wa mwisho ni wa mchunguzi mwenye mamlaka.|This engine is rule-based: it uses no AI API and does not analyse images. It shows possibilities, not confirmed fact or a legal verdict; the final decision rests with the authorised investigator.';
+// UI
+function fld(f,val,a){const[k,l,t,o]=f;let c;val=val??'';
+if(t=='x')c=`<textarea ${a} data-k="${k}" rows="3">${esc(val)}</textarea>`;
+else if(t=='s')c=`<select ${a} data-k="${k}"><option value="">—</option>${o.map(x=>{const j=x.indexOf(':'),v=x.slice(0,j);return`<option value="${v}" ${v==val?'selected':''}>${esc(T(x.slice(j+1)))}</option>`}).join('')}</select>`;
+else c=`<input ${a} data-k="${k}" type="${{t:'text',d:'date',tm:'time',n:'number'}[t]}" value="${esc(val)}">`;
+return`<label>${esc(T(l))}${c}</label>`}
+const WF=[['name','Jina|Name','t'],['age','Umri (ikiwa muhimu)|Age (if relevant)','t'],['contact','Mawasiliano (kwa ridhaa)|Contact (with consent)','t'],['role','Nafasi katika tukio|Role in incident','t'],['where','Alikuwa wapi tukio linaanza?|Where when it started?','x'],['saw','Aliona/alisikia nini?|What did they see/hear?','x'],['first','Aliona kwanza|Saw first','s',['smoke:Moshi|Smoke','fire:Moto|Fire','u:Hakumbuki|Unsure']],['odd','Jambo lisilo la kawaida?|Anything unusual?','x'],['ev','Ana ushahidi wowote?|Has any evidence?','x']];
+const EF=[['desc','Kielelezo|Item','t'],['loc','Kilipatikana wapi?|Found where?','t'],['cond','Hali yake|Condition','x'],['photo','Kilipigwa picha?|Photographed?','s',YN],['lab','Kimepelekwa uchunguzi wa kitaalamu?|Sent for expert analysis?','s',YN],['by','Nani alikabidhi?|Handed over by','t'],['store','Kimehifadhiwa wapi?|Stored where?','t']];
+function lst(k){const A=cur[k],F=k=='w'?WF:EF,fn=k=='w'?'Shahidi|Witness':'Kielelezo|Evidence';
+return A.map((x,n)=>`<div class="item"><b>${T(fn)} ${n+1}</b> <button class="btn g s" style="float:right" data-a="rm" data-l="${k}" data-i="${n}">✕</button>${F.map(f=>fld(f,x[f[0]],`data-l="${k}" data-i="${n}"`)).join('')}${k=='e'?`<label>${T('Pakia picha/video/nyaraka|Upload photos/video/documents')}<input type="file" multiple accept="image/*,video/*,.pdf,.doc,.docx" data-up="${n}"></label>${(x.f||[]).map(f=>f.ty.startsWith('image')?`<img class="thumb" src="${f.u}">`:`<span class="tag">${esc(f.n)}</span>`).join('')}`:''}</div>`).join('')+`<button class="btn g" data-a="add" data-l="${k}">+ ${T(k=='w'?'Ongeza shahidi|Add witness':'Ongeza kielelezo|Add evidence')}</button>`}
+function anHtml(r){const L=a=>a.length?'<ul>'+a.map(x=>`<li>${esc(T(x))}</li>`).join('')+'</ul>':`<p>${T('Hakuna.|None.')}</p>`;
+return`<h3>${T('Uwezekano wa vyanzo (si ukweli uliothibitishwa)|Possible causes (not confirmed fact)')}</h3>${r.hyp.length?'<ul>'+r.hyp.map(h=>`<li>${esc(T(h[0]))} — ${T(h[1])}</li>`).join('')+'</ul>':`<p>${T('Hakuna viashiria vya kutosha.|Not enough indicators.')}</p>`}<h3>${T('Taarifa zinazokinzana|Contradictions')}</h3>${L(r.con)}<h3>${T('Ushahidi unaokosekana|Missing evidence')}</h3>${L(r.miss)}<h3>${T('Matokeo|Outcome')}: <span class="tag ${r.cls=='UNDETERMINED'||r.cls=='INCONCLUSIVE'?'w':'ok'}">${r.cls}</span></h3><p>${T(CL[r.cls])} (${T('Uhakika|Confidence')}: ${T(r.conf)})</p>`}
+function rev(){const r=an(cur);return`<div class="ai"><small>${T(NOTE)}</small></div>${anHtml(r)}<label>${T('Hitimisho/maoni ya mchunguzi|Investigator conclusion / remarks')}<textarea data-k="concl" rows="4">${esc(cur.v.concl||'')}</textarea></label><label>${T('Mapendekezo|Recommendations')}<textarea data-k="recom" rows="3">${esc(cur.v.recom||'')}</textarea></label>`}
+function wiz(){const st=stp();si=Math.min(si,st.length-1);const s=st[si];
+let h=`<div class="card"><div class="bar"><i id="pb"></i></div><small id="pt"></small> <small id="sv"></small><h2>${si+1}/${st.length} · ${T(s.n)}</h2>`;
+if(s.id=='D')h+=lst('w');else if(s.id=='E')h+=lst('e');else if(s.id=='R')h+=rev();else h+=s.f(cur.v).map(f=>fld(f,cur.v[f[0]],'')).join('')+'<div id="fu"></div>';
+h+=`<div class="nav">${si?`<button class="btn g" data-a="prev">← ${T('Rudi|Previous')}</button>`:''}<button class="btn g" data-a="save">${T('Hifadhi|Save Progress')}</button><span class="sp"></span>${si<st.length-1?`<button class="btn" data-a="next">${T('Endelea|Next')} →</button>`:`<button class="btn" data-a="submit">${T('Wasilisha Uchunguzi|Submit Investigation')}</button>`}</div></div>`;
+$('#app').innerHTML=h;fu(true);upd()}
+function fu(f){const e=$('#fu');if(!e)return;const s=stp()[si],a=fus(s.id),sig=a.map(r=>r.id).join();if(!f&&sig==fsig)return;fsig=sig;
+e.innerHTML=a.length?`<div class="ai"><b>🤖 ${T('Maswali ya ziada ya AI|AI follow-up questions')}</b>${a.map(r=>fld(['fu_'+r.id,r.q,r.t,r.o],cur.v['fu_'+r.id],'')).join('')}</div>`:''}
+function pct(){const v=cur.v;let t=0,d=0;stp().forEach(s=>{if(s.f){s.f(v).forEach(f=>{t++;if(v[f[0]])d++});fus(s.id).forEach(r=>{t++;if(v['fu_'+r.id])d++})}else if(s.id=='D'||s.id=='E'){t++;if(cur[s.id=='D'?'w':'e'].length)d++}});return t?Math.round(d/t*100):0}
+function upd(){if(view!='wiz')return;const p=pct(),b=$('#pb');if(b)b.style.width=p+'%';const t=$('#pt');if(t)t.textContent=T('Maendeleo ya uchunguzi|Investigation progress')+': '+p+'%';fu(false)}
+async function dash(){view='dash';const A=await all(),q=($('#q')||{}).value||'',fl=($('#fl')||{}).value||'';A.sort((a,b)=>b.upd-a.upd);
+const c=f=>A.filter(f).length,tn=x=>T(TYPES.find(y=>y.startsWith(x+':')).replace(/^[^:]+:/,''));
+const L=A.filter(i=>(!fl||(fl=='draft'?i.st!='done':i.st=='done'||i.v.type==fl))&&JSON.stringify(i.v).toLowerCase().includes(q.toLowerCase()));
+$('#app').innerHTML=`<div class="grid"><div class="st"><b>${A.length}</b><span>Total Investigations</span></div><div class="st"><b>${c(i=>i.st!='done')}</b><span>Pending</span></div><div class="st"><b>${c(i=>i.st=='done')}</b><span>Completed</span></div><div class="st"><b>${c(i=>i.v.type=='fire')}</b><span>Fire</span></div><div class="st"><b>${c(i=>i.v.type=='road')}</b><span>Road Accident</span></div><div class="st"><b>${c(i=>i.v.type!='fire'&&i.v.type!='road')}</b><span>Other Incidents</span></div></div>
+<div class="card" style="margin-top:12px"><div class="nav" style="margin:0 0 8px"><button class="btn" data-a="new">+ ${T('Uchunguzi mpya|New investigation')}</button><button class="btn g" data-a="exp">${T('Hifadhi nakala|Export backup')}</button><label class="btn g" style="margin:0;display:inline-block">${T('Rejesha|Import')}<input type="file" accept=".json" data-imp style="display:none"></label></div>
+<div class="nav" style="margin:0"><input id="q" placeholder="${T('Tafuta...|Search...')}" value="${esc(q)}" style="flex:2"><select id="fl" style="flex:1;margin:0"><option value="">${T('Yote|All')}</option><option value="draft" ${fl=='draft'?'selected':''}>${T('Zinazosubiri|Pending')}</option><option value="done" ${fl=='done'?'selected':''}>${T('Zilizokamilika|Completed')}</option>${TYPES.map(x=>`<option value="${x.split(':')[0]}" ${fl==x.split(':')[0]?'selected':''}>${T(x.replace(/^[^:]+:/,''))}</option>`).join('')}</select></div>
+<h3>${T('Ripoti za hivi karibuni na uchunguzi|Recent reports and investigations')}</h3>${L.length?L.map(i=>`<div class="row"><div><b>${esc(i.v.ref||'—')}</b> <span class="tag ${i.st=='done'?'ok':'w'}">${i.st=='done'?T('Imekamilika|Completed'):T('Inasubiri|Pending')}</span><br><small>${tn(i.v.type||'fire')} · ${esc(i.v.loc||'')} · ${esc(i.v.date||'')}</small></div><div><button class="btn g s" data-a="open" data-id="${i.id}">${i.st=='done'?T('Fungua|Open'):T('Endelea|Continue Investigation')}</button> ${i.st=='done'?`<button class="btn s" data-a="rep" data-id="${i.id}">${T('Ripoti|Report')}</button> `:''}<button class="btn g s" data-a="del" data-id="${i.id}">🗑</button></div></div>`).join(''):`<p class="warn">${T('Hakuna uchunguzi bado. Bonyeza "Uchunguzi mpya" kuanza.|No investigations yet. Press "New investigation" to start.')}</p>`}</div>`;
+$('#bh').textContent=T('Mwanzo|Home')}
+// report
+function rep(i){const v=i.v,r=an(i),tr=(a,b)=>`<tr><th>${esc(T(a))}</th><td>${esc(b)||'—'}</td></tr>`,tb=(rows)=>`<table>${rows.join('')}</table>`;
+const fr=(F,x)=>tb(F.map(f=>tr(f[1],ov(f[0],x[f[0]])||x[f[0]])));
+const stps=k=>stp0(i,k);
+const sc=S.find(s=>s.id=='C').f().map(f=>tr(f[1],v[f[0]]));
+const mid=v.type=='fire'?S.find(s=>s.id=='F').f(v):S.find(s=>s.id=='G').f(v);
+const fuA=R.filter(x=>x.test(v)&&v['fu_'+x.id]).map(x=>tr(x.q,ov('fu_'+x.id,v['fu_'+x.id])));
+const rec=(v.recom||'')+'\n'+r.miss.map(m=>T(m)).join('\n')+'\n'+T('Fanya uchunguzi wa kitaalamu kabla ya hitimisho la mwisho.|Obtain expert examination before any final conclusion.');
+return`<h1>${T('RIPOTI YA UCHUNGUZI WA TUKIO|INCIDENT INVESTIGATION REPORT')}</h1><p><b>${T('Jeshi la Zimamoto na Uokoaji Tanzania|Tanzania Fire and Rescue Force')}</b><br>${T('Namba ya rejea|Reference')}: ${esc(v.ref)}<br>${T('Mchunguzi|Investigator')}: ${esc(v.inv)}<br>${T('Tarehe|Date')}: ${esc(v.inv_date)}</p>
+<h2>1. ${T('Taarifa za Tukio|Incident Particulars')}</h2>${tb(S[0].f().map(f=>tr(f[1],ov(f[0],v[f[0]]))))}
+<h2>2. ${T('Mandhari|Background')}</h2>${tb(S[1].f().map(f=>tr(f[1],ov(f[0],v[f[0]]))))}
+<h2>3. ${T('Mbinu|Methodology')}</h2><p>${T('Mahojiano yaliyoongozwa hatua kwa hatua, ukaguzi wa eneo, ukusanyaji wa vielelezo na uchambuzi wa kanuni (rule-based). Hakuna uchambuzi wa picha wa kiotomatiki.|Guided step-by-step interview, scene examination, evidence collection and rule-based analysis. No automated image analysis was performed.')}</p>
+<h2>4. ${T('Ukaguzi wa Eneo|Scene Examination')}</h2>${tb(sc)}
+<h2>5. ${T('Maelezo ya Mashahidi|Witness Statements')}</h2>${i.w.map((w,n)=>`<h3>${n+1}. ${esc(w.name)}</h3>${fr(WF.slice(1),w)}`).join('')||'<p>—</p>'}
+<h2>6. ${T('Vielelezo|Physical Evidence')}</h2>${i.e.map((e,n)=>`<h3>${n+1}. ${esc(e.desc)}</h3>${fr(EF.slice(1),e)}${(e.f||[]).filter(f=>f.ty.startsWith('image')).map(f=>`<img src="${f.u}" style="max-width:220px;margin:3px">`).join('')}`).join('')||'<p>—</p>'}
+<h2>7. ${T('Matokeo|Findings')}</h2>${tb(mid.map(f=>tr(f[1],ov(f[0],v[f[0]])))).concat(fuA.length?'<h3>'+T('Majibu ya maswali ya ziada|Follow-up answers')+'</h3>'+tb(fuA):'')}
+<h2>8. ${T('Uchambuzi|Analysis')}</h2>${anHtml(r)}<p><i>${T(NOTE)}</i></p>
+<h2>9. ${T('Hitimisho|Conclusion')}</h2><p><b>${r.cls}</b> — ${T(CL[r.cls])}</p><p>${esc(v.concl)}</p>
+<h2>10. ${T('Mapendekezo|Recommendations')}</h2><p style="white-space:pre-line">${esc(rec.trim())}</p>
+<h2>11. ${T('Mchunguzi|Investigator Details')}</h2>${tb([tr('Jina|Name',v.inv),tr('Kikosi|Unit',v.unit)])}
+<h2>12. ${T('Saini|Signature')}</h2><p><br>${T('Saini|Signature')}: ______________________ ${T('Tarehe|Date')}: ____________</p>
+<h2>${T('Kumbukumbu ya mabadiliko|Change log')}</h2><ul>${(i.log||[]).map(l=>`<li>${esc(l.t)} — ${esc(T(l.w))}</li>`).join('')}</ul>`}
+function stp0(){}
+function repView(){view='rep';$('#app').innerHTML=`<div class="nav no" style="margin:0 0 10px"><button class="btn g" data-a="open" data-id="${cur.id}">← ${T('Rudi|Back')}</button><button class="btn" data-a="pdf">PDF / Print</button><button class="btn" data-a="doc">Word</button><button class="btn g" data-a="saverep">${T('Hifadhi mabadiliko|Save edits')}</button><button class="btn g" data-a="regen">${T('Zalisha upya|Regenerate')}</button></div><small class="no">${T('Ripoti inaweza kuhaririwa moja kwa moja hapa chini. Kwa PDF chagua "Save as PDF" kwenye print.|You can edit the report directly below. For PDF choose "Save as PDF" in print.')}</small><div id="rep" contenteditable="true">${cur.rhtml||rep(cur)}</div>`;$('#bh').textContent=T('Mwanzo|Home')}
+// events
+const A$={
+async home(){if(cur&&view=='wiz')sv();cur=null;dash()},
+lang(){lang=lang=='sw'?'en':'sw';try{localStorage.lang=lang}catch(e){};cur?(view=='rep'?repView():wiz()):dash()},
+theme(){const d=document.documentElement,x=getComputedStyle(d).colorScheme=='dark'?'light':'dark';d.dataset.theme=x;try{localStorage.th=x}catch(e){}},
+async new(){const n=(await all()).length+1;cur={id:Date.now()+'',v:{ref:'INV-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'),inv_date:new Date().toISOString().slice(0,10),type:'fire'},w:[],e:[],st:'draft',upd:Date.now(),log:[{t:new Date().toLocaleString(),w:'Uchunguzi umeanzishwa|Investigation created'}]};await put(cur);si=0;view='wiz';wiz()},
+async open(b){cur=(await all()).find(x=>x.id==b.dataset.id);si=0;view='wiz';wiz();$('#bh').textContent=T('Mwanzo|Home')},
+async rep(b){cur=(await all()).find(x=>x.id==b.dataset.id);repView()},
+async del(b){if(confirm(T('Futa uchunguzi huu?|Delete this investigation?'))){await del(b.dataset.id);dash()}},
+next(){sv();si++;wiz();scrollTo(0,0)},prev(){sv();si--;wiz();scrollTo(0,0)},save(){sv();toast(T('Imehifadhiwa|Saved'))},
+add(b){cur[b.dataset.l].push({});sv();wiz()},rm(b){if(confirm(T('Ondoa?|Remove?'))){cur[b.dataset.l].splice(+b.dataset.i,1);sv();wiz()}},
+submit(){const r=an(cur);if(!cur.v.inv&&!confirm(T('Jina la mchunguzi halijajazwa. Wasilisha hata hivyo?|Investigator name is empty. Submit anyway?')))return;cur.st='done';log('Uchunguzi umewasilishwa|Investigation submitted ('+r.cls+')');cur.rhtml='';sv();repView()},
+pdf(){window.print()},
+doc(){const h='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #888;padding:4px;text-align:left}</style></head><body>'+$('#rep').innerHTML+'</body></html>',a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+h],{type:'application/msword'}));a.download=(cur.v.ref||'report')+'.doc';a.click()},
+saverep(){cur.rhtml=$('#rep').innerHTML;log('Ripoti imehaririwa|Report edited');sv();toast(T('Imehifadhiwa|Saved'))},
+regen(){if(confirm(T('Futa mabadiliko ya mkono?|Discard manual edits?'))){cur.rhtml='';log('Ripoti imezalishwa upya|Report regenerated');sv();repView()}},
+async exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(await all())],{type:'application/json'}));a.download='investigations-backup.json';a.click()}};
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b)A$[b.dataset.a]?.(b)});
+document.addEventListener('input',e=>{const t=e.target;if(t.id=='q'||t.id=='fl')return dash();const k=t.dataset.k;if(!k||!cur)return;const l=t.dataset.l;if(l)cur[l][+t.dataset.i][k]=t.value;else cur.v[k]=t.value;clearTimeout(timer);timer=setTimeout(sv,500);upd();if(k=='type')fsig=''});
+document.addEventListener('change',async e=>{const t=e.target;if(t.id=='fl')return dash();
+if(t.dataset.up!==undefined){const x=cur.e[+t.dataset.up];x.f=x.f||[];for(const f of t.files){const o=await new Promise(r=>{if(!f.type.startsWith('image/')){if(f.size>8e6){toast(T('Faili ni kubwa (>8MB)|File too large (>8MB)'));return r(null)}const fr=new FileReader;fr.onload=()=>r({n:f.name,ty:f.type||'file',u:fr.result});fr.readAsDataURL(f);return}const u=URL.createObjectURL(f),im=new Image;im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);r({n:f.name,ty:'image/jpeg',u:c.toDataURL('image/jpeg',.75)})};im.onerror=()=>r(null);im.src=u});if(o)x.f.push(o)}sv();wiz()}
+if(t.dataset.imp!==undefined&&t.files[0]){try{const a=JSON.parse(await t.files[0].text());for(const o of a)if(o.id&&o.v)await put(o);toast('OK');dash()}catch(x){toast('Invalid file')}}
+if(t.dataset.k=='type'&&cur){si=0+si;}});
+(async()=>{try{DB=await idb()}catch(e){DB=null}$('#bh').textContent=T('Mwanzo|Home');if(!DB)toast('IndexedDB haipatikani: data ni ya kikao hiki tu|IndexedDB unavailable: data kept for this session only'.split('|')[lang=='en'?1:0]);dash()})();
+</script></body></html>
