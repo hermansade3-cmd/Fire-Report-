@@ -928,7 +928,7 @@ return `
       ${fieldInput("Time Received", "timeline.timeReceived", t.timeReceived, { type: "time", recalc: "duration-info" })}
       ${fieldInput("Time Departed Station", "timeline.timeDeparted", t.timeDeparted, { type: "time" })}
       ${fieldInput("Time Arrived Scene", "timeline.timeArrived", t.timeArrived, { type: "time" })}
-      ${fieldInput("Time Operation Started", "timeline.timeOpStart", t.timeOpStart, { type: "time" })}
+      ${fieldInput("Time Operation Started", "timeline.timeOpStarted", t.timeOpStart, { type: "time" })}
       ${fieldInput("Time Operation Completed", "timeline.timeOpEnd", t.timeOpEnd, { type: "time" })}
       ${fieldInput("Time Departed Scene", "timeline.timeDepartedScene", t.timeDepartedScene, { type: "time" })}
       ${fieldInput("Time Returned Station", "timeline.timeReturned", t.timeReturned, { type: "time" })}
@@ -1850,7 +1850,15 @@ app.innerHTML = `
         <button class="back-btn" id="back-btn" aria-label="Back">\u2190</button>
         <h1 id="page-title">Dashboard</h1>
         <span class="save-indicator" id="save-indicator" style="display:none;"></span>
-        <button class="fire-science-btn" id="login-btn" type="button" title="Ingia / Jisajili" aria-label="Ingia / Jisajili" style="position:relative;background:transparent;border:none;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;margin-left:auto;transition:background .15s;"></button>
+        <button class="fire-science-btn" id="workplace-btn" type="button" title="Workplace \u2014 Mtandao wa Maafisa" aria-label="Workplace" style="background:transparent;border:none;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;margin-left:auto;transition:background .15s;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="9" cy="8" r="3.2" fill="currentColor" opacity="0.9"/>
+            <circle cx="16.5" cy="9" r="2.6" fill="currentColor" opacity="0.65"/>
+            <path d="M3 20c0-3.2 2.7-5.5 6-5.5s6 2.3 6 5.5" fill="currentColor" opacity="0.9"/>
+            <path d="M14.5 20c0-2.4 1.8-4.2 4-4.2s4 1.8 4 4.2" fill="currentColor" opacity="0.65"/>
+          </svg>
+        </button>
+        <button class="fire-science-btn" id="login-btn" type="button" title="Ingia / Jisajili" aria-label="Ingia / Jisajili" style="position:relative;background:transparent;border:none;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;margin-left:2px;transition:background .15s;"></button>
         <button class="fire-science-btn" id="fire-science-btn" type="button" title="Fire Science" aria-label="Fire Science" style="background:transparent;border:none;cursor:pointer;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;margin-left:2px;transition:background .15s;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2c-1.5 3-4 4.5-4 8a4 4 0 108 0c0-1-0.3-1.8-0.8-2.5.1 1-0.4 2-1.2 2 .3-2-0.6-4-2-5.5z" fill="#e2481e" stroke="#e2481e" stroke-width="0.5"/>
@@ -1876,6 +1884,10 @@ const fireBtn = $("#fire-science-btn");
 fireBtn.addEventListener("mouseenter", () => { fireBtn.style.background = "rgba(0,0,0,0.08)"; });
 fireBtn.addEventListener("mouseleave", () => { fireBtn.style.background = "transparent"; });
 fireBtn.addEventListener("click", () => { flushSave(); window.location.href = "fire_education.html"; });
+const workplaceBtn = $("#workplace-btn");
+workplaceBtn.addEventListener("mouseenter", () => { workplaceBtn.style.background = "rgba(0,0,0,0.08)"; });
+workplaceBtn.addEventListener("mouseleave", () => { workplaceBtn.style.background = "transparent"; });
+workplaceBtn.addEventListener("click", () => { flushSave(); window.location.href = "workplace.html"; });
 const loginBtn = $("#login-btn");
 loginBtn.addEventListener("mouseenter", () => { loginBtn.style.background = "rgba(0,0,0,0.08)"; });
 loginBtn.addEventListener("mouseleave", () => { loginBtn.style.background = "transparent"; });
