@@ -154,8 +154,305 @@ a.btn { text-decoration: none; text-align: center; }
 </main>
 <div id="toast" role="status" aria-live="polite"></div>
 
-<script src="core.js?v=5"></script>
-<script src="cloud-sync.js?v=1"></script>
+<script>
+/* ===== FAILI HURU: RescueDB + CloudSync zimo ndani ya faili hili (hakuna core.js / cloud-sync.js) ===== */
+(function (global) {
+  "use strict";
+  var FIREBASE_VERSION = "10.12.2";
+  var firebaseConfig = {
+    apiKey: "AIzaSyBWg5KZZVhpaEeg-nVEylIYRDIxmaiK7TQ",
+    authDomain: "fire-media-f73ac.firebaseapp.com",
+    projectId: "fire-media-f73ac",
+    storageBucket: "fire-media-f73ac.firebasestorage.app",
+    messagingSenderId: "1027823144494",
+    appId: "1:1027823144494:web:b21a24fc4b6f3ec5d259bf",
+    measurementId: "G-L3C9EQ3VCZ"
+  };
+  var SDK_FILES = ["firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js"];
+  /* Jina la IndexedDB ya app. Acha "" ili litambuliwe lenyewe (hutafuta database yenye store "reports"). */
+  var IDB_NAME = "";
+
+  /* ---------- IndexedDB (RescueDB) ---------- */
+  var dbp = null, dbName = null;
+  function reqP(r) { return new Promise(function (res, rej) { r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); }; }); }
+  async function resolveName() {
+    if (dbName) return dbName;
+    if (IDB_NAME) return (dbName = IDB_NAME);
+    try {
+      if (indexedDB.databases) {
+        var l = (await indexedDB.databases()).filter(function (d) { return d.name && !/^(firebase|firestore)/i.test(d.name); }), first = null;
+        for (var i = 0; i < l.length; i++) {
+          var db = await reqP(indexedDB.open(l[i].name)).catch(function () { return null; });
+          if (!db) continue;
+          var has = db.objectStoreNames.contains("reports"); db.close();
+          if (has) return (dbName = l[i].name);
+          if (!first) first = l[i].name;
+        }
+        if (first) return (dbName = first);
+      }
+    } catch (e) { }
+    return (dbName = "RescueReportDB");
+  }
+  function openDB() {
+    if (dbp) return dbp;
+    dbp = (async function () { if (!global.indexedDB) throw new Error("no-idb"); return reqP(indexedDB.open(await resolveName())); })();
+    dbp.catch(function () { dbp = null; });
+    return dbp;
+  }
+  async function ensureStore(name, opts) {
+    var db = await openDB();
+    if (db.objectStoreNames.contains(name)) return db;
+    var v = db.version + 1; db.close();
+    dbp = new Promise(function (res, rej) {
+      var r = indexedDB.open(dbName, v);
+      r.onupgradeneeded = function () { if (!r.result.objectStoreNames.contains(name)) r.result.createObjectStore(name, opts || { keyPath: "id" }); };
+      r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); };
+    });
+    return dbp;
+  }
+  async function getAll(store) {
+    var db = await openDB();
+    if (!db.objectStoreNames.contains(store)) return [];
+    return reqP(db.transaction(store, "readonly").objectStore(store).getAll());
+  }
+  function lsSettings() { try { return JSON.parse(localStorage.getItem("rr_settings") || "{}"); } catch (e) { return {}; } }
+  var RDB = {
+    getAllReports: function () { return getAll("reports"); },
+    getAllIncidents: function () { return getAll("incidents"); },
+    getAllSettings: async function () {
+      var o = {};
+      try { (await getAll("settings")).forEach(function (r) { if (r && r.key !== undefined && "value" in r) o[r.key] = r.value; else if (r && typeof r === "object") Object.assign(o, r); }); } catch (e) { }
+      return Object.assign(o, lsSettings());
+    },
+    setSetting: function (k, v) { var s = lsSettings(); s[k] = v; try { localStorage.setItem("rr_settings", JSON.stringify(s)); } catch (e) { } return Promise.resolve(); }
+  };
+  global.RescueDB = RDB;
+
+  /* ---------- Firebase ---------- */
+  var auth = null, db = null, readyPromise = null, LS_USER = "rescueCloudUser";
+  function loadScript(src) { return new Promise(function (resolve, reject) { var s = document.createElement("script"); s.src = src; s.async = true; s.onload = resolve; s.onerror = function () { reject(new Error("sdk-load-failed")); }; document.head.appendChild(s); }); }
+  function init() {
+    if (readyPromise) return readyPromise;
+    readyPromise = (async function () {
+      if (!global.firebase || !global.firebase.firestore) {
+        for (var i = 0; i < SDK_FILES.length; i++) await loadScript("https://www.gstatic.com/firebasejs/" + FIREBASE_VERSION + "/" + SDK_FILES[i]);
+      }
+      var fb = global.firebase;
+      if (!fb.apps.length) fb.initializeApp(firebaseConfig);
+      auth = fb.auth(); db = fb.firestore();
+      try { db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); } catch (e) { }
+      auth.onAuthStateChanged(function (u) { if (u) { try { localStorage.setItem(LS_USER, JSON.stringify({ uid: u.uid, email: u.email, displayName: u.displayName })); } catch (e) { } } else localStorage.removeItem(LS_USER); });
+      return true;
+    })().catch(function (e) { readyPromise = null; throw e; });
+    return readyPromise;
+  }
+  function FV() { return global.firebase.firestore.FieldValue; }
+  function userDoc(uid) { return db.collection("users").doc(uid); }
+  function plain(u, p) { return { uid: u.uid, id: u.uid, email: u.email, displayName: (p && p.displayName) || u.displayName || (u.email || "").split("@")[0] }; }
+  async function authUser() { await init(); return new Promise(function (res) { var off = auth.onAuthStateChanged(function (u) { off(); res(u); }); }); }
+  async function profileOf(u) { try { var s = await userDoc(u.uid).get(); return s.exists ? s.data() : null; } catch (e) { return null; } }
+  function errorMessage(e) {
+    var code = (e && e.code) || (e && e.message) || "";
+    var map = {
+      "auth/invalid-email": "Barua pepe si sahihi.", "auth/missing-email": "Weka barua pepe.", "auth/missing-password": "Weka password.",
+      "auth/weak-password": "Password iwe na angalau herufi 6.", "auth/email-already-in-use": "Barua pepe hii tayari imesajiliwa. Tumia Ingia.",
+      "auth/user-not-found": "Hakuna akaunti yenye barua pepe hii. Tumia Jisajili.", "auth/wrong-password": "Password si sahihi.",
+      "auth/invalid-credential": "Barua pepe au password si sahihi.", "auth/invalid-login-credentials": "Barua pepe au password si sahihi.",
+      "auth/too-many-requests": "Majaribio mengi sana. Subiri kidogo kisha jaribu tena.", "auth/network-request-failed": "Hakuna mtandao. Washa intaneti kisha jaribu tena.",
+      "auth/operation-not-allowed": "Email/Password haijawashwa kwenye Firebase (Authentication → Sign-in method).", "auth/user-disabled": "Akaunti hii imezimwa.",
+      "permission-denied": "Firestore imekataa ruhusa. Weka Firestore Rules zinazoruhusu mmiliki wa akaunti.",
+      "unavailable": "Seva haipatikani kwa sasa. Jaribu tena ukiwa na intaneti.", "sdk-load-failed": "Imeshindikana kupakia Firebase. Hakikisha una intaneti.",
+      "not-signed-in": "Ingia kwanza."
+    };
+    for (var k in map) { if (String(code).indexOf(k) >= 0) return map[k]; }
+    return "Hitilafu imetokea. Jaribu tena.";
+  }
+  var authApi = {
+    errorMessage: errorMessage,
+    currentUser: async function () { var u = await authUser(); if (!u) return null; return plain(u, await profileOf(u)); },
+    signUp: async function (email, password, name) {
+      await init(); var cred = await auth.createUserWithEmailAndPassword(email, password), user = cred.user, dn = name || email.split("@")[0];
+      await user.updateProfile({ displayName: dn }).catch(function () { });
+      await userDoc(user.uid).set({ uid: user.uid, email: user.email, displayName: dn, displayNameLower: dn.toLowerCase(), createdAt: FV().serverTimestamp(), lastSeen: FV().serverTimestamp() }, { merge: true });
+      return plain(user, { displayName: dn });
+    },
+    signIn: async function (email, password) {
+      await init(); var cred = await auth.signInWithEmailAndPassword(email, password), user = cred.user;
+      await userDoc(user.uid).set({ lastSeen: FV().serverTimestamp() }, { merge: true }).catch(function () { });
+      return plain(user, await profileOf(user));
+    },
+    signOut: async function () { await init(); await auth.signOut(); localStorage.removeItem(LS_USER); },
+    resetPassword: async function (email) { await init(); await auth.sendPasswordResetEmail(email); return true; }
+  };
+
+  /* ---------- Export / Import ya RescueDB (stores zote) ---------- */
+  function b2d(b) { return new Promise(function (res) { var r = new FileReader(); r.onload = function () { res(r.result); }; r.readAsDataURL(b); }); }
+  async function ser(rec) {
+    if (!rec || typeof rec !== "object" || Array.isArray(rec)) return rec;
+    var o = {}; for (var k in rec) { var v = rec[k]; o[k] = (typeof Blob !== "undefined" && v instanceof Blob) ? { __blob: await b2d(v), type: v.type } : v; } return o;
+  }
+  async function deser(rec) {
+    if (!rec || typeof rec !== "object" || Array.isArray(rec)) return rec;
+    var o = {}; for (var k in rec) { var v = rec[k]; o[k] = (v && typeof v === "object" && v.__blob) ? await fetch(v.__blob).then(function (r) { return r.blob(); }) : v; } return o;
+  }
+  RDB.exportFullBackup = async function () {
+    var db0 = await openDB(), out = {}, names = Array.prototype.slice.call(db0.objectStoreNames);
+    for (var i = 0; i < names.length; i++) {
+      var s = db0.transaction(names[i], "readonly").objectStore(names[i]), vals = await reqP(s.getAll()), keys = s.keyPath == null ? await reqP(db0.transaction(names[i], "readonly").objectStore(names[i]).getAllKeys()) : null;
+      out[names[i]] = await Promise.all(vals.map(async function (v, j) { return keys ? { __oof: 1, key: keys[j], value: await ser(v) } : ser(v); }));
+    }
+    return out;
+  };
+  RDB.importFullBackup = async function (data) {
+    for (var name in data) {
+      var arr = data[name]; if (!Array.isArray(arr) || !arr.length) continue;
+      var d = await openDB();
+      if (!d.objectStoreNames.contains(name)) {
+        var oof = arr[0] && arr[0].__oof, hasId = arr.every(function (x) { return x && x.id != null; });
+        d = await ensureStore(name, oof || !hasId ? { autoIncrement: true } : { keyPath: "id" });
+      }
+      var recs = [];
+      for (var i = 0; i < arr.length; i++) { var it = arr[i]; recs.push(it && it.__oof ? [await deser(it.value), it.key] : [await deser(it)]); }
+      await new Promise(function (res) {
+        var t = d.transaction(name, "readwrite"), s = t.objectStore(name);
+        recs.forEach(function (r) { try { var q = r.length > 1 && s.keyPath == null ? s.add(r[0], r[1]) : s.add(r[0]); q.onerror = function (e) { e.preventDefault(); e.stopPropagation(); }; } catch (e) { } });
+        t.oncomplete = res; t.onerror = res; t.onabort = res;
+      });
+    }
+  };
+
+  /* ---------- Backup ya wingu (muundo ule ule wa cloud-sync.js) ---------- */
+  var LS_LOCAL = "rescueCloudLocal:", LS_LAST = "rescueCloudLast:", CHUNK = 250000, SECRET_KEYS = ["appPin"], VOLATILE = /^(exportedAt|exportDate|exported_at|generatedAt|timestamp)$/;
+  var statusCbs = [], status = "idle", statusErr = null, timer = null, chain = Promise.resolve();
+  function setStatus(s, err) { status = s; statusErr = err || null; statusCbs.forEach(function (cb) { try { cb(s, err); } catch (e) { } }); }
+  function getUserLocal() { try { return JSON.parse(localStorage.getItem(LS_USER) || "null"); } catch (e) { return null; } }
+  function hash(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < str.length; i++) { var ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36) + "." + str.length.toString(36);
+  }
+  function safe(s) { s = String(s).replace(/[^A-Za-z0-9_.-]/g, "_"); return s.length > 150 ? s.slice(0, 150) : s; }
+  function split(s) {
+    var out = [], i = 0;
+    while (i < s.length) { var end = Math.min(i + CHUNK, s.length); if (end < s.length) { var c = s.charCodeAt(end - 1); if (c >= 0xd800 && c <= 0xdbff) end--; } out.push(s.slice(i, end)); i = end; }
+    return out.length ? out : [""];
+  }
+  function stripSecrets(data) {
+    var copy = Object.assign({}, data), s = copy.settings;
+    if (Array.isArray(s)) copy.settings = s.filter(function (x) { return !(x && SECRET_KEYS.indexOf(x.key || x.name) >= 0); });
+    else if (s && typeof s === "object") { s = Object.assign({}, s); SECRET_KEYS.forEach(function (k) { delete s[k]; }); copy.settings = s; }
+    return copy;
+  }
+  function stableScalars(sc) { var o = {}; Object.keys(sc).sort().forEach(function (k) { if (!VOLATILE.test(k)) o[k] = sc[k]; }); return o; }
+  function readLocal(uid) { try { return JSON.parse(localStorage.getItem(LS_LOCAL + uid) || "{}"); } catch (e) { return {}; } }
+  function writeLocal(uid, items) { var m = {}; Object.keys(items).forEach(function (b) { m[b] = items[b].h; }); try { localStorage.setItem(LS_LOCAL + uid, JSON.stringify(m)); } catch (e) { } }
+  function itemsCol(uid) { return userDoc(uid).collection("items"); }
+  function manifestRef(uid) { return userDoc(uid).collection("meta").doc("manifest"); }
+  async function collect() {
+    var data = stripSecrets(await RDB.exportFullBackup() || {}), items = {}, scalars = {};
+    Object.keys(data).forEach(function (k) {
+      var v = data[k];
+      if (Array.isArray(v)) v.forEach(function (it) {
+        var s = JSON.stringify(it), h = hash(s), rawId = null;
+        if (it && typeof it === "object") rawId = it.id != null ? it.id : it.incidentId != null ? it.incidentId : it.photoId != null ? it.photoId : it.key != null ? it.key : it.name != null ? it.name : null;
+        var base = safe(k) + "__" + safe(rawId == null ? "i" + h : rawId);
+        if (items[base]) base = base + "~" + safe(h);
+        if (items[base]) return;
+        items[base] = { k: k, s: s, h: h };
+      }); else scalars[k] = v;
+    });
+    return { items: items, scalars: scalars };
+  }
+  async function commit(ops) {
+    var batch = db.batch(), count = 0, size = 0;
+    for (var i = 0; i < ops.length; i++) {
+      var op = ops[i];
+      if (count >= 400 || (count > 0 && size + op.size > 3000000)) { await batch.commit(); batch = db.batch(); count = 0; size = 0; }
+      if (op.type === "set") batch.set(op.ref, op.data); else batch.delete(op.ref);
+      count++; size += op.size;
+    }
+    if (count) await batch.commit();
+  }
+  async function backup() {
+    var u = auth.currentUser; if (!u) throw new Error("not-signed-in");
+    var c = await collect(), mref = manifestRef(u.uid), msnap = await mref.get(), M = msnap.exists ? (msnap.data() || {}) : {}, R = M.items || {}, L = readLocal(u.uid);
+    var ops = [], newR = Object.assign({}, R), up = 0, del = 0;
+    Object.keys(c.items).forEach(function (b) {
+      var it = c.items[b], r = R[b]; if (r && r.h === it.h) return;
+      var parts = split(it.s);
+      parts.forEach(function (p, i) { ops.push({ type: "set", ref: itemsCol(u.uid).doc(b + "__" + i), data: { b: b, i: i, d: p }, size: p.length }); });
+      if (r && r.n > parts.length) for (var j = parts.length; j < r.n; j++) ops.push({ type: "del", ref: itemsCol(u.uid).doc(b + "__" + j), size: 0 });
+      newR[b] = { k: it.k, h: it.h, n: parts.length }; up++;
+    });
+    Object.keys(R).forEach(function (b) {
+      if (c.items[b] || !L[b]) return;
+      for (var j = 0; j < (R[b].n || 1); j++) ops.push({ type: "del", ref: itemsCol(u.uid).doc(b + "__" + j), size: 0 });
+      delete newR[b]; del++;
+    });
+    var keepCloudScalars = msnap.exists && localStorage.getItem(LS_LOCAL + u.uid) === null;
+    var scalarsStr = keepCloudScalars ? (M.scalars || "{}") : JSON.stringify(c.scalars);
+    var sh = keepCloudScalars ? (M.sh || "") : hash(JSON.stringify(stableScalars(c.scalars)));
+    if (up || del || M.sh !== sh || !msnap.exists) {
+      await commit(ops);
+      await mref.set({ items: newR, scalars: scalarsStr, sh: sh, count: Object.keys(newR).length, updatedAt: FV().serverTimestamp() });
+    }
+    writeLocal(u.uid, c.items);
+    try { localStorage.setItem(LS_LAST + u.uid, String(Date.now())); } catch (e) { }
+    return { uploaded: up, deleted: del, total: Object.keys(c.items).length };
+  }
+  function enqueue(fn) { var p = chain.then(fn); chain = p.catch(function () { }); return p; }
+  function backupNow() {
+    return enqueue(async function () {
+      await init(); var u = await authUser(); if (!u) throw new Error("not-signed-in");
+      setStatus("syncing");
+      try { var r = await backup(); setStatus("ok"); return r; } catch (e) { setStatus("error", e); throw e; }
+    });
+  }
+  function scheduleBackup(delay) {
+    if (!getUserLocal()) return;
+    clearTimeout(timer); setStatus("pending");
+    timer = setTimeout(function () { if (!navigator.onLine) { setStatus("offline"); return; } backupNow().catch(function (e) { console.warn("Cloud backup:", e); }); }, delay == null ? 20000 : delay);
+  }
+  async function cloudInfo() {
+    await init(); var u = await authUser(); if (!u) return null;
+    var snap = await manifestRef(u.uid).get();
+    if (!snap.exists) return { exists: false, count: 0, reports: 0, updatedAt: null };
+    var M = snap.data() || {}, items = M.items || {}, reports = 0;
+    Object.keys(items).forEach(function (b) { if (items[b].k === "reports") reports++; });
+    return { exists: true, count: Object.keys(items).length, reports: reports, updatedAt: M.updatedAt && M.updatedAt.toDate ? M.updatedAt.toDate() : null };
+  }
+  function restore(mode) {
+    return enqueue(async function () {
+      await init(); var u = await authUser(); if (!u) throw new Error("not-signed-in");
+      var msnap = await manifestRef(u.uid).get(); if (!msnap.exists) return { restored: false, count: 0, bad: 0 };
+      var M = msnap.data() || {}, mItems = M.items || {}, snap = await itemsCol(u.uid).get(), parts = {};
+      snap.forEach(function (d) { var x = d.data(); (parts[x.b] = parts[x.b] || [])[x.i] = x.d; });
+      var data = {}; try { data = JSON.parse(M.scalars || "{}"); } catch (e) { data = {}; }
+      var bad = 0, ok = 0;
+      Object.keys(mItems).forEach(function (b) {
+        var m = mItems[b], arr = parts[b], good = !!arr && arr.length >= m.n;
+        for (var i = 0; good && i < m.n; i++) { if (arr[i] == null) good = false; }
+        if (!good) { bad++; return; }
+        try { (data[m.k] = data[m.k] || []).push(JSON.parse(arr.slice(0, m.n).join(""))); ok++; } catch (e) { bad++; }
+      });
+      await RDB.importFullBackup(data, mode || "keep");
+      writeLocal(u.uid, (await collect()).items);
+      return { restored: true, count: ok, bad: bad };
+    });
+  }
+  function lastSync() { var u = getUserLocal(), t = u ? Number(localStorage.getItem(LS_LAST + u.uid) || 0) : 0; return t ? new Date(t) : null; }
+
+  global.CloudSync = Object.assign({}, authApi, {
+    signOut: async function () { clearTimeout(timer); return authApi.signOut(); },
+    onStatus: function (cb) { statusCbs.push(cb); try { cb(status, statusErr); } catch (e) { } },
+    getStatus: function () { return status; },
+    backupNow: backupNow, scheduleBackup: scheduleBackup, restore: restore, cloudInfo: cloudInfo, lastSync: lastSync
+  });
+  global.addEventListener("offline", function () { setStatus("offline"); });
+})(window);
+</script>
 <script>
 (function () {
   "use strict";
@@ -323,7 +620,7 @@ a.btn { text-decoration: none; text-align: center; }
   (async function start() {
     if (!window.CloudSync || !window.RescueDB) {
       show("view-auth");
-      setMsg("Faili za app (core.js / cloud-sync.js) hazikupatikana. Hakikisha ziko folda moja na login.html.");
+      setMsg("Imeshindwa kuanzisha app. Pakia ukurasa upya.");
       return;
     }
     setMode("login");
