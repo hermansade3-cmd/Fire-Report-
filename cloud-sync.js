@@ -1,10 +1,4 @@
-/* cloud-sync.js — Akaunti (Firebase Auth) + Backup ya wingu (Firestore) kwa Rescue Report
- *
- * Inatumika na login.html na script.js. Inahitaji RescueDB (core.js) ipakiwe kabla.
- * Data zote za app (ripoti, picha, settings, n.k.) zinahifadhiwa kwenye:
- *   users/{uid}/meta/manifest   -> orodha ya vitu + hash zake
- *   users/{uid}/items/{id}__{n} -> vitu vyenyewe (vipande visivyozidi ~250KB)
- */
+/* cloud-sync.js — Akaunti, Backup ya wingu, na Chat kwa Rescue Report */
 (function (global) {
   "use strict";
 
@@ -20,11 +14,11 @@
   };
   var SDK_FILES = ["firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js"];
 
-  var LS_USER = "rescueCloudUser";          // {uid,email} ikiwa mtumiaji ameingia
-  var LS_LOCAL = "rescueCloudLocal:";       // + uid  -> vitu vilivyokuwepo kifaani wakati wa sync ya mwisho
-  var LS_LAST = "rescueCloudLast:";         // + uid  -> muda wa backup ya mwisho
-  var CHUNK = 250000;                       // herufi kwa kipande (Firestore: doc < 1MB)
-  var SECRET_KEYS = ["appPin"];             // hazipandishwi wingu
+  var LS_USER = "rescueCloudUser";
+  var LS_LOCAL = "rescueCloudLocal:";
+  var LS_LAST = "rescueCloudLast:";
+  var CHUNK = 250000;
+  var SECRET_KEYS = ["appPin"];
   var VOLATILE = /^(exportedAt|exportDate|exported_at|generatedAt|timestamp)$/;
 
   var auth = null, db = null, readyPromise = null;
@@ -54,7 +48,7 @@
       if (!fb.apps.length) fb.initializeApp(firebaseConfig);
       auth = fb.auth();
       db = fb.firestore();
-      try { db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); } catch (e) { /* tayari imewekwa */ }
+      try { db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); } catch (e) { }
       auth.onAuthStateChanged(function (u) {
         if (u) remember(u);
         else localStorage.removeItem(LS_USER);
@@ -65,7 +59,7 @@
   }
 
   function remember(u) {
-    try { localStorage.setItem(LS_USER, JSON.stringify({ uid: u.uid, email: u.email })); } catch (e) { }
+    try { localStorage.setItem(LS_USER, JSON.stringify({ uid: u.uid, email: u.email, displayName: u.displayName })); } catch (e) { }
   }
   function getUser() {
     try { return JSON.parse(localStorage.getItem(LS_USER) || "null"); } catch (e) { return null; }
@@ -94,7 +88,7 @@
       var end = Math.min(i + CHUNK, s.length);
       if (end < s.length) {
         var c = s.charCodeAt(end - 1);
-        if (c >= 0xd800 && c <= 0xdbff) end--; // usikate jozi ya emoji katikati
+        if (c >= 0xd800 && c <= 0xdbff) end--;
       }
       out.push(s.slice(i, end));
       i = end;
@@ -149,18 +143,34 @@
   function getStatus() { return status; }
 
   /* ---------------- auth ---------------- */
-  async function signUp(email, password) {
+  async function signUp(email, password, displayName) {
     await init();
     var cred = await auth.createUserWithEmailAndPassword(email, password);
-    remember(cred.user);
-    return cred.user;
+    var user = cred.user;
+    if (displayName) await user.updateProfile({ displayName: displayName });
+    await userDoc(user.uid).set({
+      uid: user.uid,
+      email: user.email,
+      displayName: displayName || email.split("@")[0],
+      displayNameLower: (displayName || email.split("@")[0]).toLowerCase(),
+      createdAt: global.firebase.firestore.FieldValue.serverTimestamp(),
+      lastSeen: global.firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    remember(user);
+    return user;
   }
+  
   async function signIn(email, password) {
     await init();
     var cred = await auth.signInWithEmailAndPassword(email, password);
-    remember(cred.user);
-    return cred.user;
+    var user = cred.user;
+    await userDoc(user.uid).set({
+      lastSeen: global.firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    remember(user);
+    return user;
   }
+  
   async function signOut() {
     await init();
     clearTimeout(timer);
@@ -168,10 +178,12 @@
     localStorage.removeItem(LS_USER);
     setStatus("signedout");
   }
+  
   async function resetPassword(email) {
     await init();
     await auth.sendPasswordResetEmail(email);
   }
+  
   async function currentUser() {
     await init();
     return new Promise(function (resolve) {
@@ -223,7 +235,7 @@
           }
           var base = safe(k) + "__" + safe(rawId == null ? "i" + h : rawId);
           if (items[base]) base = base + "~" + safe(h);
-          if (items[base]) return; // nakala inayofanana kabisa
+          if (items[base]) return;
           items[base] = { k: k, s: s, h: h };
         });
       } else {
@@ -273,7 +285,6 @@
       up++;
     });
 
-    // Futa wingu kile tu kilichokuwepo kifaani wakati wa sync iliyopita na sasa hakipo.
     Object.keys(R).forEach(function (b) {
       if (c.items[b] || !L[b]) return;
       for (var j = 0; j < (R[b].n || 1); j++) ops.push({ type: "del", ref: itemsCol(u.uid).doc(b + "__" + j), size: 0 });
@@ -281,7 +292,6 @@
       del++;
     });
 
-    // Kifaa kipya ambacho hakijawahi kusync: usiandike juu ya settings za wingu.
     var keepCloudScalars = msnap.exists && localStorage.getItem(LS_LOCAL + u.uid) === null;
     var scalarsStr = keepCloudScalars ? (M.scalars || "{}") : JSON.stringify(c.scalars);
     var sh = keepCloudScalars ? (M.sh || "") : hash(JSON.stringify(stableScalars(c.scalars)));
@@ -383,11 +393,207 @@
     return t ? new Date(t) : null;
   }
 
+  /* ================= CHAT & SEARCH ================= */
+  
+  function chatId(a, b) { return [a, b].sort().join("_"); }
+
+  async function searchUsers(query) {
+    await init();
+    if (!query || query.trim().length < 2) return [];
+    var q = query.trim().toLowerCase();
+    var me = auth.currentUser;
+    var results = {};
+    
+    try {
+      var snapEmail = await db.collection("users").where("email", "==", q).limit(10).get();
+      snapEmail.forEach(function (doc) {
+        if (doc.id !== me.uid) results[doc.id] = doc.data();
+      });
+    } catch (e) { }
+
+    try {
+      var snapName = await db.collection("users")
+        .where("displayNameLower", ">=", q)
+        .where("displayNameLower", "<=", q + "\uf8ff")
+        .limit(20).get();
+      snapName.forEach(function (doc) {
+        if (doc.id !== me.uid) results[doc.id] = doc.data();
+      });
+    } catch (e) { }
+
+    return Object.keys(results).map(function (uid) {
+      return {
+        uid: uid,
+        email: results[uid].email,
+        displayName: results[uid].displayName || results[uid].email,
+        online: results[uid].lastSeen && (Date.now() - results[uid].lastSeen.toMillis() < 5 * 60 * 1000)
+      };
+    });
+  }
+
+  async function getUserProfile(uid) {
+    await init();
+    var doc = await userDoc(uid).get();
+    if (!doc.exists) return null;
+    var d = doc.data();
+    return {
+      uid: doc.id,
+      email: d.email,
+      displayName: d.displayName || d.email,
+      online: d.lastSeen && (Date.now() - d.lastSeen.toMillis() < 5 * 60 * 1000)
+    };
+  }
+
+  async function sendMessage(toUid, payload) {
+    await init();
+    var me = auth.currentUser;
+    if (!me) throw new Error("Hujaingia");
+    var cid = chatId(me.uid, toUid);
+    var myProfile = await getUserProfile(me.uid);
+    var toProfile = await getUserProfile(toUid);
+    
+    var msg = {
+      from: me.uid,
+      to: toUid,
+      type: payload.type || "text",
+      text: payload.text || "",
+      share: payload.share || null,
+      at: global.firebase.firestore.FieldValue.serverTimestamp(),
+      readBy: [me.uid]
+    };
+    
+    await db.collection("chats").doc(cid).collection("messages").add(msg);
+    
+    var lastPreview = payload.type === "share" ? "📎 " + (payload.share && payload.share.title || "Taarifa") : (payload.text || "");
+    
+    // Update mpokeaji (unread +1)
+    await userDoc(toUid).collection("chats").doc(cid).set({
+      peer: me.uid,
+      peerName: myProfile.displayName,
+      lastMessage: lastPreview,
+      lastAt: global.firebase.firestore.FieldValue.serverTimestamp(),
+      unread: global.firebase.firestore.FieldValue.increment(1)
+    }, { merge: true });
+
+    // Update mtumaji (unread 0)
+    await userDoc(me.uid).collection("chats").doc(cid).set({
+      peer: toUid,
+      peerName: toProfile.displayName,
+      lastMessage: lastPreview,
+      lastAt: global.firebase.firestore.FieldValue.serverTimestamp(),
+      unread: 0
+    }, { merge: true });
+  }
+
+  async function getMessages(peerUid, limit) {
+    await init();
+    var me = auth.currentUser;
+    var cid = chatId(me.uid, peerUid);
+    var snap = await db.collection("chats").doc(cid).collection("messages")
+      .orderBy("at", "desc").limit(limit || 50).get();
+    var list = [];
+    snap.forEach(function (doc) {
+      var d = doc.data();
+      list.push({
+        id: doc.id,
+        from: d.from,
+        to: d.to,
+        type: d.type,
+        text: d.text,
+        share: d.share,
+        at: d.at ? d.at.toMillis() : Date.now()
+      });
+    });
+    return list.reverse();
+  }
+
+  function watchMessages(peerUid, cb) {
+    init().then(function() {
+      var me = auth.currentUser;
+      var cid = chatId(me.uid, peerUid);
+      return db.collection("chats").doc(cid).collection("messages")
+        .orderBy("at", "asc").limit(100)
+        .onSnapshot(function (snap) {
+          snap.docChanges().forEach(function (ch) {
+            if (ch.type === "added") {
+              var d = ch.doc.data();
+              cb({
+                id: ch.doc.id,
+                from: d.from,
+                to: d.to,
+                type: d.type,
+                text: d.text,
+                share: d.share,
+                at: d.at ? d.at.toMillis() : Date.now()
+              });
+            }
+          });
+        });
+    });
+  }
+
+  async function markChatRead(peerUid) {
+    await init();
+    var me = auth.currentUser;
+    var cid = chatId(me.uid, peerUid);
+    try {
+      await userDoc(me.uid).collection("chats").doc(cid).set({ unread: 0 }, { merge: true });
+    } catch (e) { }
+  }
+
+  async function getRecentChats(limit) {
+    await init();
+    var me = auth.currentUser;
+    if (!me) return { list: [], total: 0 };
+    var snap = await userDoc(me.uid).collection("chats")
+      .orderBy("lastAt", "desc").limit(limit || 20).get();
+    var list = [];
+    var total = 0;
+    snap.forEach(function (doc) {
+      var d = doc.data();
+      total += (d.unread || 0);
+      list.push({
+        uid: d.peer,
+        name: d.peerName || "Mtumiaji",
+        lastMessage: d.lastMessage || "",
+        time: d.lastAt ? d.lastAt.toMillis() : null,
+        unread: d.unread || 0
+      });
+    });
+    return { list: list, total: total };
+  }
+
+  async function getTotalUnread() {
+    await init();
+    var me = auth.currentUser;
+    if (!me) return 0;
+    var snap = await userDoc(me.uid).collection("chats").get();
+    var total = 0;
+    snap.forEach(function (doc) {
+      total += (doc.data().unread || 0);
+    });
+    return total;
+  }
+
+  async function syncChats() {
+    return true;
+  }
+
   global.CloudSync = {
     init: init, signUp: signUp, signIn: signIn, signOut: signOut, resetPassword: resetPassword,
     currentUser: currentUser, getUser: getUser, errorMessage: errorMessage,
     backupNow: backupNow, scheduleBackup: scheduleBackup, restore: restore, cloudInfo: cloudInfo,
     onStatus: onStatus, getStatus: getStatus, lastSync: lastSync,
+    // Chat
+    searchUsers: searchUsers,
+    getUserProfile: getUserProfile,
+    sendMessage: sendMessage,
+    getMessages: getMessages,
+    watchMessages: watchMessages,
+    markChatRead: markChatRead,
+    getRecentChats: getRecentChats,
+    getTotalUnread: getTotalUnread,
+    syncChats: syncChats,
     _t: { hash: hash, split: split, collect: collect, backup: backup, setAuth: function (a, d) { auth = a; db = d; } }
   };
 })(window);
