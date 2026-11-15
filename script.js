@@ -197,7 +197,7 @@ damage: { propertyDamaged: "", vehicleDamage: "", equipmentDamage: "", estimated
 fuel: [],
 otherTeams: { checks: [], entries: [] },
 challenges: { text: "", options: [] },
-crew: { station: s.defaultStation || "", shiftLeader: "", driver: s.defaultVehicle ? "" : "", members: [] },
+crew: { station: s.defaultStation || "", shiftLeader: "", driver: "", members: [] },
 photoIds: [],
 };
 }
@@ -268,8 +268,32 @@ window.scrollTo(0, 0);
 const segs = path.split("/").filter(Boolean);
 const top = segs[0] || "dashboard";
 const handler = routes[top] || routes["dashboard"];
-handler(segs, params);
+try {
+const out = handler(segs, params);
+if (out && typeof out.catch === "function")
+out.catch(showRouteError);
+}
+catch (err) {
+showRouteError(err);
+}
 highlightNav(top);
+}
+function showRouteError(err) {
+console.error(err);
+const main = $("#main");
+if (!main)
+return;
+main.innerHTML = `
+    <div class="card">
+      <div class="card-title">Hitilafu imetokea</div>
+      <p class="muted">Ukurasa huu haukuweza kupakia. Data yako haijaathirika.</p>
+      <div class="btn-row">
+        <button class="btn btn-primary" id="err-retry" type="button">Jaribu tena</button>
+        <button class="btn" id="err-home" type="button">Nyumbani</button>
+      </div>
+    </div>`;
+$("#err-retry").addEventListener("click", render);
+$("#err-home").addEventListener("click", () => navigate("#/dashboard"));
 }
 function highlightNav(top) {
 $$(".nav-btn").forEach((b) => b.classList.toggle("active", b.dataset.route === top));
@@ -610,7 +634,11 @@ setMain(`
 $$("[data-set]").forEach((input) => {
 input.addEventListener("change", async () => {
 const key = input.dataset.set;
-const val = input.type === "number" ? Number(input.value) : input.value;
+let val = input.type === "number" ? Number(input.value) : input.value.trim();
+if (key === "autoSaveInterval") {
+val = Number.isFinite(val) && val > 0 ? Math.max(200, Math.round(val)) : 600;
+input.value = val;
+}
 State.settings[key] = val;
 await RescueDB.setSetting(key, val);
 toast("Imehifadhiwa", "ok");
@@ -1809,7 +1837,7 @@ return [
 }
 function buildShell() {
 const app = $("#app");
-const navHtml = navButtons().map((n) => `<button class="nav-btn" data-route="${n.r.split("?")[0].split("/")[0]}" data-nav="/${n.r}"><span class="ic">${n.ic}</span><span>${n.label}</span></button>`).join("");
+const navHtml = navButtons().map((n) => `<button class="nav-btn" aria-label="${n.label}" data-route="${n.r.split("?")[0].split("/")[0]}" data-nav="/${n.r}"><span class="ic">${n.ic}</span><span>${n.label}</span></button>`).join("");
 app.innerHTML = `
     <nav class="sidebar">
       <div style="padding:8px 12px 16px 12px;"><strong style="font-size:15px;">\uD83D\uDEA8 Rescue Report</strong></div>
@@ -1839,13 +1867,16 @@ app.innerHTML = `
     <nav class="bottom-nav"><div class="nav-row">${navHtml}</div></nav>
     <div id="toast-host"></div>
   `;
-$("#back-btn").addEventListener("click", () => { flushSave(); history.back(); });
+$("#back-btn").addEventListener("click", () => { flushSave(); if (history.length > 1)
+history.back();
+else
+navigate("#/dashboard"); });
 $("#inc-search-btn").addEventListener("click", () => { openFilesSheet(); });
 const fireBtn = $("#fire-science-btn");
 fireBtn.addEventListener("mouseenter", () => { fireBtn.style.background = "rgba(0,0,0,0.08)"; });
 fireBtn.addEventListener("mouseleave", () => { fireBtn.style.background = "transparent"; });
 fireBtn.addEventListener("click", () => { flushSave(); window.location.href = "fire_education.html"; });
-const loginBtn = $("login-btn");
+const loginBtn = $("#login-btn");
 loginBtn.addEventListener("mouseenter", () => { loginBtn.style.background = "rgba(0,0,0,0.08)"; });
 loginBtn.addEventListener("mouseleave", () => { loginBtn.style.background = "transparent"; });
 loginBtn.addEventListener("click", () => { flushSave(); window.location.href = "login.html"; });
@@ -1860,7 +1891,7 @@ try { return JSON.parse(localStorage.getItem("rescueCloudUser") || "null"); }
 catch (e) { return null; }
 }
 function updateLoginBtn(status) {
-const btn = $("login-btn");
+const btn = $("#login-btn");
 if (!btn)
 return;
 const user = cloudUser();
@@ -1896,13 +1927,15 @@ const cs = await loadCloudSync();
 if (cs)
 cs.scheduleBackup();
 }
+let cloudStarted = false;
 async function initCloud() {
 updateLoginBtn();
-if (!cloudUser())
+if (!cloudUser() || cloudStarted)
 return;
 const cs = await loadCloudSync();
 if (!cs)
 return;
+cloudStarted = true;
 cs.onStatus((st) => updateLoginBtn(st));
 cs.scheduleBackup(4000);
 window.addEventListener("online", () => cs.scheduleBackup(2000));
@@ -1910,6 +1943,14 @@ window.addEventListener("hashchange", () => cs.scheduleBackup());
 document.addEventListener("visibilitychange", () => { if (document.hidden)
 cs.scheduleBackup(500); });
 }
+window.addEventListener("pageshow", (e) => { if (e.persisted) {
+updateLoginBtn();
+initCloud();
+} });
+window.addEventListener("storage", (e) => { if (e.key === "rescueCloudUser") {
+updateLoginBtn();
+initCloud();
+} });
 function updateOfflineBanner() {
 const b = $("#offline-banner");
 if (!b)
@@ -1988,5 +2029,23 @@ RescueDB.setSetting("lastBackupReminderShown", Date.now());
 }
 }
 }
-document.addEventListener("DOMContentLoaded", boot);
+function bootFailed(err) {
+console.error("Boot error:", err);
+const app = document.getElementById("app");
+if (!app)
+return;
+app.innerHTML = "";
+const box = document.createElement("div");
+box.style.cssText = "padding:24px;font-family:sans-serif;text-align:center;";
+const msg = document.createElement("p");
+msg.textContent = "Programu imeshindwa kuanza. Data yako haijafutwa.";
+const btn = document.createElement("button");
+btn.textContent = "Pakia upya";
+btn.style.cssText = "padding:12px 20px;font-size:16px;border-radius:10px;border:1px solid #999;";
+btn.addEventListener("click", () => location.reload());
+box.appendChild(msg);
+box.appendChild(btn);
+app.appendChild(box);
+}
+document.addEventListener("DOMContentLoaded", () => { boot().catch(bootFailed); });
 })();
