@@ -3,1411 +3,1261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Workplace — Fire Report</title>
-<meta name="theme-color" content="#4a4687">
+<title>Fire Report – Workplace</title>
+<meta name="description" content="Fire Report Workplace: mtandao wa kitaalamu, timu, majukumu, ujumbe na ripoti za pamoja kwa maafisa wa Zimamoto na Uokoaji.">
+<meta name="theme-color" content="#0e1420">
 <style>
-/* ============================================================
-   FIRE REPORT – WORKPLACE
-   Design tokens copied from login.html (same palette)
-   ============================================================ */
-:root {
-  --bg: #f3f4f8; --card: #ffffff; --text: #1f2333; --muted: #6a7087;
-  --line: #e1e4ee; --brand: #4a4687; --accent: #cf4a24;
-  --accent-text: #ffffff; --ok: #1f8a4c; --warn: #b7791f;
-  --err: #c53030; --field: #f7f8fc;
-  --shadow: 0 6px 20px rgba(40, 44, 80, .08);
-  --radius: 16px;
+/* ===== Tokens (zinafanana na style.css ya Fire Report) ===== */
+:root{
+  --bg:#0e1420;--bg-raised:#161f30;--bg-raised-2:#1c283d;--line:#2a3650;--text:#eef2f8;--text-dim:#9fb0c9;--text-faint:#6b7a94;
+  --accent:#e05a2f;--accent-dim:#a9431f;--accent-text:#fff3ec;--ok:#3fb27f;--warn:#e0a930;--danger:#e0492f;--danger-bg:#3a1a16;
+  --info:#6fa8dc;--radius:10px;--radius-sm:6px;--nav-h:64px;--topbar-h:56px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans",Helvetica,Arial,sans-serif;
 }
-:root[data-theme="dark"] {
-  --bg: #0e1420; --card: #172033; --text: #eef2f8; --muted: #9aa4b2;
-  --line: #26324a; --brand: #3a3670; --accent: #e2562e;
-  --accent-text: #ffffff; --ok: #46c27a; --warn: #e0a93b;
-  --err: #ff7a6b; --field: #101827;
-  --shadow: 0 6px 20px rgba(0, 0, 0, .35);
+[data-theme="light"]{
+  --bg:#f4f5f7;--bg-raised:#ffffff;--bg-raised-2:#eceff3;--line:#d7dce4;--text:#171b24;--text-dim:#4b5568;--text-faint:#808ea3;
+  --accent:#cf4a24;--accent-dim:#a9431f;--accent-text:#ffffff;--danger-bg:#fbe3df;
 }
-* { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--text); }
-body {
-  font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
-  font-size: 15px; line-height: 1.45; min-height: 100vh;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 70px);
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:var(--text);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none;
+  background:radial-gradient(circle at 10% 0%,rgba(224,90,47,.12),transparent 28%),radial-gradient(circle at 90% 12%,rgba(63,178,127,.09),transparent 25%),var(--bg);}
+h1,h2,h3,h4{margin:0 0 8px;font-weight:700;letter-spacing:-.01em}
+p{margin:0 0 8px}
+button,input,select,textarea{font-family:inherit}
+a{color:var(--accent)}
+.hidden{display:none!important}
+.muted{color:var(--text-faint);font-size:12px}
+.dim{color:var(--text-dim)}
+.grow{flex:1;min-width:0}
+.row{display:flex;align-items:center;gap:10px}
+.row.wrap{flex-wrap:wrap}
+.between{justify-content:space-between}
+.mt{margin-top:12px}.mb{margin-bottom:12px}
+.ellip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ===== Shell ===== */
+#app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{position:sticky;top:0;z-index:20;height:var(--topbar-h);display:flex;align-items:center;gap:8px;padding:0 12px;
+  background:color-mix(in srgb,var(--bg-raised) 82%,transparent);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%);
+  border-bottom:1px solid var(--line);box-shadow:0 8px 28px rgba(0,0,0,.10)}
+.topbar h1{font-size:17px;margin:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.icon-btn{background:none;border:none;color:var(--text);font-size:18px;padding:7px 9px;cursor:pointer;border-radius:var(--radius-sm);line-height:1;position:relative}
+.icon-btn:active{background:var(--bg-raised-2)}
+.sync-pill{font-size:11px;border:1px solid var(--line);background:var(--bg-raised-2);color:var(--text-dim);border-radius:999px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.sync-pill.ok{color:var(--ok);border-color:var(--ok)}
+.sync-pill.off{color:var(--warn);border-color:var(--warn)}
+.sync-pill.bad{color:var(--danger);border-color:var(--danger)}
+.banner{background:var(--bg-raised-2);color:var(--warn);font-size:12px;text-align:center;padding:6px 10px;border-bottom:1px solid var(--line)}
+.content-col{flex:1;min-width:0;display:flex;flex-direction:column}
+main{flex:1;padding:14px 14px calc(var(--nav-h) + 24px);max-width:820px;width:100%;margin:0 auto}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);display:flex;z-index:30;
+  background:color-mix(in srgb,var(--bg-raised) 85%,transparent);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav button{flex:1;background:none;border:none;color:var(--text-faint);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;cursor:pointer;position:relative}
+.bottom-nav .ic{font-size:20px;line-height:1}
+.bottom-nav button.active{color:var(--accent);font-weight:800}
+.sidebar{display:none}
+.nbadge{position:absolute;top:4px;left:calc(50% + 6px);min-width:17px;height:17px;border-radius:9px;background:var(--accent);color:var(--accent-text);font-size:10px;font-weight:800;display:grid;place-items:center;padding:0 4px}
+@media (min-width:760px){
+  .bottom-nav{display:none}
+  main{padding-bottom:40px}
+  #app{flex-direction:row}
+  .sidebar{width:210px;background:color-mix(in srgb,var(--bg-raised) 85%,transparent);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:14px 8px;gap:3px;position:sticky;top:0;height:100vh;overflow-y:auto}
+  .sidebar button{display:flex;align-items:center;gap:10px;background:none;border:none;color:var(--text-dim);padding:10px 12px;border-radius:var(--radius-sm);font-size:14px;cursor:pointer;text-align:left;position:relative}
+  .sidebar button.active{background:var(--bg-raised-2);color:var(--accent);font-weight:600}
+  .sidebar .nbadge{position:static;margin-left:auto}
+  .sidebar .brand{font-weight:800;padding:6px 12px 14px;font-size:15px}
+  .sidebar .brand span{color:var(--accent)}
 }
 
-/* ---------- Topbar ---------- */
-header.top {
-  position: sticky; top: 0; z-index: 10;
-  background: var(--brand); color: #fff;
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 12px;
-  display: flex; align-items: center; gap: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.15);
-}
-header.top h1 { font-size: 17px; margin: 0; font-weight: 600; flex: 1; }
-header.top button {
-  width: 38px; height: 38px; border: 0; border-radius: 50%;
-  background: rgba(255,255,255,.16); color: #fff; font-size: 18px;
-  cursor: pointer; position: relative; flex: none;
-}
-.badge-dot {
-  position: absolute; top: 4px; right: 4px;
-  min-width: 16px; height: 16px; border-radius: 8px;
-  background: var(--accent); color: #fff; font-size: 10px;
-  font-weight: 700; display: grid; place-items: center;
-  padding: 0 4px; border: 2px solid var(--brand);
-}
+/* ===== Buttons / cards / forms ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:15px;border:1px solid var(--line);background:var(--bg-raised-2);color:var(--text);
+  padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;min-height:44px;box-shadow:0 5px 16px rgba(0,0,0,.07);transition:transform .16s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.btn-primary:active{background:var(--accent-dim)}
+.btn-danger{background:var(--danger-bg);border-color:var(--danger);color:var(--danger)}
+.btn-ghost{background:transparent;box-shadow:none}
+.btn-sm{padding:7px 12px;min-height:34px;font-size:13px;border-radius:12px}
+.btn-block{width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.card{background:linear-gradient(145deg,color-mix(in srgb,var(--bg-raised) 92%,transparent),color-mix(in srgb,var(--bg-raised-2) 68%,transparent));
+  border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.card-title{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-faint);margin-bottom:10px;font-weight:700}
+.item{display:flex;align-items:center;gap:10px;padding:11px 12px;border:1px solid var(--line);border-radius:16px;background:var(--bg-raised);margin-bottom:8px;cursor:pointer;position:relative;overflow:hidden}
+.item:active{transform:scale(.99)}
+.item.unread{border-color:var(--accent)}
+.item .t{font-weight:700;font-size:14px}
+.item .s{font-size:12px;color:var(--text-dim)}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.stat-box{background:var(--bg-raised);border:1px solid var(--line);border-radius:17px;padding:12px 8px;text-align:center;cursor:pointer}
+.stat-box .num{font-size:22px;font-weight:800;color:var(--accent)}
+.stat-box .label{font-size:11px;color:var(--text-dim);margin-top:2px}
+.tile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.tile{background:var(--bg-raised);border:1px solid var(--line);border-radius:16px;padding:14px 10px;text-align:center;cursor:pointer;font-weight:600;font-size:13px;position:relative}
+.tile .ic{display:block;font-size:24px;margin-bottom:4px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:5px}
+.field input[type=text],.field input[type=email],.field input[type=password],.field input[type=search],.field input[type=number],.field input[type=date],.field input[type=datetime-local],.field select,.field textarea,.input{
+  width:100%;background:var(--bg-raised-2);border:1px solid var(--line);color:var(--text);border-radius:var(--radius-sm);padding:11px 12px;font-size:15px;min-height:44px}
+.field textarea{min-height:84px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus,.input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+.field-row{display:flex;gap:10px}.field-row .field{flex:1}
+.chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);background:var(--bg-raised-2);color:var(--text-dim);border-radius:999px;padding:8px 13px;font-size:13px;cursor:pointer;white-space:nowrap;user-select:none}
+.chip.sel{background:var(--accent);border-color:var(--accent);color:var(--accent-text);font-weight:600}
+.tag{display:inline-block;font-size:11px;background:var(--bg-raised-2);border:1px solid var(--line);color:var(--text-dim);border-radius:999px;padding:3px 9px;margin:2px 4px 2px 0}
+.badge{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:4px 9px;border-radius:999px;white-space:nowrap;background:var(--bg-raised-2);color:var(--text-dim)}
+.b-ok{background:#163a2c;color:var(--ok)}.b-warn{background:#3a3320;color:var(--warn)}.b-info{background:#1e2f45;color:var(--info)}.b-bad{background:var(--danger-bg);color:var(--danger)}
+[data-theme="light"] .b-ok{background:#d9f2e6}[data-theme="light"] .b-warn{background:#fbefcf}[data-theme="light"] .b-info{background:#dcebf8}
+.avatar{width:42px;height:42px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--accent),#ff8a3d);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px;overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.avatar.lg{width:78px;height:78px;font-size:26px}
+.avatar.sm{width:30px;height:30px;font-size:12px}
+.empty{text-align:center;padding:30px 16px;color:var(--text-faint);font-size:14px}
+.empty .ic{font-size:36px;margin-bottom:8px}
+.bar{height:6px;background:var(--bg-raised-2);border-radius:3px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent)}
+.tile .nbadge{left:auto;right:8px;top:8px}
+.kv{display:grid;grid-template-columns:38% 1fr;gap:4px 8px;font-size:13px}
+.kv .k{color:var(--text-faint)}
+.switch-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.switch-row:last-child{border-bottom:none}
+.tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.tabs button{background:none;border:none;color:var(--text-faint);padding:10px 14px;font-size:14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
+.tabs button.sel{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+.sk{height:62px;border-radius:16px;margin-bottom:8px;background:linear-gradient(90deg,var(--bg-raised) 25%,var(--bg-raised-2) 50%,var(--bg-raised) 75%);background-size:200% 100%;animation:sk 1.2s infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.fab{position:fixed;right:16px;bottom:calc(var(--nav-h) + 16px);z-index:25;width:54px;height:54px;border-radius:50%;border:none;background:var(--accent);color:var(--accent-text);font-size:26px;box-shadow:0 8px 24px rgba(224,90,47,.4);cursor:pointer}
+@media (min-width:760px){.fab{bottom:24px}}
 
-/* ---------- Bottom nav ---------- */
-nav.bottom {
-  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-  background: var(--card); border-top: 1px solid var(--line);
-  padding: 6px 2px calc(env(safe-area-inset-bottom, 0px) + 6px);
-  display: flex; justify-content: space-around;
-  box-shadow: 0 -4px 14px rgba(0,0,0,.06);
-}
-nav.bottom button {
-  flex: 1; border: 0; background: transparent; color: var(--muted);
-  font: inherit; font-size: 10px; font-weight: 600;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
-  padding: 6px 0; border-radius: 10px; cursor: pointer; position: relative;
-}
-nav.bottom button .ic { font-size: 17px; line-height: 1; }
-nav.bottom button.active { color: var(--brand); }
-:root[data-theme="dark"] nav.bottom button.active { color: #a9a4f0; }
-nav.bottom .nav-badge {
-  position: absolute; top: 2px; right: 50%; transform: translateX(12px);
-  min-width: 14px; height: 14px; border-radius: 7px;
-  background: var(--accent); color: #fff; font-size: 9px;
-  font-weight: 700; display: grid; place-items: center; padding: 0 3px;
-}
+/* ===== Modal / toast ===== */
+.modal-backdrop{position:fixed;inset:0;background:rgba(7,10,16,.58);backdrop-filter:blur(7px);display:flex;align-items:flex-end;justify-content:center;z-index:200}
+.modal{background:var(--bg-raised);border:1px solid var(--line);border-radius:22px 22px 0 0;padding:18px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+@media (min-width:600px){.modal-backdrop{align-items:center}.modal{border-radius:22px}}
+.modal h3{margin-bottom:12px}
+.modal .btn-row{margin-top:14px}
+#toast-host{position:fixed;bottom:calc(var(--nav-h) + 12px);left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;z-index:300;pointer-events:none}
+.toast{background:var(--bg-raised-2);border:1px solid var(--line);color:var(--text);padding:10px 16px;border-radius:999px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:92vw}
+.toast.err{border-color:var(--danger);color:var(--danger)}.toast.ok{border-color:var(--ok);color:var(--ok)}
 
-/* ---------- Main ---------- */
-main { max-width: 720px; margin: 0 auto; padding: 14px 12px 24px; }
+/* ===== Messaging ===== */
+.thread{display:flex;flex-direction:column;gap:6px;padding-bottom:10px}
+.bubble{max-width:82%;padding:8px 22px 8px 11px;border-radius:16px;font-size:14px;line-height:1.4;background:var(--bg-raised-2);border:1px solid var(--line);align-self:flex-start;word-break:break-word;position:relative}
+.bubble.me{align-self:flex-end;background:color-mix(in srgb,var(--accent) 22%,var(--bg-raised));border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.bubble .who{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.bubble .meta{font-size:10px;color:var(--text-faint);margin-top:3px;text-align:right;display:flex;gap:6px;justify-content:flex-end;align-items:center}
+.bubble .quote{border-left:3px solid var(--accent);background:rgba(127,127,127,.12);padding:4px 8px;border-radius:6px;margin-bottom:5px;font-size:12px;color:var(--text-dim)}
+.bubble.pending{opacity:.65}.bubble.failed{border-color:var(--danger)}
+.bubble.deleted{font-style:italic;color:var(--text-faint)}
+.bubble img.att{max-width:100%;border-radius:10px;display:block;margin-bottom:4px;min-height:60px;background:var(--bg)}
+.bubble .more{position:absolute;top:2px;right:4px;background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:14px;padding:2px 4px}
+.filechip{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--bg-raised);font-size:13px;cursor:pointer;margin-bottom:4px}
+.composer{position:sticky;bottom:calc(var(--nav-h) + 6px);background:var(--bg);padding:8px 0 4px;border-top:1px solid var(--line)}
+@media (min-width:760px){.composer{bottom:0}}
+.composer .box{display:flex;gap:8px;align-items:flex-end}
+.composer textarea{flex:1;min-height:44px;max-height:120px;resize:none;background:var(--bg-raised-2);border:1px solid var(--line);color:var(--text);border-radius:22px;padding:11px 14px;font-size:15px}
+.composer .round{width:44px;height:44px;border-radius:50%;flex:none;border:1px solid var(--line);background:var(--bg-raised-2);color:var(--text);font-size:18px;cursor:pointer}
+.composer .round.send{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.composer .round.rec{background:var(--danger);border-color:var(--danger);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55}}
+.replybar{display:flex;align-items:center;gap:8px;font-size:12px;background:var(--bg-raised-2);border-left:3px solid var(--accent);padding:6px 10px;border-radius:8px;margin-bottom:6px}
+.ubadge{background:var(--accent);color:var(--accent-text);font-size:11px;font-weight:800;border-radius:10px;min-width:20px;height:20px;display:grid;place-items:center;padding:0 6px}
 
-/* ---------- Cards ---------- */
-.card {
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: var(--radius); padding: 16px;
-  box-shadow: var(--shadow); margin-bottom: 12px;
-}
-.card-title {
-  font-size: 15px; font-weight: 700; margin-bottom: 10px;
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-}
-.muted { color: var(--muted); font-size: 13px; }
-.hint { color: var(--muted); font-size: 13px; padding: 12px 4px; text-align: center; }
-.empty-state { text-align: center; padding: 30px 12px; color: var(--muted); }
-.empty-state .ic { font-size: 40px; margin-bottom: 8px; opacity: .55; }
-
-/* ---------- Buttons ---------- */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  border: 1.5px solid var(--line); background: var(--field); color: var(--text);
-  border-radius: 12px; padding: 10px 14px; font: inherit; font-weight: 600;
-  cursor: pointer; transition: transform .06s, background .15s;
-}
-.btn:active { transform: scale(.98); }
-.btn.primary { background: var(--brand); color: #fff; border-color: transparent; }
-.btn.accent { background: var(--accent); color: #fff; border-color: transparent; }
-.btn.danger { color: var(--err); border-color: var(--err); }
-.btn.sm { padding: 6px 10px; font-size: 13px; border-radius: 10px; }
-.btn.block { width: 100%; }
-.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.btn-row .btn { flex: 1; min-width: 120px; }
-
-/* ---------- Fields ---------- */
-.field { margin-bottom: 12px; }
-.field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
-.field input, .field textarea, .field select {
-  width: 100%; padding: 11px 12px; font: inherit; color: var(--text);
-  background: var(--field); border: 1.5px solid var(--line);
-  border-radius: 11px; outline: none;
-}
-.field input:focus, .field textarea:focus, .field select:focus {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(74,70,135,.18);
-}
-.field textarea { resize: vertical; min-height: 80px; }
-.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* ---------- Tabs ---------- */
-.tabs {
-  display: flex; overflow-x: auto; gap: 4px; margin-bottom: 12px;
-  border-bottom: 1px solid var(--line); padding-bottom: 2px;
-}
-.tabs button {
-  border: 0; background: transparent; color: var(--muted);
-  padding: 8px 12px; font: inherit; font-weight: 600; font-size: 13px;
-  cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap;
-}
-.tabs button.active { color: var(--text); background: var(--field); }
-
-/* ---------- List item ---------- */
-.list-item {
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: 13px; padding: 12px; margin-bottom: 8px;
-  cursor: pointer; transition: background .12s;
-}
-.list-item:hover { background: var(--field); }
-.list-item .row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-.list-item .name { font-weight: 700; font-size: 14px; flex: 1; }
-.list-item .meta { font-size: 12px; color: var(--muted); }
-.avatar {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--brand); color: #fff; font-weight: 700;
-  display: grid; place-items: center; font-size: 15px; flex: none;
-}
-.avatar.sm { width: 30px; height: 30px; font-size: 12px; }
-
-/* ---------- Pills ---------- */
-.pill {
-  display: inline-block; padding: 2px 8px; border-radius: 999px;
-  font-size: 11px; font-weight: 700;
-}
-.pill.ok { background: rgba(31,138,76,.15); color: var(--ok); }
-.pill.warn { background: rgba(183,121,31,.15); color: var(--warn); }
-.pill.err { background: rgba(197,48,48,.15); color: var(--err); }
-.pill.info { background: rgba(74,70,135,.15); color: var(--brand); }
-:root[data-theme="dark"] .pill.info { color: #a9a4f0; }
-
-/* ---------- Messages ---------- */
-.msg-bubble {
-  max-width: 82%; padding: 8px 12px; border-radius: 14px;
-  background: var(--field); border: 1px solid var(--line);
-  margin-bottom: 6px; font-size: 14px; word-wrap: break-word;
-}
-.msg-bubble.mine {
-  margin-left: auto; background: var(--brand); color: #fff; border-color: transparent;
-}
-.msg-bubble .when { font-size: 10px; opacity: .7; margin-top: 3px; display: block; }
-.msg-bubble .sender { font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
-
-/* ---------- Modal ---------- */
-.modal-bg {
-  position: fixed; inset: 0; background: rgba(0,0,0,.55);
-  z-index: 50; display: flex; align-items: flex-end; justify-content: center;
-  animation: fadeIn .15s;
-}
-.modal {
-  background: var(--card); width: 100%; max-width: 520px;
-  border-radius: 20px 20px 0 0; padding: 18px 16px
-    calc(env(safe-area-inset-bottom, 0px) + 18px);
-  max-height: 88vh; overflow-y: auto;
-  animation: slideUp .22s cubic-bezier(.2,.9,.25,1);
-}
-.modal h3 { margin: 0 0 12px; font-size: 17px; }
-@keyframes fadeIn { from { opacity: 0; } }
-@keyframes slideUp { from { transform: translateY(30px); } }
-
-/* ---------- Toast ---------- */
-#toast {
-  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
-  transform: translateX(-50%) translateY(20px);
-  background: #1f2333; color: #fff; padding: 11px 18px;
-  border-radius: 22px; font-size: 13px; max-width: 92vw;
-  opacity: 0; pointer-events: none; transition: all .25s; z-index: 100;
-  text-align: center;
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-#toast.err { background: var(--err); }
-#toast.ok { background: var(--ok); }
-
-/* ---------- Sync banner ---------- */
-.sync-banner {
-  padding: 8px 12px; border-radius: 10px; font-size: 12px;
-  font-weight: 600; margin-bottom: 10px; text-align: center;
-}
-.sync-banner.local { background: rgba(183,121,31,.15); color: var(--warn); }
-.sync-banner.offline { background: rgba(197,48,48,.12); color: var(--err); }
-.sync-banner.online { background: rgba(31,138,76,.12); color: var(--ok); }
-
-/* ---------- Search ---------- */
-.search-bar { position: relative; margin-bottom: 10px; }
-.search-bar input {
-  width: 100%; padding: 11px 12px 11px 38px; font: inherit;
-  background: var(--field); border: 1.5px solid var(--line);
-  border-radius: 12px; outline: none; color: var(--text);
-}
-.search-bar::before {
-  content: "🔍"; position: absolute; left: 12px; top: 50%;
-  transform: translateY(-50%); font-size: 15px; opacity: .6;
-}
-
-/* ---------- Stat grid ---------- */
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
-.stat-box {
-  background: var(--card); border: 1px solid var(--line);
-  border-radius: 13px; padding: 12px 10px; text-align: center;
-  box-shadow: var(--shadow);
-}
-.stat-box .num { font-size: 22px; font-weight: 800; color: var(--brand); }
-:root[data-theme="dark"] .stat-box .num { color: #a9a4f0; }
-.stat-box .label { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600; }
-
-.divider { height: 1px; background: var(--line); margin: 10px 0; }
-
-/* ---------- Auth gate ---------- */
-.auth-gate {
-  max-width: 460px; margin: 40px auto; padding: 24px 20px;
-  text-align: center;
-}
-.auth-gate .big { font-size: 60px; margin-bottom: 12px; }
-.auth-gate h2 { margin: 0 0 8px; font-size: 20px; }
-.auth-gate p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
-.auth-gate .btn { max-width: 260px; margin: 0 auto; }
+/* ===== Auth screen ===== */
+.auth{max-width:430px;margin:0 auto;padding:30px 16px}
+.auth .logo{font-size:42px;text-align:center}
+.auth h2{text-align:center;margin-bottom:4px}
+.auth .sub{text-align:center;color:var(--text-dim);font-size:13px;margin-bottom:18px}
+.form-error{color:var(--danger);font-size:13px;min-height:18px;margin:4px 0}
+.diff{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px}
+.diff pre{white-space:pre-wrap;word-break:break-word;margin:0;background:var(--bg-raised-2);border:1px solid var(--line);border-radius:8px;padding:8px;max-height:140px;overflow:auto;font-family:inherit}
+.report-text{white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.55;background:#fff;color:#111;border-radius:12px;padding:14px;max-height:420px;overflow:auto}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-
-<header class="top">
-  <button id="back" aria-label="Rudi">&larr;</button>
-  <h1>Workplace</h1>
-  <button id="notif-btn" aria-label="Notifications">🔔<span class="badge-dot" id="notif-badge" hidden>0</span></button>
-</header>
-
-<main id="view"></main>
-
-<nav class="bottom" id="bottom-nav" hidden>
-  <button data-route="overview"><span class="ic">🏠</span>Overview</button>
-  <button data-route="network"><span class="ic">👥</span>Network</button>
-  <button data-route="workspaces"><span class="ic">🧩</span>Workspaces</button>
-  <button data-route="reports"><span class="ic">📄</span>Shared</button>
-  <button data-route="messages"><span class="ic">💬</span>Messages<span class="nav-badge" id="msg-badge" hidden>0</span></button>
-  <button data-route="tasks"><span class="ic">✅</span>Tasks</button>
-  <button data-route="more"><span class="ic">⋯</span>More</button>
-</nav>
-
-<div id="toast" role="status" aria-live="polite"></div>
-
+<div id="app"><div id="boot" style="padding:40px;text-align:center;color:var(--text-dim)">Inapakia Workplace…</div></div>
+<div id="toast-host"></div>
+<div id="modal-host"></div>
 <script>
-/* ================================================================
-   FIRE REPORT – WORKPLACE  (workspace.html) — v2
-   Auto sign-in: reads current user from CloudSync (login.html flow).
-   NO local placeholder user, NO seeded sample officers.
-   All workplace data is stored in IndexedDB (namespaced `wb_*`).
-   ================================================================ */
-(function () {
 "use strict";
+(function(){
+/* =====================================================================
+ * FIRE REPORT – WORKPLACE (faili la kujitegemea)
+ * Hakuna maktaba ya nje. Inatumia Supabase REST/Auth/Storage/Realtime moja kwa moja.
+ * Haiandiki kwenye IndexedDB ya Fire Report (rescueReportDB) – inasoma tu
+ * ripoti kwa ajili ya kuzishiriki. Hifadhi yake yenyewe: fireWorkplaceDB.
+ * ===================================================================== */
+const SB_URL = "https://lovqecgjzispwdtooyph.supabase.co";
+const SB_KEY = "sb_publishable_TAEeEIAPg6y7GMs8_rRnKg_oiszo1N9"; // publishable (anon) key – si siri
+const FILE_BUCKET = "workplace-files";
+const MAX_FILE = 10 * 1024 * 1024;
+const PAGE = 20;
 
-/* ---------------------------------------------------------------
-   0) Helpers
-   --------------------------------------------------------------- */
-const $  = (s, r) => (r || document).querySelector(s);
-const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
-const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
-  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
-const uid = (p) => (p||"wb") + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
-const now = () => new Date().toISOString();
-const fmtDate = (iso) => {
-  if (!iso) return "–";
-  const d = new Date(iso); if (isNaN(d)) return iso;
-  return d.toLocaleDateString() + " " + d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+/* ---------- utils ---------- */
+const LS = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} },
 };
-const fmtShort = (iso) => {
-  if (!iso) return "–";
-  const d = new Date(iso); if (isNaN(d)) return iso;
-  return d.toLocaleDateString();
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const uuid = () => (crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => { const r = (Math.random() * 16) | 0; return (c === "x" ? r : (r & 3) | 8).toString(16); }));
+const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const safeName = (n) => String(n || "faili").replace(/[^\w.\-]+/g, "_").slice(-80);
+const initials = (n) => String(n || "?").trim().split(/\s+/).slice(0, 2).map((w) => w[0] || "").join("").toUpperCase() || "?";
+const pad = (n) => String(n).padStart(2, "0");
+function fmtDate(d) { if (!d) return "-"; const x = new Date(d); return isNaN(x) ? "-" : `${pad(x.getDate())}/${pad(x.getMonth() + 1)}/${x.getFullYear()}`; }
+function fmtDT(d) { if (!d) return "-"; const x = new Date(d); return isNaN(x) ? "-" : `${fmtDate(x)} ${pad(x.getHours())}:${pad(x.getMinutes())}`; }
+function fmtTime(d) { const x = new Date(d); return `${pad(x.getHours())}:${pad(x.getMinutes())}`; }
+function ago(d) {
+  const s = (Date.now() - new Date(d).getTime()) / 1000;
+  if (s < 45) return "sasa hivi"; if (s < 3600) return `dak ${Math.round(s / 60)}`;
+  if (s < 86400) return `saa ${Math.round(s / 3600)}`; if (s < 86400 * 7) return `siku ${Math.round(s / 86400)}`;
+  return fmtDate(d);
+}
+const sameJson = (a, b) => JSON.stringify(a == null ? null : a) === JSON.stringify(b == null ? null : b);
+
+const TASK_STATUS = { pending: ["Inasubiri", "b-warn"], accepted: ["Imekubaliwa", "b-info"], in_progress: ["Inaendelea", "b-info"], under_review: ["Inakaguliwa", "b-warn"], completed: ["Imekamilika", "b-ok"], rejected: ["Imekataliwa", "b-bad"] };
+const PRIORITY = { low: "Chini", medium: "Wastani", high: "Juu", critical: "Dharura" };
+const APPROVAL = { draft: ["Rasimu", ""], submitted: ["Imetumwa", "b-info"], under_review: ["Inakaguliwa", "b-warn"], changes_requested: ["Marekebisho", "b-warn"], approved: ["Imeidhinishwa", "b-ok"], rejected: ["Imekataliwa", "b-bad"] };
+const PERMS = { viewer: "Viewer – kuangalia", contributor: "Contributor – kuchangia", editor: "Editor – kuhariri", reviewer: "Reviewer – kukagua", supervisor: "Supervisor – kuidhinisha" };
+const VIS = { public: "Public (wazi)", private: "Private (ombi la kujiunga)", invite: "Invitation Only (mwaliko)" };
+const NAV = [
+  ["overview", "🏠", "Overview"], ["network", "🌐", "Network"], ["profile", "👤", "My Profile"], ["workspaces", "🧩", "Workspaces"],
+  ["reports", "📄", "Shared Reports"], ["messages", "💬", "Messages"], ["tasks", "✅", "My Tasks"], ["groups", "👥", "Groups"],
+  ["feed", "📰", "Activity Feed"], ["notifications", "🔔", "Notifications"],
+];
+
+/* ---------- global state ---------- */
+const S = {
+  session: null, me: null, myPrivate: null, route: {}, rid: 0, stale: false,
+  following: new Set(), followers: new Set(), pcache: new Map(), badges: { messages: 0, tasks: 0, notifications: 0 },
+  rt: "off", lastSync: null, fileUrls: new Map(), roles: [], convUnread: {}, openConv: null,
 };
 
+/* ---------- toast / modal ---------- */
 function toast(msg, kind) {
-  const el = $("#toast");
-  el.textContent = msg;
-  el.className = (kind || "") + " show";
-  clearTimeout(el._t);
-  el._t = setTimeout(() => el.className = (kind||""), 2600);
+  const host = $("#toast-host"); const t = document.createElement("div");
+  t.className = "toast " + (kind || ""); t.textContent = msg; host.appendChild(t);
+  setTimeout(() => t.remove(), kind === "err" ? 4800 : 2800);
+}
+function openModal(html, mount) {
+  const host = $("#modal-host");
+  host.innerHTML = `<div class="modal-backdrop" data-act="backdrop"><div class="modal" role="dialog">${html}</div></div>`;
+  const m = $(".modal", host); if (mount) mount(m); return m;
+}
+function closeModal() { $("#modal-host").innerHTML = ""; }
+function confirmBox(msg, okLabel = "Ndiyo", danger = false) {
+  return new Promise((res) => {
+    openModal(`<h3>Thibitisha</h3><p class="dim">${esc(msg)}</p><div class="btn-row"><button class="btn ${danger ? "btn-danger" : "btn-primary"}" data-act="cf-yes">${esc(okLabel)}</button><button class="btn btn-ghost" data-act="cf-no">Ghairi</button></div>`);
+    S._cf = res;
+  });
+}
+function needOnline() { if (navigator.onLine) return true; toast("Kitendo hiki kinahitaji mtandao", "err"); return false; }
+function fail(e) {
+  console.error(e);
+  if (e instanceof ApiError) toast(e.message || "Hitilafu", "err");
+  else toast("Hakuna mtandao au seva haipatikani. Jaribu tena.", "err");
 }
 
-/* ---------------------------------------------------------------
-   1) IndexedDB layer (namespaced `wb_*`)
-   --------------------------------------------------------------- */
-const WB = (function () {
-  const DB_NAME = "fire_workplace_db";
-  const DB_VER  = 1;
-  const STORES = [
-    "wb_profiles", "wb_follows", "wb_workspaces", "wb_ws_members",
-    "wb_ws_invites", "wb_shared_reports", "wb_tasks",
-    "wb_conversations", "wb_messages", "wb_groups",
-    "wb_notifications", "wb_activity", "wb_sync_queue"
-  ];
-  let db = null;
-
+/* ---------- own IndexedDB (cache, outbox, kv) ---------- */
+const WDB = (function () {
+  let p = null; const mem = {};
   function open() {
-    if (db) return Promise.resolve(db);
-    return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, DB_VER);
-      req.onupgradeneeded = (e) => {
+    if (p) return p;
+    p = new Promise((res, rej) => {
+      const r = indexedDB.open("fireWorkplaceDB", 1);
+      r.onupgradeneeded = (e) => {
         const d = e.target.result;
-        STORES.forEach((name) => {
-          if (!d.objectStoreNames.contains(name)) {
-            const store = d.createObjectStore(name, { keyPath: "id" });
-            if (name === "wb_follows") {
-              store.createIndex("follower",  "followerId");
-              store.createIndex("following", "followingId");
-            }
-            if (name === "wb_ws_members") {
-              store.createIndex("workspace", "workspaceId");
-              store.createIndex("user",      "userId");
-            }
-            if (name === "wb_messages") {
-              store.createIndex("conversation", "conversationId");
-            }
-            if (name === "wb_tasks") {
-              store.createIndex("assignee", "assignedTo");
-              store.createIndex("workspace", "workspaceId");
-            }
-            if (name === "wb_notifications") {
-              store.createIndex("user", "userId");
-            }
-          }
-        });
+        if (!d.objectStoreNames.contains("cache")) d.createObjectStore("cache", { keyPath: "k" });
+        if (!d.objectStoreNames.contains("kv")) d.createObjectStore("kv", { keyPath: "k" });
+        if (!d.objectStoreNames.contains("outbox")) d.createObjectStore("outbox", { keyPath: "id" });
       };
-      req.onsuccess = () => { db = req.result; resolve(db); };
-      req.onerror   = () => reject(req.error);
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
     });
+    return p;
   }
-
-  function tx(storeName, mode) {
-    return open().then((d) => d.transaction(storeName, mode || "readonly").objectStore(storeName));
-  }
-  const wrap = (req) => new Promise((res, rej) => {
-    req.onsuccess = () => res(req.result);
-    req.onerror   = () => rej(req.error);
-  });
-
-  return {
-    async getAll(store)        { return wrap((await tx(store)).getAll()); },
-    async get(store, id)       { return wrap((await tx(store)).get(id)); },
-    async put(store, obj)      { return wrap((await tx(store, "readwrite")).put(obj)); },
-    async del(store, id)       { return wrap((await tx(store, "readwrite")).delete(id)); },
-    async byIndex(store, idxName, value) {
-      const s = await tx(store);
-      return wrap(s.index(idxName).getAll(value));
+  async function run(store, mode, fn) {
+    try {
+      const d = await open();
+      return await new Promise((res, rej) => {
+        const t = d.transaction(store, mode); const o = t.objectStore(store); let out; const rq = fn(o);
+        if (rq) rq.onsuccess = () => (out = rq.result);
+        t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+      });
+    } catch (e) { // IndexedDB haipatikani: tumia kumbukumbu ya muda
+      mem[store] = mem[store] || {};
+      const o = { get: (k) => ({ set onsuccess(f) { this.result = mem[store][k]; f(); } }) };
+      if (fn.toString().includes("getAll")) return Object.values(mem[store]);
+      return undefined;
     }
+  }
+  return {
+    get: (s, k) => run(s, "readonly", (o) => o.get(k)),
+    put: (s, v) => run(s, "readwrite", (o) => o.put(v)),
+    del: (s, k) => run(s, "readwrite", (o) => o.delete(k)),
+    all: (s) => run(s, "readonly", (o) => o.getAll()),
   };
 })();
+const kvGet = async (k) => { const r = await WDB.get("kv", k); return r ? r.v : null; };
+const kvSet = (k, v) => WDB.put("kv", { k, v });
+async function cachePut(key, v) { try { await WDB.put("cache", { k: key, v, t: Date.now() }); } catch (e) {} }
+async function cacheGet(key) { try { return await WDB.get("cache", key); } catch (e) { return null; } }
 
-/* ---------------------------------------------------------------
-   2) Session — auto sign-in from CloudSync (login.html already did auth)
-   --------------------------------------------------------------- */
-const Session = {
-  user: null,
-  async load() {
-    // 1) Try CloudSync directly (login.html + cloud-sync.js)
-    let cu = null;
+/* ---------- read-only access to Fire Report's own DB (for sharing / settings) ---------- */
+function openRescueDB() {
+  return new Promise((res) => {
     try {
-      if (window.CloudSync) {
-        if (typeof CloudSync.currentUser === "function") {
-          cu = await CloudSync.currentUser();
-        } else if (CloudSync.currentUser) {
-          cu = CloudSync.currentUser;
+      const r = indexedDB.open("rescueReportDB"); // bila version: haibadilishi schema
+      r.onupgradeneeded = (e) => { try { e.target.transaction.abort(); } catch (_) {} }; // DB haipo: usiiunde
+      r.onsuccess = () => { const db = r.result; if (!db.objectStoreNames.contains("reports")) { db.close(); res(null); } else res(db); };
+      r.onerror = () => res(null); r.onblocked = () => res(null);
+    } catch (e) { res(null); }
+  });
+}
+async function localReports() {
+  const db = await openRescueDB(); if (!db) return [];
+  return new Promise((res) => {
+    try {
+      const rq = db.transaction("reports", "readonly").objectStore("reports").getAll();
+      rq.onsuccess = () => { db.close(); res((rq.result || []).sort((a, b) => String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")))); };
+      rq.onerror = () => { db.close(); res([]); };
+    } catch (e) { db.close(); res([]); }
+  });
+}
+async function localSetting(key) {
+  const db = await openRescueDB(); if (!db || !db.objectStoreNames.contains("settings")) return null;
+  return new Promise((res) => {
+    try {
+      const rq = db.transaction("settings", "readonly").objectStore("settings").get(key);
+      rq.onsuccess = () => { db.close(); res(rq.result ? rq.result.value : null); };
+      rq.onerror = () => { db.close(); res(null); };
+    } catch (e) { db.close(); res(null); }
+  });
+}
+
+/* ---------- HTTP / API ---------- */
+class ApiError extends Error { constructor(m, status, code, raw) { super(m); this.status = status; this.code = code; this.raw = raw; } }
+const isNetErr = (e) => !(e instanceof ApiError);
+function cleanMsg(msg) {
+  if (!msg) return "Hitilafu isiyojulikana";
+  const m = String(msg).match(/^([A-Z_]{4,})(?::(.*))?$/s);
+  if (m) { if (m[1] === "CONFLICT") return "Ripoti imebadilishwa na mtu mwingine"; if (m[2] && m[2].trim()) return m[2].trim(); }
+  const m2 = String(msg).match(/^[A-Z_]{4,}: (.*)$/s); if (m2) return m2[1];
+  if (/row-level security/i.test(msg)) return "Huna ruhusa ya kufanya kitendo hiki";
+  if (/duplicate key/i.test(msg)) return "Tayari ipo";
+  return msg;
+}
+function getSess() { try { return JSON.parse(LS.get("fw_session") || "null"); } catch (e) { return null; } }
+function setSess(s) { S.session = s; if (s) LS.set("fw_session", JSON.stringify(s)); else LS.del("fw_session"); }
+const normSess = (d) => ({ access_token: d.access_token, refresh_token: d.refresh_token, expires_at: d.expires_at || Math.floor(Date.now() / 1000) + (d.expires_in || 3600), user: d.user });
+let refreshing = null;
+function refreshSession() {
+  if (refreshing) return refreshing;
+  refreshing = (async () => {
+    const s = S.session || getSess(); if (!s || !s.refresh_token) return false;
+    try {
+      const d = await http("/auth/v1/token?grant_type=refresh_token", { method: "POST", auth: false, body: { refresh_token: s.refresh_token } });
+      setSess(normSess(d)); RT.sendToken(); return true;
+    } catch (e) { if (e instanceof ApiError) { setSess(null); return false; } return false; }
+    finally { refreshing = null; }
+  })();
+  return refreshing;
+}
+async function validToken() {
+  const s = S.session; if (!s) return null;
+  if (s.expires_at - 60 < Date.now() / 1000 && navigator.onLine) await refreshSession();
+  return S.session ? S.session.access_token : null;
+}
+async function http(path, opt = {}) {
+  const url = path.startsWith("http") ? path : SB_URL + path;
+  let body = opt.body;
+  const headers = Object.assign({ apikey: SB_KEY }, opt.headers || {});
+  if (body !== undefined && !(body instanceof Blob) && !(body instanceof FormData) && typeof body !== "string") { headers["Content-Type"] = "application/json"; body = JSON.stringify(body); }
+  if (opt.prefer) headers.Prefer = opt.prefer;
+  if (opt.range) headers.Range = opt.range;
+  const send = async () => {
+    if (opt.auth !== false) headers.Authorization = "Bearer " + ((await validToken()) || SB_KEY);
+    else headers.Authorization = "Bearer " + SB_KEY;
+    return fetch(url, { method: opt.method || "GET", headers, body });
+  };
+  let res = await send();
+  if (res.status === 401 && opt.auth !== false) { if (await refreshSession()) res = await send(); else if (!S.session) { onSignedOut(); } }
+  const text = await res.text(); let data = null;
+  if (text) { try { data = JSON.parse(text); } catch (e) { data = text; } }
+  if (!res.ok) {
+    const msg = (data && (data.message || data.msg || data.error_description || data.error)) || res.statusText;
+    throw new ApiError(cleanMsg(msg), res.status, data && data.code, data);
+  }
+  return data;
+}
+const rest = (table, qs = "", opt = {}) => http(`/rest/v1/${table}${qs ? "?" + qs : ""}`, opt);
+const rpc = (fn, args = {}) => http(`/rest/v1/rpc/${fn}`, { method: "POST", body: args });
+const enc = encodeURIComponent;
+const inList = (ids) => "(" + ids.map((i) => `"${i}"`).join(",") + ")";
+
+async function cached(key, fn) {
+  const k = (S.session ? S.session.user.id : "x") + ":" + key;
+  if (!navigator.onLine) { const c = await cacheGet(k); if (c) { S.stale = true; paintBanner(); return c.v; } }
+  try { const v = await fn(); cachePut(k, v); if (S.stale) { S.stale = false; paintBanner(); } return v; }
+  catch (e) { if (isNetErr(e)) { const c = await cacheGet(k); if (c) { S.stale = true; paintBanner(); return c.v; } } throw e; }
+}
+
+/* ---------- storage (files) ---------- */
+async function uploadFile(path, blob, type) {
+  if (blob.size > MAX_FILE) throw new ApiError("Faili ni kubwa kuliko MB 10");
+  await http(`/storage/v1/object/${FILE_BUCKET}/${path.split("/").map(enc).join("/")}`, { method: "POST", body: blob, headers: { "Content-Type": type || blob.type || "application/octet-stream", "x-upsert": "true" } });
+}
+async function signedUrl(path) {
+  const c = S.fileUrls.get(path); if (c && c.exp > Date.now()) return c.url;
+  const d = await http(`/storage/v1/object/sign/${FILE_BUCKET}/${path.split("/").map(enc).join("/")}`, { method: "POST", body: { expiresIn: 3600 } });
+  const url = SB_URL + "/storage/v1" + d.signedURL;
+  S.fileUrls.set(path, { url, exp: Date.now() + 3000 * 1000 }); return url;
+}
+async function hydrateFiles(root) {
+  const els = $$("[data-fpath]", root || document);
+  for (const el of els) {
+    if (el.dataset.loaded) continue; el.dataset.loaded = "1";
+    signedUrl(el.dataset.fpath).then((u) => { el.src = u; }).catch(() => { el.alt = "Picha haipatikani"; });
+  }
+}
+function compressImage(file, max = 1280, q = 0.8) {
+  return new Promise((res, rej) => {
+    if (!/^image\//.test(file.type) || /gif|svg/.test(file.type)) return res(file);
+    const img = new Image(); const u = URL.createObjectURL(file);
+    img.onload = () => {
+      let { width: w, height: h } = img; const k = Math.min(1, max / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+      const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").drawImage(img, 0, 0, w, h);
+      c.toBlob((b) => { URL.revokeObjectURL(u); if (!b) return res(file); const out = new File([b], safeName(file.name).replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }); res(out.size < file.size ? out : file); }, "image/jpeg", q);
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); res(file); };
+    img.src = u;
+  });
+}
+function imageToDataUrl(file, size = 220) {
+  return new Promise((res, rej) => {
+    const img = new Image(); const u = URL.createObjectURL(file);
+    img.onload = () => {
+      const c = document.createElement("canvas"); c.width = size; c.height = size; const x = c.getContext("2d");
+      const s = Math.min(img.width, img.height); x.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
+      URL.revokeObjectURL(u); res(c.toDataURL("image/jpeg", 0.78));
+    };
+    img.onerror = () => { URL.revokeObjectURL(u); rej(new Error("Picha haisomeki")); };
+    img.src = u;
+  });
+}
+
+/* ---------- auth ---------- */
+const Auth = {
+  async signIn(email, password) { const d = await http("/auth/v1/token?grant_type=password", { method: "POST", auth: false, body: { email, password } }); setSess(normSess(d)); },
+  async signUp(email, password, meta) {
+    const d = await http("/auth/v1/signup", { method: "POST", auth: false, body: { email, password, data: meta } });
+    if (d && d.access_token) { setSess(normSess(d)); return true; } return false;
+  },
+  async recover(email) { await http("/auth/v1/recover", { method: "POST", auth: false, body: { email } }); },
+  async signOut() { try { if (navigator.onLine) await http("/auth/v1/logout", { method: "POST" }); } catch (e) {} },
+};
+
+/* ---------- Host (Firebase) auto-login bridge ----------
+ * Workplace ikiwa ndani ya faili/ukurasa mwingine wenye Firebase login, haina haja ya kuingia upya.
+ * Host inatoa Firebase ID token (iframe: postMessage, au inline: window.FireReportHost.getIdToken).
+ * Token inatumwa kwenye Edge Function "firebase-bridge" (inaikagua kwenye seva) ambayo inarudisha
+ * kibali cha mara moja cha kupata session halisi ya Supabase. Hakuna siri yoyote kwenye frontend. */
+const BRIDGE_URL = SB_URL + "/functions/v1/firebase-bridge";
+const Host = {
+  inline() { return !!(window.FireReportHost && typeof window.FireReportHost.getIdToken === "function"); },
+  embedded: window.parent !== window,
+  get on() { return Host.inline() || Host.embedded; },
+  _wait: null,
+  async token(force) {
+    if (Host.inline()) { try { return (await window.FireReportHost.getIdToken(!!force)) || null; } catch (e) { return null; } }
+    if (!Host.embedded) return null;
+    return new Promise((res) => {
+      const t = setTimeout(() => { Host._wait = null; res(null); }, 6000);
+      Host._wait = (tok) => { clearTimeout(t); Host._wait = null; res(tok); };
+      try { window.parent.postMessage({ type: "fw-request-token", force: !!force }, "*"); } catch (e) { clearTimeout(t); Host._wait = null; res(null); }
+    });
+  },
+};
+const jwtSub = (t) => { try { return JSON.parse(atob(t.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).sub || null; } catch (e) { return null; } };
+async function bridgeLogin(idToken) {
+  const r = await http(BRIDGE_URL, { method: "POST", auth: false, body: { idToken } });
+  const d = await http("/auth/v1/verify", { method: "POST", auth: false, body: { type: r.type || "magiclink", token_hash: r.token_hash } });
+  setSess(normSess(d)); LS.set("fw_bridge", jwtSub(idToken) || ""); return true;
+}
+window.addEventListener("message", (e) => {
+  if (e.source !== window.parent || !e.data || typeof e.data !== "object") return;
+  if (e.data.type === "fw-token") { if (Host._wait) Host._wait(e.data.idToken || null); else if (e.data.idToken) hostTokenPushed(e.data.idToken); }
+  else if (e.data.type === "fw-signout") hostSignedOut();
+});
+
+/* ---------- outbox (offline queue) ---------- */
+const OB = {
+  busy: false, counts: { pending: 0, failed: 0 },
+  async add(op, payload) {
+    const item = { id: uuid(), op, payload, created: Date.now(), tries: 0, status: "pending", error: null };
+    await WDB.put("outbox", item); await OB.recount(); await OB.kick(); return item;
+  },
+  async list() { return ((await WDB.all("outbox")) || []).sort((a, b) => a.created - b.created); },
+  async recount() { const l = await OB.list(); OB.counts = { pending: l.filter((i) => i.status === "pending").length, failed: l.filter((i) => i.status === "failed").length }; paintSync(); return l; },
+  async exec(it) {
+    const p = it.payload, uid = S.session.user.id;
+    if (it.op === "message" || it.op === "comment") {
+      const row = Object.assign({}, p.row);
+      if (p.file) {
+        const path = `${uid}/${it.id}-${safeName(p.file.name)}`;
+        await uploadFile(path, p.file.blob, p.file.type);
+        row.attachment_path = path; row.attachment_name = p.file.name; if (it.op === "message") row.attachment_type = p.file.type;
+      }
+      row.client_id = it.id;
+      await rest(it.op === "message" ? "messages" : "report_comments", "", { method: "POST", body: row, prefer: "return=minimal" });
+    } else if (it.op === "task") {
+      try { await rest("tasks", "", { method: "POST", body: p.row, prefer: "return=minimal" }); }
+      catch (e) { if (!(e instanceof ApiError && e.status === 409)) throw e; }
+      for (const f of p.files || []) {
+        const path = `${uid}/${f.id}-${safeName(f.name)}`;
+        await uploadFile(path, f.blob, f.type);
+        try { await rest("task_attachments", "", { method: "POST", body: { id: f.id, task_id: p.row.id, name: f.name, path, mime: f.type }, prefer: "return=minimal" }); }
+        catch (e) { if (!(e instanceof ApiError && e.status === 409)) throw e; }
+      }
+    } else if (it.op === "taskupdate") {
+      await rest("tasks", `id=eq.${p.id}`, { method: "PATCH", body: p.patch, prefer: "return=minimal" });
+    } else if (it.op === "workspace") {
+      await rest("workspaces", "", { method: "POST", body: p.row, prefer: "return=minimal" });
+    } else throw new ApiError("Aina ya kazi haijulikani");
+  },
+  async kick() {
+    if (OB.busy || !navigator.onLine || !S.session) return;
+    OB.busy = true; let done = 0;
+    try {
+      const items = await OB.list();
+      for (const it of items) {
+        if (it.status === "failed") continue;
+        try { await OB.exec(it); await WDB.del("outbox", it.id); done++; OB.afterOne(it); }
+        catch (e) {
+          if (isNetErr(e)) break;
+          if (e.status === 409 || e.code === "23505") { await WDB.del("outbox", it.id); done++; continue; }
+          it.status = "failed"; it.error = e.message; it.tries++; await WDB.put("outbox", it);
         }
       }
-    } catch (e) { console.warn("CloudSync.currentUser failed:", e); }
-
-    // 2) Fallback: read cached user from localStorage (written by cloud-sync.js)
-    if (!cu || !cu.email) {
-      try {
-        const cached = JSON.parse(localStorage.getItem("rescueCloudUser") || "null");
-        if (cached && cached.email) cu = cached;
-      } catch (e) {}
-    }
-
-    // 3) No user → return null (page will show auth gate)
-    if (!cu || !cu.email) {
-      this.user = null;
-      return null;
-    }
-
-    // 4) Build session user (stable id derived from email)
-    const id = "u-" + btoa(cu.email).replace(/=/g,"").replace(/[+/]/g, "_");
-    this.user = {
-      id,
-      email: cu.email,
-      raw: cu
-    };
-
-    // 5) Ensure a profile record exists (create once from email)
-    let prof = await WB.get("wb_profiles", id);
-    if (!prof) {
-      prof = {
-        id,
-        email: cu.email,
-        fullName: (cu.email.split("@")[0] || "Officer")
-          .replace(/[._-]+/g, " ")
-          .replace(/\b\w/g, (m) => m.toUpperCase()),
-        rank: "", station: "", region: "",
-        serviceNumber: "", skills: [], bio: "",
-        joinedAt: now(), avatarEmoji: "🧑‍🚒"
-      };
-      await WB.put("wb_profiles", prof);
-    }
-    return this.user;
-  }
-};
-
-/* ---------------------------------------------------------------
-   3) Backend status banner
-   --------------------------------------------------------------- */
-const BACKEND = {
-  mode() {
-    if (window.CloudSync && Session.user && !Session.user.raw?.isLocal) return "cloud";
-    return "local-fallback";
+      if (done) { S.lastSync = Date.now(); await kvSet("lastSync", S.lastSync); }
+    } finally { OB.busy = false; await OB.recount(); if (done) refreshView(); }
   },
-  label() {
-    if (!navigator.onLine) {
-      return { cls:"offline", txt:"Offline — mabadiliko yanahifadhiwa kwenye kifaa" };
-    }
-    const m = this.mode();
-    if (m === "cloud") {
-      return { cls:"online", txt:"Imeunganishwa kama " + (Session.user?.email || "") };
-    }
-    return { cls:"local", txt:"Data inahifadhiwa kwenye kifaa hiki (IndexedDB). Sync ya wakati mmoja itahitaji Supabase." };
-  }
+  afterOne(it) {
+    const lbl = { message: "Ujumbe umethibitishwa na seva", task: "Jukumu limetumwa", taskupdate: "Mabadiliko ya jukumu yamehifadhiwa", workspace: "Workspace imeundwa", comment: "Maoni yametumwa" }[it.op];
+    if (lbl && it.op !== "message") toast(lbl, "ok");
+  },
 };
-function syncBanner() {
-  const s = BACKEND.label();
-  return `<div class="sync-banner ${s.cls}">${esc(s.txt)}</div>`;
-}
 
-/* ---------------------------------------------------------------
-   4) Router
-   --------------------------------------------------------------- */
-const routes = {};
-function register(name, fn) { routes[name] = fn; }
-function navigate(r) {
-  if (location.hash === "#/" + r) render();
-  else location.hash = "#/" + r;
-}
-function currentRoute() {
-  const h = location.hash.slice(1) || "/overview";
-  return h.split("/")[1] || "overview";
-}
+/* ---------- realtime (Supabase Realtime kupitia WebSocket, bila maktaba) ---------- */
+const RT = {
+  ws: null, ref: 0, hb: null, retry: 0, stopped: true,
+  topic: "realtime:fw",
+  send(o) { if (RT.ws && RT.ws.readyState === 1) RT.ws.send(JSON.stringify(Object.assign({ ref: String(++RT.ref) }, o))); },
+  sendToken() { if (RT.ws && RT.ws.readyState === 1 && S.session) RT.send({ topic: RT.topic, event: "access_token", payload: { access_token: S.session.access_token } }); },
+  connect() {
+    if (!S.session || RT.ws || !navigator.onLine) return; RT.stopped = false;
+    let ws; try { ws = new WebSocket(SB_URL.replace(/^http/, "ws") + `/realtime/v1/websocket?apikey=${SB_KEY}&vsn=1.0.0`); } catch (e) { return; }
+    RT.ws = ws;
+    ws.onopen = () => {
+      RT.retry = 0;
+      const ch = (table, event = "*") => ({ event, schema: "public", table });
+      RT.send({ topic: RT.topic, event: "phx_join", payload: { config: { broadcast: { ack: false, self: false }, presence: { key: "" }, private: false,
+        postgres_changes: [ch("messages"), ch("notifications", "INSERT"), ch("conversation_members", "UPDATE"), ch("tasks"), ch("workspace_invitations", "INSERT")] },
+        access_token: S.session.access_token } });
+      clearInterval(RT.hb); RT.hb = setInterval(() => RT.send({ topic: "phoenix", event: "heartbeat", payload: {} }), 25000);
+    };
+    ws.onmessage = (ev) => {
+      let m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      if (m.event === "phx_reply" && m.topic === RT.topic) { RT.setState(m.payload && m.payload.status === "ok" ? "live" : "off"); }
+      else if (m.event === "postgres_changes" && m.payload && m.payload.data) { const d = m.payload.data; try { handleRealtime(d.table, d.type, d.record || {}, d.old_record || {}); } catch (e) { console.error(e); } }
+    };
+    ws.onclose = () => { clearInterval(RT.hb); RT.ws = null; RT.setState("off"); if (!RT.stopped && S.session) setTimeout(RT.connect, Math.min(30000, 1000 * 2 ** Math.min(RT.retry++, 5))); };
+    ws.onerror = () => { try { ws.close(); } catch (e) {} };
+  },
+  stop() { RT.stopped = true; clearInterval(RT.hb); try { if (RT.ws) RT.ws.close(); } catch (e) {} RT.ws = null; RT.setState("off"); },
+  setState(s) { S.rt = s; paintSync(); },
+};
 
-window.addEventListener("hashchange", render);
-function render() {
-  // If not signed in, show auth gate and stop
-  if (!Session.user) {
-    renderAuthGate();
-    return;
-  }
-  $("#bottom-nav").hidden = false;
+/* =====================================================================
+ * SHELL, ROUTER, AUTH, PROFILES, FOLLOW, OVERVIEW, NETWORK, MY PROFILE
+ * ===================================================================== */
+const A = {};   // actions   (data-act="...")
+const F = {};   // forms     (data-form="...")
+const VIEWS = {};
 
-  State.route = currentRoute();
-  $$("#bottom-nav button").forEach((b) => {
-    const r = b.dataset.route;
-    const active = r === State.route ||
-      (r === "more" && ["profile","groups","activity","notifications","settings"].includes(State.route));
-    b.classList.toggle("active", active);
-  });
-  const fn = routes[State.route] || routes.overview;
-  const view = $("#view");
-  view.innerHTML = '<div class="hint">Inapakia…</div>';
-  Promise.resolve(fn()).catch((e) => {
-    console.error(e);
-    view.innerHTML = `<div class="card"><div class="card-title">Hitilafu</div>
-      <p class="muted">Ukurasa haukupakia: ${esc(e.message||"")}</p>
-      <button class="btn block" onclick="location.reload()">Pakia upya</button></div>`;
-  });
-  updateBadges();
-}
-
-function renderAuthGate() {
-  $("#bottom-nav").hidden = true;
-  $("#view").innerHTML = `
-    <div class="auth-gate">
-      <div class="big">🔒</div>
-      <h2>Ingia kwanza</h2>
-      <p>Workplace inahitaji akaunti. Tafadhali ingia kupitia ukurasa wa Akaunti, kisha rudi hapa.</p>
-      <button class="btn primary block" id="gate-login">Nenda kwenye Login</button>
-      <button class="btn block" id="gate-back" style="margin-top:8px;">Rudi kwenye App</button>
-    </div>`;
-  $("#gate-login").addEventListener("click", () => location.href = "login.html");
-  $("#gate-back").addEventListener("click", () => location.href = "index.html");
-}
-
-/* ---------------------------------------------------------------
-   5) State + badges
-   --------------------------------------------------------------- */
-const State = { route: "overview" };
-
-async function updateBadges() {
-  if (!Session.user) return;
-  try {
-    const notifs = (await WB.byIndex("wb_notifications","user",Session.user.id)).filter(n => !n.read);
-    const nb = $("#notif-badge");
-    if (notifs.length) { nb.textContent = notifs.length > 9 ? "9+" : notifs.length; nb.hidden = false; }
-    else nb.hidden = true;
-
-    const convs = (await WB.getAll("wb_conversations"))
-      .filter(c => (c.memberIds||[]).includes(Session.user.id));
-    let unread = 0;
-    for (const c of convs) {
-      const msgs = await WB.byIndex("wb_messages","conversation",c.id);
-      unread += msgs.filter(m => m.senderId !== Session.user.id && !(m.readBy||[]).includes(Session.user.id)).length;
-    }
-    const mb = $("#msg-badge");
-    if (unread) { mb.textContent = unread > 9 ? "9+" : unread; mb.hidden = false; }
-    else mb.hidden = true;
-  } catch (e) { /* ignore */ }
-}
-
-/* ---------------------------------------------------------------
-   6) ROUTE: Overview
-   --------------------------------------------------------------- */
-register("overview", async () => {
-  const me = Session.user;
-  const meProfile = await WB.get("wb_profiles", me.id);
-  const myFollows   = (await WB.byIndex("wb_follows","follower",me.id)).length;
-  const myFollowers = (await WB.byIndex("wb_follows","following",me.id)).length;
-
-  const wss = await WB.getAll("wb_workspaces");
-  let myWsCount = 0;
-  for (const w of wss) {
-    const mem = await WB.byIndex("wb_ws_members","workspace",w.id);
-    if (mem.some(m => m.userId === me.id)) myWsCount++;
-  }
-
-  const myOpenTasks = (await WB.byIndex("wb_tasks","assignee",me.id))
-    .filter(t => t.status !== "Completed" && t.status !== "Rejected").length;
-
-  const notifs = (await WB.byIndex("wb_notifications","user",me.id)).filter(n => !n.read);
-
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card" style="display:flex;align-items:center;gap:12px;">
-      <div class="avatar" style="width:52px;height:52px;font-size:22px;">${esc(meProfile.avatarEmoji || "🧑‍🚒")}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-weight:700;">${esc(meProfile.fullName)}</div>
-        <div class="muted" style="font-size:12px;">
-          ${esc(meProfile.rank || "Fire Officer")}${meProfile.station ? " · " + esc(meProfile.station) : ""}
-        </div>
-        <div class="muted" style="font-size:11px;">${esc(me.email)}</div>
-      </div>
-      <button class="btn sm" data-nav="profile">Profile</button>
-    </div>
-
-    <div class="stat-grid">
-      <div class="stat-box"><div class="num">${myFollows}</div><div class="label">Following</div></div>
-      <div class="stat-box"><div class="num">${myFollowers}</div><div class="label">Followers</div></div>
-      <div class="stat-box"><div class="num">${myWsCount}</div><div class="label">Workspaces</div></div>
-      <div class="stat-box"><div class="num">${myOpenTasks}</div><div class="label">Open Tasks</div></div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Quick Actions</div>
-      <div class="btn-row">
-        <button class="btn primary" data-action="new-workspace">➕ Workspace</button>
-        <button class="btn" data-action="new-task">✅ Task</button>
-        <button class="btn" data-nav="network">👥 Find Officers</button>
-        <button class="btn" data-nav="messages">💬 Messages</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Recent Activity</div>
-      <div id="feed-mini">${await miniFeedHtml()}</div>
-    </div>
-
-    ${notifs.length ? `<div class="card">
-      <div class="card-title">Notifications (${notifs.length})</div>
-      ${notifs.slice(0,3).map(n => `<div class="list-item" data-notif="${esc(n.id)}">
-        <div class="name">${esc(n.title)}</div>
-        <div class="meta">${esc(n.body||"")} · ${fmtDate(n.at)}</div>
-      </div>`).join("")}
-    </div>` : ""}
-  `;
-  bindCommon($("#view"));
-});
-
-async function miniFeedHtml() {
-  const acts = (await WB.getAll("wb_activity")).sort((a,b) => b.at.localeCompare(a.at)).slice(0,5);
-  if (!acts.length) return '<div class="hint">Hakuna shughuli bado. Anza kuunda workspace au kufuata maafisa.</div>';
-  return acts.map(a => `<div class="list-item">
-    <div class="name">${esc(a.text)}</div>
-    <div class="meta">${fmtDate(a.at)}</div>
-  </div>`).join("");
-}
-
-/* ---------------------------------------------------------------
-   7) ROUTE: Network (Follow)
-   --------------------------------------------------------------- */
-register("network", async () => {
-  const me = Session.user;
-  const allProfiles = (await WB.getAll("wb_profiles")).filter(p => p.id !== me.id);
-  const myFollows = new Set((await WB.byIndex("wb_follows","follower",me.id)).map(f => f.followingId));
-
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="tabs" id="net-tabs">
-      <button class="active" data-tab="search">Search Officers</button>
-      <button data-tab="following">Following</button>
-      <button data-tab="followers">Followers</button>
-    </div>
-    <div id="net-body"></div>
-  `;
-
-  function renderSearch(q) {
-    q = (q||"").trim().toLowerCase();
-    const list = allProfiles.filter(p => {
-      if (!q) return true;
-      const hay = [p.fullName,p.rank,p.station,p.region,(p.skills||[]).join(" ")].join(" ").toLowerCase();
-      return hay.includes(q);
-    });
-    $("#net-body").innerHTML = `
-      <div class="search-bar"><input id="net-search" placeholder="Tafuta jina, kituo, mkoa, utaalamu…" value="${esc(q)}"></div>
-      ${list.length
-        ? list.map(p => officerCardHtml(p, myFollows.has(p.id))).join("")
-        : '<div class="hint">Hakuna maafisa waliofanana na utafutaji wako. Maafisa wataonekana hapa baada ya kujiunga na wakafuata network.</div>'}
-    `;
-    const inp = $("#net-search");
-    let t;
-    inp.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => renderSearch(inp.value), 220); });
-    $$("[data-follow]").forEach(b => b.addEventListener("click", () => toggleFollow(b.dataset.follow)));
-  }
-
-  async function renderFollowing() {
-    const ids = [...myFollows];
-    const list = allProfiles.filter(p => ids.includes(p.id));
-    $("#net-body").innerHTML = list.length
-      ? list.map(p => officerCardHtml(p, true)).join("")
-      : '<div class="hint">Haujachagua mtu yeyote bado. Tumia "Search Officers".</div>';
-    $$("[data-follow]").forEach(b => b.addEventListener("click", () => toggleFollow(b.dataset.follow)));
-  }
-
-  async function renderFollowers() {
-    const ids = (await WB.byIndex("wb_follows","following",me.id)).map(f => f.followerId);
-    const list = allProfiles.filter(p => ids.includes(p.id));
-    $("#net-body").innerHTML = list.length
-      ? list.map(p => officerCardHtml(p, myFollows.has(p.id))).join("")
-      : '<div class="hint">Hakuna anayekufuata bado.</div>';
-    $$("[data-follow]").forEach(b => b.addEventListener("click", () => toggleFollow(b.dataset.follow)));
-  }
-
-  async function toggleFollow(targetId) {
-    if (targetId === me.id) return toast("Hauwezi kujifuata mwenyewe","err");
-    const existing = (await WB.byIndex("wb_follows","follower",me.id))
-      .find(x => x.followingId === targetId);
-    if (existing) {
-      await WB.del("wb_follows", existing.id);
-      toast("Umekoma kumfuata","ok");
-    } else {
-      await WB.put("wb_follows", {
-        id: uid("f"), followerId: me.id, followingId: targetId, createdAt: now()
-      });
-      // Notify target
-      await pushNotification(targetId, "follow", "Mfuasi mpya", `${me.email} amekufuata`, "#/network");
-      toast("Umefuata afisa","ok");
-      addActivity("follow", `Umefuata afisa mpya`);
-    }
-    const active = $("#net-tabs .active").dataset.tab;
-    if (active === "search") renderSearch($("#net-search")?.value || "");
-    else if (active === "following") renderFollowing();
-    else renderFollowers();
-  }
-
-  $$("#net-tabs button").forEach(b => {
-    b.addEventListener("click", () => {
-      $$("#net-tabs button").forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
-      if (b.dataset.tab === "search") renderSearch("");
-      else if (b.dataset.tab === "following") renderFollowing();
-      else renderFollowers();
-    });
-  });
-  renderSearch("");
-});
-
-function officerCardHtml(p, isFollowing) {
-  const initials = (p.fullName||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
-  return `<div class="list-item">
-    <div class="row1">
-      <div class="avatar">${esc(initials)}</div>
-      <div style="flex:1;min-width:0;">
-        <div class="name">${esc(p.fullName)}</div>
-        <div class="meta">${esc(p.rank||"Officer")} · ${esc(p.station||"—")} · ${esc(p.region||"—")}</div>
-        <div class="meta" style="font-size:11px;">${(p.skills||[]).slice(0,3).map(s=>`<span class="pill info">${esc(s)}</span>`).join(" ")}</div>
-      </div>
-    </div>
-    <div class="btn-row" style="margin-top:8px;">
-      <button class="btn sm ${isFollowing?"":"primary"}" data-follow="${esc(p.id)}">${isFollowing?"✓ Following":"+ Follow"}</button>
-      <button class="btn sm" data-action="start-dm" data-id="${esc(p.id)}">💬 Message</button>
-    </div>
-  </div>`;
-}
-
-/* ---------------------------------------------------------------
-   8) ROUTE: Profile
-   --------------------------------------------------------------- */
-register("profile", async () => {
-  const me = Session.user;
-  const p = await WB.get("wb_profiles", me.id);
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">My Professional Profile</div>
-      <div class="field"><label>Avatar (emoji)</label>
-        <input id="pf-emoji" value="${esc(p.avatarEmoji||"🧑‍🚒")}" maxlength="4">
-      </div>
-      <div class="field"><label>Full Name</label>
-        <input id="pf-name" value="${esc(p.fullName||"")}">
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Rank / Position</label>
-          <input id="pf-rank" value="${esc(p.rank||"")}" placeholder="e.g. Fire Officer">
-        </div>
-        <div class="field"><label>Service Number</label>
-          <input id="pf-svc" value="${esc(p.serviceNumber||"")}">
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field"><label>Fire Station</label>
-          <input id="pf-station" value="${esc(p.station||"")}">
-        </div>
-        <div class="field"><label>Region</label>
-          <input id="pf-region" value="${esc(p.region||"")}">
-        </div>
-      </div>
-      <div class="field"><label>Skills (comma separated)</label>
-        <input id="pf-skills" value="${esc((p.skills||[]).join(", "))}">
-      </div>
-      <div class="field"><label>Professional Bio</label>
-        <textarea id="pf-bio">${esc(p.bio||"")}</textarea>
-      </div>
-      <button class="btn primary block" id="pf-save">💾 Hifadhi Profile</button>
-    </div>
-    <div class="card">
-      <div class="card-title">Akaunti</div>
-      <div class="row" style="padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:14px;">
-        <span class="muted">Email</span><strong>${esc(me.email)}</strong>
-      </div>
-      <div style="margin-top:10px;">
-        <button class="btn block" id="pf-logout">Toka kwenye Akaunti</button>
-      </div>
-    </div>
-  `;
-  $("#pf-save").addEventListener("click", async () => {
-    p.avatarEmoji = ($("#pf-emoji").value||"🧑‍🚒").trim().slice(0,4);
-    p.fullName    = $("#pf-name").value.trim();
-    p.rank        = $("#pf-rank").value.trim();
-    p.serviceNumber = $("#pf-svc").value.trim();
-    p.station     = $("#pf-station").value.trim();
-    p.region      = $("#pf-region").value.trim();
-    p.skills      = $("#pf-skills").value.split(",").map(s=>s.trim()).filter(Boolean);
-    p.bio         = $("#pf-bio").value.trim();
-    await WB.put("wb_profiles", p);
-    toast("Profile imehifadhiwa","ok");
-  });
-  $("#pf-logout").addEventListener("click", async () => {
-    if (!confirm("Toka kwenye akaunti? Data ya kifaa itabaki.")) return;
-    try {
-      if (window.CloudSync && CloudSync.signOut) await CloudSync.signOut();
-    } catch (e) {}
-    localStorage.removeItem("rescueCloudUser");
-    Session.user = null;
-    location.href = "login.html";
-  });
-});
-
-/* ---------------------------------------------------------------
-   9) ROUTE: Workspaces
-   --------------------------------------------------------------- */
-register("workspaces", async () => {
-  const me = Session.user;
-  const all = await WB.getAll("wb_workspaces");
-  const my = [];
-  for (const w of all) {
-    const members = await WB.byIndex("wb_ws_members","workspace",w.id);
-    if (members.some(m => m.userId === me.id)) my.push({ ...w, _members: members });
-  }
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">My Workspaces (${my.length})</div>
-      ${my.length ? my.map(w => workspaceCardHtml(w)).join("") : '<div class="hint">Bado hujaunda workspace. Bonyeza hapa chini.</div>'}
-    </div>
-    <button class="btn primary block" data-action="new-workspace">➕ Create Workspace</button>
-  `;
-  bindCommon($("#view"));
-});
-
-function workspaceCardHtml(w) {
-  const memberCount = (w._members||[]).length;
-  const isLeader = (w._members||[]).some(m => m.userId === Session.user.id && m.role === "leader");
-  return `<div class="list-item" data-ws="${esc(w.id)}">
-    <div class="name">${esc(w.name)} ${isLeader?'<span class="pill ok">Leader</span>':''}</div>
-    <div class="meta">${esc(w.description||"")}</div>
-    <div class="meta" style="font-size:11px;margin-top:4px;">👥 ${memberCount} members · Created ${fmtShort(w.createdAt)}</div>
-  </div>`;
-}
-
-/* ---------------------------------------------------------------
-   10) ROUTE: Shared Reports
-   --------------------------------------------------------------- */
-register("reports", async () => {
-  const me = Session.user;
-  const all = await WB.getAll("wb_shared_reports");
-  const sharedToMe = all.filter(r => r.sharedWith === me.id);
-  const sharedByMe = all.filter(r => r.ownerId === me.id);
-
-  let myReports = [];
-  try {
-    if (window.RescueDB && RescueDB.getAllReports) {
-      myReports = await RescueDB.getAllReports();
-    }
-  } catch (e) {}
-
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">Share a Report</div>
-      ${myReports.length ? `
-        <div class="field"><label>Chagua ripoti</label>
-          <select id="share-report-id">
-            ${myReports.map(r => `<option value="${esc(r.incidentId)}">${esc(r.reportNumber || r.incidentId)} — ${esc((r.incident&&r.incident.type)||"")}</option>`).join("")}
-          </select>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Officer ID/Email</label>
-            <input id="share-officer" placeholder="email ya afisa">
-          </div>
-          <div class="field"><label>Permission</label>
-            <select id="share-perm">
-              <option value="viewer">Viewer</option>
-              <option value="contributor">Contributor</option>
-              <option value="editor">Editor</option>
-              <option value="reviewer">Reviewer</option>
-              <option value="supervisor">Supervisor</option>
-            </select>
-          </div>
-        </div>
-        <button class="btn primary block" id="share-do">📤 Share Report</button>
-      ` : '<div class="hint">Hakuna ripoti kwenye kifaa bado. Unda ripoti kwenye app kuu kwanza.</div>'}
-    </div>
-
-    <div class="card">
-      <div class="card-title">Shared With Me (${sharedToMe.length})</div>
-      ${sharedToMe.length ? sharedToMe.map(r => `
-        <div class="list-item">
-          <div class="name">${esc(r.reportId)}</div>
-          <div class="meta">From ${esc(r.ownerId)} · <span class="pill info">${esc(r.permission)}</span></div>
-          <div class="meta" style="font-size:11px;">${fmtDate(r.createdAt)}</div>
-        </div>`).join("") : '<div class="hint">Hakuna ripoti iliyoshirikishwa na wewe bado.</div>'}
-    </div>
-
-    <div class="card">
-      <div class="card-title">Shared By Me (${sharedByMe.length})</div>
-      ${sharedByMe.length ? sharedByMe.map(r => `
-        <div class="list-item">
-          <div class="name">${esc(r.reportId)}</div>
-          <div class="meta">To ${esc(r.sharedWith)} · ${esc(r.permission)} · ${fmtDate(r.createdAt)}</div>
-        </div>`).join("") : '<div class="hint">Bado hujashirikisha ripoti yoyote.</div>'}
-    </div>
-  `;
-  const btn = $("#share-do");
-  if (btn) btn.addEventListener("click", async () => {
-    const reportId = $("#share-report-id").value;
-    const officerEmail = $("#share-officer").value.trim();
-    const perm = $("#share-perm").value;
-    if (!officerEmail) return toast("Andika email ya afisa","err");
-    const profiles = await WB.getAll("wb_profiles");
-    const target = profiles.find(p => p.email === officerEmail || p.id === officerEmail);
-    if (!target) return toast("Afisa hakupatikana. Hakikisha ameingia Workplace kwanza.","err");
-    if (target.id === me.id) return toast("Hauwezi kujishirikisha mwenyewe","err");
-    await WB.put("wb_shared_reports", {
-      id: uid("sh"), reportId, ownerId: me.id, sharedWith: target.id, permission: perm, createdAt: now()
-    });
-    await pushNotification(target.id, "shared_report", "Ripoti imeshirikishwa",
-      `${me.email} ameshirikisha ripoti ${reportId}`, "#/reports");
-    toast("Ripoti imeshirikishwa","ok");
-    render();
-  });
-});
-
-/* ---------------------------------------------------------------
-   11) ROUTE: Messages
-   --------------------------------------------------------------- */
-register("messages", async () => {
-  const me = Session.user;
-  const convs = (await WB.getAll("wb_conversations"))
-    .filter(c => (c.memberIds||[]).includes(me.id))
-    .sort((a,b) => (b.createdAt||"").localeCompare(a.createdAt||""));
-  const profiles = await WB.getAll("wb_profiles");
-  const nameOf = (id) => (profiles.find(p => p.id === id) || {}).fullName || id;
-
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">Conversations</div>
-      ${convs.length ? convs.map(c => {
-        const other = (c.memberIds||[]).find(id => id !== me.id);
-        return `<div class="list-item" data-conv="${esc(c.id)}">
-          <div class="name">${esc(c.name || nameOf(other))}</div>
-          <div class="meta">${esc(c.type)} · ${c.memberIds.length} members</div>
-        </div>`;
-      }).join("") : '<div class="hint">Hakuna mazungumzo bado. Anza kutoka Network → Message.</div>'}
-    </div>
-  `;
-  $$("[data-conv]").forEach(el => {
-    el.addEventListener("click", () => navigate("conversation/" + el.dataset.conv));
-  });
-});
-
-register("conversation", async () => {
-  const me = Session.user;
-  const convId = location.hash.split("/")[2];
-  if (!convId) return navigate("messages");
-  const conv = await WB.get("wb_conversations", convId);
-  if (!conv) return navigate("messages");
-  const msgs = (await WB.byIndex("wb_messages","conversation",convId))
-    .sort((a,b) => a.at.localeCompare(b.at));
-  const profiles = await WB.getAll("wb_profiles");
-  const nameOf = (id) => (profiles.find(p => p.id === id) || {}).fullName || id;
-
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card" style="min-height:200px;">
-      <div class="card-title">${esc(conv.name || "Conversation")}</div>
-      <div id="msg-list">${msgs.length ? msgs.map(m => msgBubbleHtml(m, me.id, nameOf(m.senderId))).join("") : '<div class="hint">Anza mazungumzo…</div>'}</div>
-      <div class="divider"></div>
-      <div style="display:flex;gap:6px;">
-        <input id="msg-input" placeholder="Andika ujumbe…" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:var(--field);color:var(--text);font:inherit;">
-        <button class="btn primary" id="msg-send">Tuma</button>
-      </div>
-    </div>
-  `;
-  for (const m of msgs) {
-    if (m.senderId !== me.id && !(m.readBy||[]).includes(me.id)) {
-      m.readBy = [...(m.readBy||[]), me.id];
-      await WB.put("wb_messages", m);
-    }
-  }
-  updateBadges();
-  $("#msg-list").scrollTop = $("#msg-list").scrollHeight;
-
-  const send = async () => {
-    const text = $("#msg-input").value.trim();
-    if (!text) return;
-    await WB.put("wb_messages", {
-      id: uid("msg"), conversationId: convId, senderId: me.id,
-      text, at: now(), readBy: [me.id]
-    });
-    $("#msg-input").value = "";
-    render();
-  };
-  $("#msg-send").addEventListener("click", send);
-  $("#msg-input").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
-});
-
-function msgBubbleHtml(m, myId, senderName) {
-  const mine = m.senderId === myId;
-  return `<div class="msg-bubble ${mine?"mine":""}">
-    ${mine?"":`<div class="sender">${esc(senderName)}</div>`}
-    ${esc(m.text)}
-    <span class="when">${fmtDate(m.at)}</span>
-  </div>`;
-}
-
-/* ---------------------------------------------------------------
-   12) ROUTE: Tasks
-   --------------------------------------------------------------- */
-register("tasks", async () => {
-  const me = Session.user;
-  const all = await WB.getAll("wb_tasks");
-  const mine = all.filter(t => t.assignedTo === me.id);
-  const assigned = all.filter(t => t.assignedBy === me.id);
-
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="tabs" id="task-tabs">
-      <button class="active" data-tab="mine">My Tasks (${mine.length})</button>
-      <button data-tab="assigned">Assigned (${assigned.length})</button>
-      <button data-tab="done">Completed</button>
-    </div>
-    <div id="task-body"></div>
-    <button class="btn primary block" data-action="new-task" style="margin-top:10px;">➕ New Task</button>
-  `;
-
-  function renderTab(tab) {
-    let list = [];
-    if (tab === "mine") list = mine.filter(t => t.status !== "Completed");
-    else if (tab === "assigned") list = assigned;
-    else list = [...mine, ...assigned].filter(t => t.status === "Completed");
-    $("#task-body").innerHTML = list.length ? list.map(taskCardHtml).join("") : '<div class="hint">Hakuna kazi hapa.</div>';
-    $$("[data-task-status]").forEach(sel => {
-      sel.addEventListener("change", async () => {
-        const id = sel.dataset.taskStatus;
-        const t = await WB.get("wb_tasks", id);
-        t.status = sel.value;
-        t.progress = t.status === "Completed" ? 100 : t.progress;
-        await WB.put("wb_tasks", t);
-        toast("Status imebadilishwa","ok");
-        renderTab(tab);
-      });
-    });
-  }
-  $$("#task-tabs button").forEach(b => b.addEventListener("click", () => {
-    $$("#task-tabs button").forEach(x => x.classList.remove("active"));
-    b.classList.add("active");
-    renderTab(b.dataset.tab);
-  }));
-  renderTab("mine");
-  bindCommon($("#view"));
-});
-
-function taskCardHtml(t) {
-  const priClass = t.priority === "High" ? "err" : t.priority === "Low" ? "ok" : "warn";
-  const overdue = t.deadline && new Date(t.deadline) < new Date() && t.status !== "Completed";
-  return `<div class="list-item">
-    <div class="row1">
-      <div class="name" style="flex:1;">${esc(t.title)}</div>
-      <span class="pill ${priClass}">${esc(t.priority||"Normal")}</span>
-    </div>
-    <div class="meta">${esc(t.description||"")}</div>
-    <div class="meta" style="font-size:11px;margin-top:4px;">
-      ${t.deadline ? `Deadline: <strong>${fmtShort(t.deadline)}</strong>${overdue?' <span class="pill err">Overdue</span>':''}` : ""}
-      · Status: <select data-task-status="${esc(t.id)}" style="font:inherit;font-size:11px;padding:2px 4px;border-radius:6px;border:1px solid var(--line);background:var(--field);color:var(--text);">
-        ${["Pending","Accepted","In Progress","Under Review","Completed","Rejected"].map(s => `<option ${t.status===s?"selected":""}>${s}</option>`).join("")}
-      </select>
-    </div>
-  </div>`;
-}
-
-/* ---------------------------------------------------------------
-   13) ROUTE: Groups
-   --------------------------------------------------------------- */
-register("groups", async () => {
-  const me = Session.user;
-  const groups = await WB.getAll("wb_groups");
-  const mine = groups.filter(g => (g.members||[]).includes(me.id));
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">Professional Groups</div>
-      ${mine.length ? mine.map(g => `
-        <div class="list-item">
-          <div class="name">${esc(g.name)} <span class="pill info">${esc(g.privacy)}</span></div>
-          <div class="meta">${esc(g.description||"")}</div>
-          <div class="meta" style="font-size:11px;">👥 ${(g.members||[]).length} members</div>
-        </div>`).join("") : '<div class="hint">Hakuna kikundi bado.</div>'}
-    </div>
-    <button class="btn primary block" id="new-group-btn">➕ Create Group</button>
-  `;
-  $("#new-group-btn").addEventListener("click", () => openGroupModal());
-});
-
-/* ---------------------------------------------------------------
-   14) ROUTE: Activity Feed
-   --------------------------------------------------------------- */
-register("activity", async () => {
-  const acts = (await WB.getAll("wb_activity")).sort((a,b) => b.at.localeCompare(a.at)).slice(0,50);
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">Professional Activity</div>
-      ${acts.length ? acts.map(a => `<div class="list-item">
-        <div class="name">${esc(a.text)}</div>
-        <div class="meta">${fmtDate(a.at)}</div>
-      </div>`).join("") : '<div class="hint">Hakuna shughuli bado.</div>'}
-    </div>
-  `;
-});
-
-/* ---------------------------------------------------------------
-   15) ROUTE: Notifications
-   --------------------------------------------------------------- */
-register("notifications", async () => {
-  const me = Session.user;
-  const list = (await WB.byIndex("wb_notifications","user",me.id))
-    .sort((a,b) => b.at.localeCompare(a.at));
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">Notifications
-        <button class="btn sm" id="mark-all-read">Mark all read</button>
-      </div>
-      ${list.length ? list.map(n => `<div class="list-item" data-notif-open="${esc(n.id)}" style="${n.read?'opacity:.6;':''}">
-        <div class="name">${esc(n.title)} ${n.read?"":'<span class="pill err">New</span>'}</div>
-        <div class="meta">${esc(n.body||"")} · ${fmtDate(n.at)}</div>
-      </div>`).join("") : '<div class="hint">Hakuna notifications.</div>'}
-    </div>
-  `;
-  $("#mark-all-read").addEventListener("click", async () => {
-    for (const n of list) { n.read = true; await WB.put("wb_notifications", n); }
-    updateBadges(); render();
-  });
-  $$("[data-notif-open]").forEach(el => el.addEventListener("click", async () => {
-    const n = await WB.get("wb_notifications", el.dataset.notifOpen);
-    n.read = true;
-    await WB.put("wb_notifications", n);
-    updateBadges();
-    if (n.link) { location.hash = n.link; }
-    else render();
-  }));
-});
-
-/* ---------------------------------------------------------------
-   16) ROUTE: More
-   --------------------------------------------------------------- */
-register("more", async () => {
-  $("#view").innerHTML = `
-    ${syncBanner()}
-    <div class="card">
-      <div class="card-title">More</div>
-      <button class="btn block" data-nav="profile" style="margin-bottom:8px;">👤 My Profile</button>
-      <button class="btn block" data-nav="groups" style="margin-bottom:8px;">👥 Groups</button>
-      <button class="btn block" data-nav="activity" style="margin-bottom:8px;">📰 Activity Feed</button>
-      <button class="btn block" data-nav="notifications" style="margin-bottom:8px;">🔔 Notifications</button>
-      <button class="btn block" id="export-wb">📦 Export Workplace Data (JSON)</button>
-    </div>
-    <div class="card">
-      <div class="card-title">Hali ya Backend</div>
-      <p class="muted">${esc(BACKEND.label().txt)}</p>
-      <p class="muted" style="font-size:12px;">Workplace sasa inatumia kifaa hiki (IndexedDB) kwa data ya kikazi. Kuwezesha ushirikiano wa maafisa wengi kwa wakati mmoja, unahitaji kuunganisha Supabase tables (profiles, follows, workspaces, messages, n.k.).</p>
-    </div>
-  `;
-  bindCommon($("#view"));
-  $("#export-wb").addEventListener("click", async () => {
-    const data = {};
-    for (const store of ["wb_profiles","wb_follows","wb_workspaces","wb_ws_members","wb_tasks","wb_conversations","wb_messages","wb_groups","wb_notifications","wb_activity"]) {
-      data[store] = await WB.getAll(store);
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `workplace-export-${Date.now()}.json`;
-    a.click();
-    toast("Export imepakuliwa","ok");
-  });
-});
-
-/* ---------------------------------------------------------------
-   17) Common binding
-   --------------------------------------------------------------- */
-function bindCommon(root) {
-  $$("[data-nav]", root).forEach(el => el.addEventListener("click", () => navigate(el.dataset.nav)));
-  $$("[data-action='new-workspace']", root).forEach(el => el.addEventListener("click", openNewWorkspaceModal));
-  $$("[data-action='new-task']", root).forEach(el => el.addEventListener("click", openNewTaskModal));
-  $$("[data-action='start-dm']", root).forEach(el => el.addEventListener("click", async () => {
-    const other = el.dataset.id;
-    const convs = (await WB.getAll("wb_conversations")).filter(c => (c.memberIds||[]).includes(Session.user.id));
-    let conv = convs.find(c => (c.memberIds||[]).includes(other) && c.memberIds.length === 2);
-    if (!conv) {
-      conv = { id: uid("conv"), type: "dm", name: "", memberIds: [Session.user.id, other], createdAt: now() };
-      await WB.put("wb_conversations", conv);
-    }
-    location.hash = "#/conversation/" + conv.id;
-  }));
-  $$("[data-ws]", root).forEach(el => el.addEventListener("click", () => openWorkspaceDetail(el.dataset.ws)));
-}
-
-/* ---------------------------------------------------------------
-   18) Modals
-   --------------------------------------------------------------- */
-function modal(html, onMount) {
-  const bg = document.createElement("div");
-  bg.className = "modal-bg";
-  bg.innerHTML = `<div class="modal">${html}</div>`;
-  document.body.appendChild(bg);
-  bg.addEventListener("click", (e) => { if (e.target === bg) bg.remove(); });
-  $$("[data-close]", bg).forEach(b => b.addEventListener("click", () => bg.remove()));
-  if (onMount) onMount(bg);
-  return bg;
-}
-
-function openNewWorkspaceModal() {
-  modal(`
-    <h3>New Workspace</h3>
-    <div class="field"><label>Workspace Name</label><input id="ws-name" placeholder="e.g. Fire Investigation Team"></div>
-    <div class="field"><label>Description</label><textarea id="ws-desc" placeholder="Kazi ya workspace hii…"></textarea></div>
-    <div class="btn-row">
-      <button class="btn" data-close>Ghairi</button>
-      <button class="btn primary" id="ws-create">Unda</button>
-    </div>
-  `, (bg) => {
-    $("#ws-create", bg).addEventListener("click", async () => {
-      const name = $("#ws-name", bg).value.trim();
-      const desc = $("#ws-desc", bg).value.trim();
-      if (!name) return toast("Weka jina","err");
-      const ws = { id: uid("ws"), name, description: desc, createdBy: Session.user.id, createdAt: now(), status: "open" };
-      await WB.put("wb_workspaces", ws);
-      await WB.put("wb_ws_members", {
-        id: uid("wm"), workspaceId: ws.id, userId: Session.user.id, role: "leader", joinedAt: now()
-      });
-      await addActivity("workspace", `Workspace mpya: ${name}`);
-      bg.remove();
-      toast("Workspace imeundwa","ok");
-      render();
-    });
-  });
-}
-
-function openNewTaskModal() {
-  modal(`
-    <h3>New Task</h3>
-    <div class="field"><label>Title</label><input id="tk-title" placeholder="Task title"></div>
-    <div class="field"><label>Description</label><textarea id="tk-desc"></textarea></div>
-    <div class="field-row">
-      <div class="field"><label>Priority</label>
-        <select id="tk-pri"><option>Low</option><option selected>Normal</option><option>High</option></select>
-      </div>
-      <div class="field"><label>Deadline</label>
-        <input id="tk-dl" type="date">
-      </div>
-    </div>
-    <div class="field"><label>Assign to (Officer Email)</label>
-      <input id="tk-assignee" placeholder="email ya afisa">
-    </div>
-    <div class="btn-row">
-      <button class="btn" data-close>Ghairi</button>
-      <button class="btn primary" id="tk-create">Unda</button>
-    </div>
-  `, (bg) => {
-    $("#tk-create", bg).addEventListener("click", async () => {
-      const title = $("#tk-title", bg).value.trim();
-      if (!title) return toast("Weka title","err");
-      const assignee = $("#tk-assignee", bg).value.trim();
-      const profiles = await WB.getAll("wb_profiles");
-      const target = profiles.find(p => p.email === assignee || p.id === assignee);
-      const task = {
-        id: uid("tk"), workspaceId: "", title,
-        description: $("#tk-desc", bg).value.trim(),
-        assignedBy: Session.user.id,
-        assignedTo: target ? target.id : Session.user.id,
-        priority: $("#tk-pri", bg).value,
-        deadline: $("#tk-dl", bg).value,
-        status: "Pending", progress: 0, createdAt: now()
-      };
-      await WB.put("wb_tasks", task);
-      if (target && target.id !== Session.user.id) {
-        await pushNotification(target.id, "task", "Task mpya",
-          `${Session.user.email} amekupa kazi: ${title}`, "#/tasks");
-      }
-      await addActivity("task", `Task mpya: ${title}`);
-      bg.remove();
-      toast("Task imeundwa","ok");
-      render();
-    });
-  });
-}
-
-function openGroupModal() {
-  modal(`
-    <h3>New Group</h3>
-    <div class="field"><label>Group Name</label><input id="gp-name"></div>
-    <div class="field"><label>Description</label><textarea id="gp-desc"></textarea></div>
-    <div class="field"><label>Privacy</label>
-      <select id="gp-priv"><option value="public">Public</option><option value="private">Private</option><option value="invite">Invitation only</option></select>
-    </div>
-    <div class="btn-row">
-      <button class="btn" data-close>Ghairi</button>
-      <button class="btn primary" id="gp-create">Unda</button>
-    </div>
-  `, (bg) => {
-    $("#gp-create", bg).addEventListener("click", async () => {
-      const name = $("#gp-name", bg).value.trim();
-      if (!name) return toast("Weka jina","err");
-      await WB.put("wb_groups", {
-        id: uid("gp"), name, description: $("#gp-desc", bg).value.trim(),
-        creatorId: Session.user.id, privacy: $("#gp-priv", bg).value,
-        members: [Session.user.id], admins: [Session.user.id], createdAt: now()
-      });
-      bg.remove();
-      toast("Group imeundwa","ok");
-      navigate("groups");
-    });
-  });
-}
-
-async function openWorkspaceDetail(wsId) {
-  const ws = await WB.get("wb_workspaces", wsId);
-  if (!ws) return;
-  const members = await WB.byIndex("wb_ws_members","workspace",wsId);
-  const profiles = await WB.getAll("wb_profiles");
-  const nameOf = (id) => (profiles.find(p => p.id === id) || {}).fullName || id;
-  modal(`
-    <h3>${esc(ws.name)}</h3>
-    <p class="muted">${esc(ws.description||"")}</p>
-    <div class="divider"></div>
-    <div class="card-title">Members (${members.length})</div>
-    ${members.map(m => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);">
-      <div class="avatar sm">${esc(nameOf(m.userId).split(" ").map(x=>x[0]).join("").slice(0,2))}</div>
-      <div style="flex:1;font-size:13px;">${esc(nameOf(m.userId))}</div>
-      <span class="pill info">${esc(m.role)}</span>
-    </div>`).join("")}
-    <div class="btn-row" style="margin-top:12px;">
-      <button class="btn" data-close>Funga</button>
-    </div>
-  `);
-}
-
-/* ---------------------------------------------------------------
-   19) Helpers: notifications + activity
-   --------------------------------------------------------------- */
-async function pushNotification(userId, type, title, body, link) {
-  await WB.put("wb_notifications", {
-    id: uid("nt"), userId, type, title, body, link, read: false, at: now()
-  });
-  updateBadges();
-}
-async function addActivity(type, text) {
-  await WB.put("wb_activity", {
-    id: uid("ac"), actorId: Session.user ? Session.user.id : "system",
-    type, text, at: now(), visibility: "public"
-  });
-}
-
-/* ---------------------------------------------------------------
-   20) Boot — auto sign-in via CloudSync
-   --------------------------------------------------------------- */
-async function boot() {
-  // 1) Theme — same as login.html: read from RescueDB settings
-  try {
-    const s = await (window.RescueDB && RescueDB.getAllSettings ? RescueDB.getAllSettings() : Promise.resolve({}));
-    const theme = s.theme === "light" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", theme);
-  } catch (e) {
-    document.documentElement.setAttribute("data-theme", "dark");
-  }
-
-  // 2) Bottom nav wiring (safe even if hidden)
-  $$("#bottom-nav button").forEach(b => b.addEventListener("click", () => navigate(b.dataset.route)));
-  $("#back").addEventListener("click", () => {
-    if (history.length > 1) history.back();
-    else location.href = "index.html";
-  });
-  $("#notif-btn").addEventListener("click", () => {
-    if (Session.user) navigate("notifications");
-    else location.href = "login.html";
-  });
-
-  // 3) Network status listener
-  window.addEventListener("online", () => { if (Session.user) render(); });
-  window.addEventListener("offline", () => { if (Session.user) render(); });
-
-  // 4) Attempt auto sign-in from CloudSync (login.html already did auth)
-  try {
-    await Session.load();
-  } catch (e) {
-    console.warn("Session load failed:", e);
-    Session.user = null;
-  }
-
-  // 5) First render (auth gate OR overview)
-  if (!location.hash) location.hash = "#/overview";
-  render();
-  if (Session.user) updateBadges();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  boot().catch((e) => {
-    console.error(e);
-    document.body.innerHTML = `<div style="padding:24px;font-family:sans-serif;">
-      <h3>Workplace imeshindwa kuanza</h3>
-      <p>${esc(e.message||"")}</p>
-      <button onclick="location.reload()">Pakia upya</button>
-    </div>`;
-  });
-});
-
+/* ---------- theme ---------- */
+function applyTheme(t) { document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark"); const m = $('meta[name="theme-color"]'); if (m) m.content = t === "light" ? "#f4f5f7" : "#0e1420"; }
+(function initTheme() {
+  const q = new URLSearchParams(location.search).get("theme"); const saved = LS.get("fw_theme");
+  applyTheme(q || saved || (window.matchMedia && matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"));
+  if (!q && !saved) localSetting("theme").then((t) => { if (t) applyTheme(t); }).catch(() => {});
 })();
-</script>
-</body>
-</html>
+A.theme = () => { const n = document.documentElement.getAttribute("data-theme") === "light" ? "dark" : "light"; applyTheme(n); LS.set("fw_theme", n); };
+
+/* ---------- small ui helpers ---------- */
+const avatarHtml = (p, cls = "") => `<div class="avatar ${cls}">${p && p.avatar ? `<img src="${esc(p.avatar)}" alt="">` : esc(initials(p && p.full_name))}</div>`;
+const empty = (ic, t) => `<div class="empty"><div class="ic">${ic}</div>${esc(t)}</div>`;
+const skeleton = (n = 3) => '<div class="sk"></div>'.repeat(n);
+const badge = (txt, cls = "") => `<span class="badge ${cls}">${esc(txt)}</span>`;
+function paint(rid, html) { if (rid !== S.rid) return false; const v = $("#view"); v.innerHTML = html; hydrateFiles(v); return true; }
+function errCard(e) { return `<div class="card"><h3>Imeshindikana kupakia</h3><p class="dim">${esc(isNetErr(e) ? "Hakuna mtandao na hakuna data iliyohifadhiwa kwa ukurasa huu." : e.message)}</p><button class="btn" data-act="reload">Jaribu tena</button></div>`; }
+A.reload = () => render();
+function backBtn(href, label = "Rudi") { return `<button class="btn btn-ghost btn-sm mb" data-go="${href}">← ${esc(label)}</button>`; }
+const go = (p) => { location.hash = "#/" + p; };
+function setBadge(key, n) {
+  S.badges[key] = n;
+  $$(`[data-badge="${key}"]`).forEach((e) => { e.textContent = n > 99 ? "99+" : n; e.classList.toggle("hidden", !n); });
+}
+function paintBanner() {
+  const b = $("#banner"); if (!b) return; const m = [];
+  if (!navigator.onLine) m.push("Hauna mtandao – unaona data iliyohifadhiwa. Vitendo vinasubiri kutumwa.");
+  else if (S.stale) m.push("Seva haipatikani – unaona data iliyohifadhiwa.");
+  b.innerHTML = m.length ? `<div class="banner">${m.join(" ")}</div>` : "";
+}
+function paintSync() {
+  const el = $("#sync-pill"); if (!el) return; const { pending, failed } = OB.counts;
+  let t, c;
+  if (!navigator.onLine) { t = "⚠ Offline" + (pending ? ` · ${pending}` : ""); c = "off"; }
+  else if (failed) { t = `! ${failed} zimeshindwa`; c = "bad"; }
+  else if (pending) { t = `⟳ ${pending} zinasubiri`; c = "off"; }
+  else { t = S.rt === "live" ? "● Live" : "✓ Sawa"; c = "ok"; }
+  el.textContent = t; el.className = "sync-pill " + c;
+}
+
+/* ---------- shell ---------- */
+function buildShell() {
+  const bd = (k) => (["messages", "tasks", "notifications"].includes(k) ? `<span class="nbadge hidden" data-badge="${k}"></span>` : "");
+  const bottom = [["overview", "🏠", "Mwanzo"], ["network", "🌐", "Network"], ["messages", "💬", "Ujumbe"], ["tasks", "✅", "Kazi"]];
+  $("#app").innerHTML = `
+  <aside class="sidebar"><div class="brand">🔥 Fire Report <span>Workplace</span></div>
+    ${NAV.map((n) => `<button data-nav="${n[0]}"><span>${n[1]}</span><span>${n[2]}</span>${bd(n[0])}</button>`).join("")}
+  </aside>
+  <div class="content-col">
+    <header class="topbar">
+      <a class="icon-btn" href="index.html" data-act="host-back" title="Rudi Fire Report" style="text-decoration:none">←</a>
+      <h1 id="ttl">Workplace</h1>
+      <button class="sync-pill" id="sync-pill" data-act="sync-open"></button>
+      <button class="icon-btn" data-act="theme" title="Mandhari">◐</button>
+    </header>
+    <div id="banner"></div>
+    <main id="view"></main>
+  </div>
+  <nav class="bottom-nav">
+    ${bottom.map((n) => `<button data-nav="${n[0]}"><span class="ic">${n[1]}</span><span>${n[2]}</span>${bd(n[0])}</button>`).join("")}
+    <button data-act="more"><span class="ic">☰</span><span>Zaidi</span><span class="nbadge hidden" data-badge="notifications"></span></button>
+  </nav>`;
+  Object.keys(S.badges).forEach((k) => setBadge(k, S.badges[k]));
+  paintBanner(); paintSync();
+}
+A.more = () => {
+  const items = NAV.filter((n) => !["overview", "network", "messages", "tasks"].includes(n[0]));
+  openModal(`<h3>Menyu</h3><div class="tile-grid">${items.map((n) => `<div class="tile" data-go="${n[0]}"><span class="ic">${n[1]}</span>${n[2]}${["notifications"].includes(n[0]) ? '<span class="nbadge hidden" data-badge="notifications"></span>' : ""}</div>`).join("")}</div>
+  <div class="btn-row"><button class="btn btn-ghost" data-act="close-modal">Funga</button></div>`);
+  setBadge("notifications", S.badges.notifications);
+};
+function navActive(view) { $$("[data-nav]").forEach((b) => b.classList.toggle("active", b.dataset.nav === view)); }
+
+/* ---------- router ---------- */
+function parseRoute() {
+  const raw = (location.hash || "#/overview").slice(2); const [p, qs] = raw.split("?"); const [view, id, sub] = p.split("/");
+  return { view: view || "overview", id: id || null, sub: sub || null, q: new URLSearchParams(qs || "") };
+}
+async function render() {
+  if (!S.session || !S.me) return;
+  const r = parseRoute(); S.route = r; const rid = ++S.rid; navActive(r.view);
+  const nv = NAV.find((n) => n[0] === r.view); $("#ttl").textContent = nv ? nv[2] : "Workplace";
+  const v = $("#view"); v.innerHTML = skeleton(3);
+  try { await (VIEWS[r.view] || VIEWS.overview)(r, rid); }
+  catch (e) { if (rid === S.rid) { v.innerHTML = errCard(e); if (e instanceof ApiError && e.status === 401) onSignedOut(); } else console.error(e); }
+  if (rid === S.rid) window.scrollTo(0, 0);
+}
+function refreshView(force) {
+  const ae = document.activeElement;
+  if (!force && ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName) && $("#view") && $("#view").contains(ae)) return;
+  if ($("#modal-host").children.length && !force) return;
+  render();
+}
+const refreshViewSoon = debounce(() => refreshView(), 500);
+window.addEventListener("hashchange", () => { closeModal(); render(); });
+
+/* ---------- global event delegation ---------- */
+document.addEventListener("click", async (e) => {
+  const nav = e.target.closest("[data-nav]"); if (nav) { go(nav.dataset.nav); return; }
+  const g = e.target.closest("[data-go]"); if (g) { closeModal(); if (g.dataset.go.startsWith("#")) location.hash = g.dataset.go; else go(g.dataset.go); return; }
+  const el = e.target.closest("[data-act]"); if (!el) return;
+  const act = el.dataset.act;
+  if (act === "backdrop") { if (e.target === el) closeModal(); return; }
+  if (el.classList.contains("modal-backdrop")) return;
+  const fn = A[act]; if (!fn) return;
+  if (el.disabled) return;
+  try { await fn(el, e); } catch (err) { fail(err); }
+});
+document.addEventListener("submit", async (e) => {
+  const f = e.target.closest("[data-form]"); if (!f) return; e.preventDefault();
+  const fn = F[f.dataset.form]; if (!fn) return;
+  const btn = $('button[type="submit"]', f); if (btn) btn.disabled = true;
+  try { await fn(f, e); } catch (err) { fail(err); const er = $(".form-error", f); if (er) er.textContent = err.message || ""; }
+  finally { if (btn) btn.disabled = false; }
+});
+A["close-modal"] = () => closeModal();
+A["cf-yes"] = () => { closeModal(); if (S._cf) S._cf(true); };
+A["cf-no"] = () => { closeModal(); if (S._cf) S._cf(false); };
+
+/* ---------- profiles & follow graph ---------- */
+function rememberProfiles(rows) { (rows || []).forEach((p) => S.pcache.set(p.id, Object.assign(S.pcache.get(p.id) || {}, p))); }
+async function getProfiles(ids) {
+  ids = [...new Set((ids || []).filter(Boolean))]; const miss = ids.filter((i) => !S.pcache.has(i));
+  if (miss.length) { try { rememberProfiles(await rest("profiles", `select=id,full_name,rank,station,region,avatar,role&id=in.${inList(miss)}`)); } catch (e) {} }
+  return ids.map((i) => S.pcache.get(i)).filter(Boolean);
+}
+const pname = (id) => (S.pcache.get(id) || {}).full_name || "Afisa";
+async function loadGraph() {
+  const uid = S.me.id;
+  const [a, b] = await Promise.all([
+    cached("following", () => rest("follows", `select=following_id&follower_id=eq.${uid}&limit=3000`)),
+    cached("followers", () => rest("follows", `select=follower_id&following_id=eq.${uid}&limit=3000`)),
+  ]);
+  S.following = new Set(a.map((x) => x.following_id)); S.followers = new Set(b.map((x) => x.follower_id));
+}
+function followBtn(id, sm = true) {
+  if (id === S.me.id) return "";
+  const c = sm ? "btn-sm" : "";
+  if (S.following.has(id)) return `<button class="btn ${c} btn-ghost" data-act="unfollow" data-id="${id}">Unfollow</button>`;
+  return `<button class="btn ${c} btn-primary" data-act="follow" data-id="${id}">${S.followers.has(id) ? "Follow Back" : "Follow"}</button>`;
+}
+A.follow = async (el) => {
+  const id = el.dataset.id; if (id === S.me.id) return toast("Huwezi kujifuata mwenyewe", "err");
+  if (S.following.has(id) || !needOnline()) return;
+  try { await rest("follows", "", { method: "POST", body: { follower_id: S.me.id, following_id: id }, prefer: "return=minimal" }); }
+  catch (e) { if (!(e instanceof ApiError && e.status === 409)) throw e; }
+  S.following.add(id); cachePut(S.me.id + ":following", [...S.following].map((x) => ({ following_id: x })));
+  toast("Umemfuata " + pname(id), "ok"); refreshView(true);
+};
+A.unfollow = async (el) => {
+  const id = el.dataset.id; if (!needOnline()) return;
+  await rest("follows", `follower_id=eq.${S.me.id}&following_id=eq.${id}`, { method: "DELETE", prefer: "return=minimal" });
+  S.following.delete(id); cachePut(S.me.id + ":following", [...S.following].map((x) => ({ following_id: x })));
+  toast("Umeacha kumfuata", "ok"); refreshView(true);
+};
+function officerRow(p, extra) {
+  return `<div class="item" data-act="open-officer" data-id="${p.id}">${avatarHtml(p)}<div class="grow"><div class="t ellip">${esc(p.full_name || "Afisa")}</div>
+    <div class="s ellip">${esc([p.rank, p.station, p.region].filter(Boolean).join(" · ") || "—")}</div></div>${extra !== undefined ? extra : followBtn(p.id)}</div>`;
+}
+A["open-officer"] = (el) => go("network/" + el.dataset.id);
+
+/* ---------- auth screens ---------- */
+function onSignedOut() { RT.stop(); setSess(null); S.me = null; if (Host.on) autoLogin(); else showAuth("login"); }
+function showHostWait(msg, retry, fallback) {
+  $("#app").innerHTML = `<div class="auth"><div class="logo">🔥</div><h2>Fire Report – Workplace</h2><div class="card" style="text-align:center"><p class="dim">${esc(msg)}</p>
+    ${retry ? `<div class="btn-row" style="justify-content:center"><button class="btn btn-primary" data-act="host-retry">Jaribu tena</button>${fallback ? '<button class="btn btn-ghost" data-act="auth-mode" data-mode="login">Ingia kwa barua pepe</button>' : ""}</div>` : '<div class="sk"></div>'}</div></div>`;
+}
+let alBusy = false;
+async function autoLogin(tok) {
+  if (alBusy) return false; alBusy = true; try { return await autoLoginRun(tok); } finally { alBusy = false; }
+}
+async function autoLoginRun(tok) {
+  showHostWait("Inaingia kiotomatiki kupitia akaunti ya Fire Report…");
+  if (tok === undefined) tok = await Host.token(false);
+  if (!tok) { showHostWait("Hujaingia kwenye Fire Report. Ingia kwenye programu kuu kwanza, kisha bonyeza \"Jaribu tena\".", true); return false; }
+  try { await bridgeLogin(tok); await startApp(); return true; }
+  catch (e) { showHostWait(isNetErr(e) ? "Hakuna mtandao. Uingiaji wa kwanza unahitaji mtandao." : "Imeshindikana kuingia kiotomatiki: " + e.message, true, true); return false; }
+}
+A["host-retry"] = () => autoLogin();
+A["host-back"] = (el, e) => { if (Host.embedded) { e.preventDefault(); try { window.parent.postMessage({ type: "fw-close" }, "*"); } catch (x) {} } };
+async function hostTokenPushed(tok) { if (jwtSub(tok) && jwtSub(tok) !== LS.get("fw_bridge")) { RT.stop(); setSess(null); await autoLogin(tok); } }
+function hostSignedOut() { LS.del("fw_bridge"); RT.stop(); setSess(null); S.me = null; showHostWait("Umetoka kwenye Fire Report. Ingia tena kwenye programu kuu.", true); }
+function showAuth(mode, note) {
+  $("#app").innerHTML = `<div class="auth"><div class="logo">🔥</div><h2>Fire Report – Workplace</h2><div class="sub">Mtandao wa kitaalamu wa Zimamoto na Uokoaji</div>
+  ${note ? `<div class="card" style="border-color:var(--ok)">${esc(note)}</div>` : ""}
+  <div class="card">${mode === "signup" ? `
+    <h3>Fungua akaunti</h3>
+    <form data-form="signup"><div class="field"><label>Jina kamili</label><input type="text" name="full_name" required autocomplete="name"></div>
+    <div class="field-row"><div class="field"><label>Cheo (Rank)</label><input type="text" name="rank"></div><div class="field"><label>Mkoa</label><input type="text" name="region"></div></div>
+    <div class="field"><label>Kituo cha Zimamoto</label><input type="text" name="station"></div>
+    <div class="field"><label>Barua pepe</label><input type="email" name="email" required autocomplete="email"></div>
+    <div class="field"><label>Nenosiri (angalau herufi 8)</label><input type="password" name="password" minlength="8" required autocomplete="new-password"></div>
+    <div class="form-error"></div><button class="btn btn-primary btn-block" type="submit">Fungua akaunti</button></form>
+    <p class="mt dim" style="text-align:center">Tayari una akaunti? <button class="btn-ghost btn btn-sm" data-act="auth-mode" data-mode="login">Ingia</button></p>`
+  : mode === "recover" ? `
+    <h3>Rejesha nenosiri</h3>
+    <form data-form="recover"><div class="field"><label>Barua pepe</label><input type="email" name="email" required></div>
+    <div class="form-error"></div><button class="btn btn-primary btn-block" type="submit">Tuma kiungo cha kurejesha</button></form>
+    <p class="mt" style="text-align:center"><button class="btn-ghost btn btn-sm" data-act="auth-mode" data-mode="login">← Rudi kuingia</button></p>`
+  : `
+    <h3>Ingia</h3>
+    <form data-form="login"><div class="field"><label>Barua pepe</label><input type="email" name="email" required autocomplete="email"></div>
+    <div class="field"><label>Nenosiri</label><input type="password" name="password" required autocomplete="current-password"></div>
+    <div class="form-error"></div><button class="btn btn-primary btn-block" type="submit">Ingia</button></form>
+    <div class="row between mt"><button class="btn-ghost btn btn-sm" data-act="auth-mode" data-mode="signup">Fungua akaunti</button><button class="btn-ghost btn btn-sm" data-act="auth-mode" data-mode="recover">Umesahau nenosiri?</button></div>`}
+  </div><p class="muted" style="text-align:center">Programu ya Fire Report inaendelea kufanya kazi bila akaunti. Akaunti inahitajika kwa Workplace tu.</p>
+  <p style="text-align:center"><a href="index.html">← Rudi Fire Report</a></p></div>`;
+}
+A["auth-mode"] = (el) => showAuth(el.dataset.mode);
+F.login = async (f) => {
+  if (!needOnline()) return; const d = new FormData(f);
+  try { await Auth.signIn(String(d.get("email")).trim(), String(d.get("password"))); }
+  catch (e) { throw new ApiError(/invalid|credentials/i.test(e.message) ? "Barua pepe au nenosiri si sahihi" : /confirm/i.test(e.message) ? "Thibitisha barua pepe yako kwanza (angalia inbox)" : e.message); }
+  await startApp();
+};
+F.signup = async (f) => {
+  if (!needOnline()) return; const d = new FormData(f);
+  const meta = { full_name: String(d.get("full_name")).trim(), rank: String(d.get("rank") || "").trim(), region: String(d.get("region") || "").trim(), station: String(d.get("station") || "").trim() };
+  const ok = await Auth.signUp(String(d.get("email")).trim(), String(d.get("password")), meta);
+  if (ok) await startApp(); else showAuth("login", "Akaunti imeundwa. Angalia barua pepe yako kuthibitisha, kisha ingia.");
+};
+F.recover = async (f) => { if (!needOnline()) return; await Auth.recover(String(new FormData(f).get("email")).trim()); showAuth("login", "Kiungo cha kurejesha nenosiri kimetumwa (kama barua pepe ipo)."); };
+A.logout = async () => { if (!(await confirmBox("Unataka kutoka kwenye akaunti? Kazi zisizotumwa zitabaki kwenye kifaa hiki.", "Toka"))) return; await Auth.signOut(); onSignedOut(); };
+
+/* ---------- OVERVIEW ---------- */
+VIEWS.overview = async (r, rid) => {
+  const uid = S.me.id;
+  const [cnt, open, wInv, gInv, reports, overdue] = await Promise.all([
+    cached("counts", () => rpc("follow_counts", { p_user: uid })),
+    cached("open-tasks", () => rest("tasks", `select=id,deadline,status&assigned_to=eq.${uid}&status=in.(pending,accepted,in_progress,under_review)&limit=500`)),
+    cached("wsinv", () => rest("workspace_invitations", `select=id,expires_at,workspaces(name),inviter_id&invitee_id=eq.${uid}&status=eq.pending&order=created_at.desc`)),
+    cached("grinv", () => rest("group_invitations", `select=id,expires_at,professional_groups(name),inviter_id&invitee_id=eq.${uid}&status=eq.pending&order=created_at.desc`)),
+    cached("shared-count", () => rest("shared_reports", `select=id&limit=500`)),
+    Promise.resolve(null),
+  ]);
+  const c = Array.isArray(cnt) ? cnt[0] : cnt;
+  const od = open.filter((t) => t.deadline && new Date(t.deadline) < new Date()).length;
+  await getProfiles([...wInv.map((i) => i.inviter_id), ...gInv.map((i) => i.inviter_id)]);
+  const me = S.me; const incomplete = !me.rank || !me.station;
+  const inv = [...wInv.map((i) => ({ k: "ws", i })), ...gInv.map((i) => ({ k: "gr", i }))];
+  paint(rid, `
+  <div class="card"><div class="row">${avatarHtml(me, "lg")}<div class="grow"><h2 style="margin:0">${esc(me.full_name || "Karibu")}</h2>
+    <div class="dim">${esc([me.rank, me.station, me.region].filter(Boolean).join(" · ") || "Kamilisha profile yako")}</div></div></div>
+    ${incomplete ? `<div class="mt"><button class="btn btn-sm btn-primary" data-go="profile">Kamilisha profile</button></div>` : ""}</div>
+  <div class="stat-grid">
+    <div class="stat-box" data-go="network/${uid}/followers"><div class="num">${c ? c.followers : 0}</div><div class="label">Wafuasi</div></div>
+    <div class="stat-box" data-go="network/${uid}/following"><div class="num">${c ? c.following : 0}</div><div class="label">Unafuata</div></div>
+    <div class="stat-box" data-go="tasks"><div class="num">${open.length}</div><div class="label">Kazi wazi${od ? ` · ${od} zimechelewa` : ""}</div></div>
+  </div>
+  ${inv.length ? `<div class="card"><div class="card-title">Mialiko inayosubiri (${inv.length})</div>${inv.map(({ k, i }) => `
+    <div class="item" style="cursor:default"><div class="grow"><div class="t">${esc(k === "ws" ? (i.workspaces || {}).name : (i.professional_groups || {}).name)}</div>
+    <div class="s">${k === "ws" ? "Workspace" : "Kikundi"} · kutoka ${esc(pname(i.inviter_id))} · inaisha ${fmtDate(i.expires_at)}</div></div>
+    <button class="btn btn-sm btn-primary" data-act="inv-accept" data-k="${k}" data-id="${i.id}">Kubali</button>
+    <button class="btn btn-sm btn-ghost" data-act="inv-reject" data-k="${k}" data-id="${i.id}">Kataa</button></div>`).join("")}</div>` : ""}
+  <div class="card"><div class="card-title">Fikia haraka</div><div class="tile-grid">
+    ${NAV.filter((n) => n[0] !== "overview").map((n) => `<div class="tile" data-go="${n[0]}"><span class="ic">${n[1]}</span>${n[2]}${["messages", "tasks", "notifications"].includes(n[0]) ? `<span class="nbadge hidden" data-badge="${n[0]}" style="left:auto;right:8px;top:8px"></span>` : ""}</div>`).join("")}
+  </div></div>
+  <div class="card"><div class="card-title">Usawazishaji</div><div class="kv">
+    <div class="k">Mtandao</div><div>${navigator.onLine ? "Upo" : "Hakuna (offline)"}</div>
+    <div class="k">Realtime</div><div>${S.rt === "live" ? "Imeunganishwa" : "Haijaunganishwa (inasasisha kila sekunde 20)"}</div>
+    <div class="k">Zinasubiri / zimeshindwa</div><div>${OB.counts.pending} / ${OB.counts.failed}</div>
+    <div class="k">Usawazishaji wa mwisho</div><div>${S.lastSync ? fmtDT(S.lastSync) : "-"}</div></div>
+    <div class="btn-row mt"><button class="btn btn-sm" data-act="sync-open">Fungua hali ya usawazishaji</button></div></div>`);
+  ["messages", "tasks", "notifications"].forEach((k) => setBadge(k, S.badges[k]));
+};
+A["inv-accept"] = (el) => respondInvite(el, true);
+A["inv-reject"] = (el) => respondInvite(el, false);
+async function respondInvite(el, accept) {
+  if (!needOnline()) return;
+  await rpc(el.dataset.k === "ws" ? "respond_workspace_invitation" : "respond_group_invitation", { p_id: el.dataset.id, p_accept: accept });
+  toast(accept ? "Mwaliko umekubaliwa" : "Mwaliko umekataliwa", "ok"); refreshBadges(); refreshView(true);
+}
+
+/* ---------- NETWORK ---------- */
+const NET = { tab: "discover", q: "", offset: 0, done: false };
+VIEWS.network = async (r, rid) => {
+  if (r.id) return officerView(r, rid);
+  await loadGraph().catch(() => {});
+  paint(rid, `
+  <div class="tabs">${[["discover", "Gundua"], ["following", "Ninafuata"], ["followers", "Wananifuata"], ["mutual", "Mutual"]].map(([k, l]) => `<button class="${NET.tab === k ? "sel" : ""}" data-act="net-tab" data-tab="${k}">${l}</button>`).join("")}</div>
+  ${NET.tab === "discover" ? `<div class="field"><input type="search" class="input" id="net-q" placeholder="Tafuta kwa jina, kituo, mkoa, cheo au utaalamu…" value="${esc(NET.q)}"></div>` : ""}
+  <div id="net-results">${skeleton(4)}</div>`);
+  if (rid !== S.rid) return;
+  const qi = $("#net-q"); if (qi) qi.addEventListener("input", debounce(() => { NET.q = qi.value.trim(); NET.offset = 0; netLoad(true); }, 350));
+  NET.offset = 0; await netLoad(true);
+};
+A["net-tab"] = (el) => { NET.tab = el.dataset.tab; NET.offset = 0; render(); };
+async function netLoad(reset) {
+  const box = $("#net-results"); if (!box) return; const uid = S.me.id; let rows = [], more = false, head = "";
+  try {
+    if (NET.tab === "discover") {
+      if (reset && !NET.q) {
+        const sug = await cached("suggested", () => rpc("suggested_officers", { p_limit: 8 })); rememberProfiles(sug);
+        if (sug.length) head = `<div class="card-title">Wanaopendekezwa</div>${sug.map((p) => officerRow(p)).join("")}<div class="card-title mt">Maafisa wote</div>`;
+      }
+      rows = await cached(`search:${NET.q}:${NET.offset}`, () => rpc("search_officers", { p_q: NET.q, p_limit: PAGE, p_offset: NET.offset })); more = rows.length === PAGE;
+    } else if (NET.tab === "following") {
+      const d = await cached(`fing:${NET.offset}`, () => rest("follows", `select=created_at,p:profiles!follows_following_id_fkey(*)&follower_id=eq.${uid}&order=created_at.desc&limit=${PAGE}&offset=${NET.offset}`)); rows = d.map((x) => x.p).filter(Boolean); more = d.length === PAGE;
+    } else if (NET.tab === "followers") {
+      const d = await cached(`fers:${NET.offset}`, () => rest("follows", `select=created_at,p:profiles!follows_follower_id_fkey(*)&following_id=eq.${uid}&order=created_at.desc&limit=${PAGE}&offset=${NET.offset}`)); rows = d.map((x) => x.p).filter(Boolean); more = d.length === PAGE;
+    } else { rows = await cached("mutual", () => rpc("mutual_followers", { p_user: uid })); }
+    rememberProfiles(rows);
+  } catch (e) { box.innerHTML = errCard(e); return; }
+  const html = rows.map((p) => officerRow(p)).join("");
+  const none = NET.tab === "discover" ? "Hakuna afisa aliyepatikana" : NET.tab === "following" ? "Bado hujamfuata mtu" : NET.tab === "followers" ? "Bado hakuna anayekufuata" : "Hakuna mutual followers bado";
+  if (reset) box.innerHTML = head + (html || (head ? "" : empty("🔎", none))) + (more ? `<button class="btn btn-block" data-act="net-more">Pakia zaidi</button>` : "");
+  else { const mb = $('[data-act="net-more"]', box); if (mb) mb.remove(); box.insertAdjacentHTML("beforeend", html + (more ? `<button class="btn btn-block" data-act="net-more">Pakia zaidi</button>` : "")); }
+  NET.more = more;
+}
+A["net-more"] = async () => { NET.offset += PAGE; await netLoad(false); };
+
+async function officerView(r, rid) {
+  const id = r.id, isMe = id === S.me.id; await loadGraph().catch(() => {});
+  const [prof, priv, cnt, mutuals] = await Promise.all([
+    cached("prof:" + id, () => rest("profiles", `select=*&id=eq.${id}`)),
+    cached("priv:" + id, () => rest("profile_private", `select=*&id=eq.${id}`)),
+    cached("cnt:" + id, () => rpc("follow_counts", { p_user: id })),
+    cached("mut:" + id, () => rpc("mutual_followers", { p_user: id })),
+  ]);
+  const p = prof[0]; if (!p) return paint(rid, backBtn("network") + empty("🕵️", "Afisa huyu hajapatikana"));
+  rememberProfiles([p]); const pv = priv[0] || {}; const c = Array.isArray(cnt) ? cnt[0] : cnt; const sub = r.sub;
+  let list = null;
+  if (sub === "followers") list = (await rest("follows", `select=p:profiles!follows_follower_id_fkey(*)&following_id=eq.${id}&order=created_at.desc&limit=100`)).map((x) => x.p);
+  else if (sub === "following") list = (await rest("follows", `select=p:profiles!follows_following_id_fkey(*)&follower_id=eq.${id}&order=created_at.desc&limit=100`)).map((x) => x.p);
+  else if (sub === "mutual") list = mutuals;
+  if (list) rememberProfiles(list);
+  const roleLabel = (S.roles.find((x) => x.key === p.role) || {}).label || p.role;
+  const mutualFollow = S.following.has(id) && S.followers.has(id);
+  let admin = "";
+  if (S.me.role === "system_admin" && !isMe) {
+    if (!S.roles.length) S.roles = await rest("app_roles", "select=*&order=sort_order").catch(() => []);
+    admin = `<div class="card"><div class="card-title">Usimamizi (Administrator)</div><div class="row"><select class="input" id="role-sel">${S.roles.map((x) => `<option value="${x.key}" ${x.key === p.role ? "selected" : ""}>${esc(x.label)}</option>`).join("")}</select>
+      <button class="btn btn-primary btn-sm" data-act="set-role" data-id="${id}">Hifadhi cheo</button></div></div>`;
+  }
+  paint(rid, `${backBtn(isMe ? "overview" : "network")}
+  <div class="card"><div class="row" style="align-items:flex-start">${avatarHtml(p, "lg")}<div class="grow"><h2 style="margin:0">${esc(p.full_name || "Afisa")}</h2>
+    <div class="dim">${esc(p.rank || "")}</div><div class="mt">${badge(roleLabel, "b-info")}${mutualFollow && !isMe ? badge("Mnafuatana", "b-ok") : ""}</div></div></div>
+    <div class="kv mt"><div class="k">Kituo</div><div>${esc(p.station || "-")}</div><div class="k">Mkoa</div><div>${esc(p.region || "-")}</div>
+    ${pv.is_public && pv.service_number ? `<div class="k">Service No.</div><div>${esc(pv.service_number)}</div>` : ""}
+    <div class="k">Alijiunga</div><div>${fmtDate(p.created_at)}</div></div>
+    ${(p.skills || []).length ? `<div class="mt">${p.skills.map((s) => `<span class="tag">${esc(s)}</span>`).join("")}</div>` : ""}
+    ${p.bio ? `<p class="mt dim" style="white-space:pre-wrap">${esc(p.bio)}</p>` : ""}
+    <div class="stat-grid mt" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat-box" data-go="network/${id}/followers"><div class="num">${c ? c.followers : 0}</div><div class="label">Wafuasi</div></div>
+      <div class="stat-box" data-go="network/${id}/following"><div class="num">${c ? c.following : 0}</div><div class="label">Anafuata</div></div>
+      <div class="stat-box" data-go="network/${id}/mutual"><div class="num">${mutuals.length}</div><div class="label">Mutual</div></div></div>
+    <div class="btn-row">${isMe ? `<button class="btn btn-primary" data-go="profile">Hariri profile</button>` : `${followBtn(id, false)}<button class="btn" data-act="msg-user" data-id="${id}">💬 Ujumbe</button><button class="btn" data-act="invite-ws" data-id="${id}">🧩 Alika workspace</button>`}</div></div>
+  ${admin}
+  ${list ? `<div class="card"><div class="card-title">${{ followers: "Wanaomfuata", following: "Anaowafuata", mutual: "Mutual followers" }[sub]}</div>${list.map((x) => officerRow(x)).join("") || empty("👥", "Hakuna")}</div>` : ""}`);
+}
+A["set-role"] = async (el) => {
+  if (!needOnline()) return; await rpc("admin_set_role", { p_user: el.dataset.id, p_role: $("#role-sel").value });
+  S.pcache.delete(el.dataset.id); toast("Cheo kimebadilishwa", "ok"); refreshView(true);
+};
+
+/* ---------- MY PROFILE ---------- */
+VIEWS.profile = async (r, rid) => {
+  const me = S.me, pv = S.myPrivate || {}; S._avatar = undefined;
+  let admin = "";
+  if (me.role === "system_admin") {
+    S.roles = await rest("app_roles", "select=*&order=sort_order").catch(() => S.roles);
+    admin = `<div class="card"><div class="card-title">Usimamizi wa roles (Administrator)</div>
+      ${S.roles.map((x) => `<div class="switch-row"><div><b>${esc(x.label)}</b><div class="muted">${esc(x.key)}</div></div>
+        <label class="row" style="gap:6px;font-size:12px"><input type="checkbox" data-act="role-approve" data-key="${esc(x.key)}" ${x.can_approve ? "checked" : ""}> anaweza kuidhinisha</label></div>`).join("")}
+      <form data-form="add-role" class="mt"><div class="field-row"><div class="field"><label>Key (herufi ndogo)</label><input type="text" name="key" pattern="[a-z_]{3,40}" required></div>
+      <div class="field"><label>Jina</label><input type="text" name="label" required></div></div>
+      <label class="row"><input type="checkbox" name="can_approve"> Anaweza kuidhinisha ripoti</label><div class="form-error"></div>
+      <button class="btn btn-sm mt" type="submit">Ongeza role</button></form></div>`;
+  }
+  const roleLabel = (S.roles.find((x) => x.key === me.role) || {}).label || me.role;
+  paint(rid, `
+  <form data-form="profile"><div class="card"><div class="row"><div id="av-prev">${avatarHtml(me, "lg")}</div>
+    <div class="grow"><label class="btn btn-sm" for="av-file">Badilisha picha</label><input type="file" id="av-file" accept="image/*" class="hidden" data-change="avatar">
+    <div class="muted mt">Picha inabanwa kiotomatiki (220×220).</div></div></div></div>
+  <div class="card"><div class="card-title">Taarifa za kikazi</div>
+    <div class="field"><label>Jina kamili</label><input type="text" name="full_name" value="${esc(me.full_name)}" required></div>
+    <div class="field-row"><div class="field"><label>Cheo / Nafasi</label><input type="text" name="rank" value="${esc(me.rank || "")}"></div>
+    <div class="field"><label>Service Number</label><input type="text" name="service_number" value="${esc(pv.service_number || "")}"></div></div>
+    <label class="row mb"><input type="checkbox" name="is_public" ${pv.is_public ? "checked" : ""}> Onyesha service number kwa maafisa wengine</label>
+    <div class="field-row"><div class="field"><label>Kituo cha Zimamoto</label><input type="text" name="station" value="${esc(me.station || "")}"></div>
+    <div class="field"><label>Mkoa</label><input type="text" name="region" value="${esc(me.region || "")}"></div></div>
+    <button type="button" class="btn btn-sm btn-ghost mb" data-act="prefill-local">Chukua kituo/mkoa kutoka Settings za Fire Report</button>
+    <div class="field"><label>Utaalamu (tenganisha kwa koma)</label><input type="text" name="skills" value="${esc((me.skills || []).join(", "))}" placeholder="Fire Investigation, Rescue, First Aid"></div>
+    <div class="field"><label>Wasifu wa kitaalamu</label><textarea name="bio" maxlength="1000">${esc(me.bio || "")}</textarea></div>
+    <div class="kv mb"><div class="k">Cheo cha mfumo</div><div>${badge(roleLabel, "b-info")} <span class="muted">(kinabadilishwa na administrator tu)</span></div>
+    <div class="k">Alijiunga</div><div>${fmtDate(me.created_at)}</div><div class="k">Barua pepe</div><div>${esc(S.session.user.email || "")}</div></div>
+    <div class="form-error"></div><button class="btn btn-primary btn-block" type="submit">Hifadhi</button></div></form>
+  ${admin}
+  <div class="card"><div class="card-title">Akaunti</div><div class="btn-row"><button class="btn" data-act="sync-open">Hali ya usawazishaji</button>
+    <button class="btn" data-act="notif-perm">Washa arifa za kifaa</button>${Host.on ? "" : `<button class="btn btn-danger" data-act="logout">Toka</button>`}</div></div>`);
+  const fi = $("#av-file"); if (fi) fi.addEventListener("change", async () => {
+    const f = fi.files[0]; if (!f) return;
+    try { S._avatar = await imageToDataUrl(f); $("#av-prev").innerHTML = avatarHtml({ avatar: S._avatar, full_name: me.full_name }, "lg"); } catch (e) { fail(e); }
+  });
+  $$('[data-act="role-approve"]').forEach((c) => c.addEventListener("change", async () => {
+    try { await rest("app_roles", `key=eq.${c.dataset.key}`, { method: "PATCH", body: { can_approve: c.checked }, prefer: "return=minimal" }); toast("Imehifadhiwa", "ok"); }
+    catch (e) { fail(e); c.checked = !c.checked; }
+  }));
+};
+A["prefill-local"] = async () => {
+  const [st, rg] = await Promise.all([localSetting("defaultStation"), localSetting("defaultRegion")]);
+  const f = $('[data-form="profile"]'); if (st) f.station.value = st; if (rg) f.region.value = rg;
+  toast(st || rg ? "Imechukuliwa kutoka Fire Report" : "Hakuna settings zilizohifadhiwa kwenye Fire Report", st || rg ? "ok" : "err");
+};
+F.profile = async (f) => {
+  if (!needOnline()) return; const d = new FormData(f);
+  const skills = [...new Set(String(d.get("skills") || "").split(",").map((s) => s.trim()).filter(Boolean))].slice(0, 20);
+  const body = { full_name: String(d.get("full_name")).trim(), rank: String(d.get("rank") || "").trim() || null, station: String(d.get("station") || "").trim() || null,
+    region: String(d.get("region") || "").trim() || null, bio: String(d.get("bio") || "").trim() || null, skills };
+  if (S._avatar) body.avatar = S._avatar;
+  const upd = await rest("profiles", `id=eq.${S.me.id}`, { method: "PATCH", body, prefer: "return=representation" });
+  await rest("profile_private", "on_conflict=id", { method: "POST", body: { id: S.me.id, service_number: String(d.get("service_number") || "").trim() || null, is_public: !!d.get("is_public") }, prefer: "resolution=merge-duplicates,return=minimal" });
+  if (upd[0]) { S.me = upd[0]; S.pcache.set(S.me.id, S.me); cachePut(S.me.id + ":me", S.me); }
+  S.myPrivate = { service_number: String(d.get("service_number") || "").trim(), is_public: !!d.get("is_public") };
+  toast("Profile imehifadhiwa", "ok"); refreshView(true);
+};
+F["add-role"] = async (f) => {
+  if (!needOnline()) return; const d = new FormData(f);
+  await rest("app_roles", "", { method: "POST", body: { key: String(d.get("key")), label: String(d.get("label")), can_approve: !!d.get("can_approve"), sort_order: 50 }, prefer: "return=minimal" });
+  toast("Role imeongezwa", "ok"); refreshView(true);
+};
+A["notif-perm"] = async () => {
+  if (!("Notification" in window)) return toast("Kifaa hiki hakiungi arifa", "err");
+  const p = await Notification.requestPermission(); toast(p === "granted" ? "Arifa zimewashwa" : "Arifa hazijaruhusiwa", p === "granted" ? "ok" : "err");
+};
+
+/* ---------- SYNC PANEL ---------- */
+A["sync-open"] = async () => {
+  const items = await OB.recount(); const lbl = { message: "Ujumbe", task: "Jukumu jipya", taskupdate: "Mabadiliko ya jukumu", workspace: "Workspace", comment: "Maoni ya ripoti" };
+  openModal(`<h3>Hali ya usawazishaji</h3><div class="kv mb"><div class="k">Mtandao</div><div>${navigator.onLine ? "Upo" : "Hakuna"}</div>
+    <div class="k">Realtime</div><div>${S.rt === "live" ? "Imeunganishwa" : "Haijaunganishwa"}</div>
+    <div class="k">Usawazishaji wa mwisho</div><div>${S.lastSync ? fmtDT(S.lastSync) : "-"}</div></div>
+    ${items.length ? items.map((it) => `<div class="item" style="cursor:default"><div class="grow"><div class="t">${lbl[it.op] || it.op} ${badge(it.status === "failed" ? "Imeshindwa" : "Inasubiri", it.status === "failed" ? "b-bad" : "b-warn")}</div>
+      <div class="s">${fmtDT(it.created)} · majaribio ${it.tries}${it.error ? " · " + esc(it.error) : ""}</div></div>
+      ${it.status === "failed" ? `<button class="btn btn-sm" data-act="ob-retry" data-id="${it.id}">Jaribu tena</button>` : ""}
+      <button class="btn btn-sm btn-ghost" data-act="ob-del" data-id="${it.id}">Futa</button></div>`).join("") : empty("✓", "Hakuna kazi zinazosubiri")}
+    <div class="btn-row"><button class="btn btn-primary" data-act="ob-now">Sawazisha sasa</button><button class="btn btn-ghost" data-act="close-modal">Funga</button></div>`);
+};
+A["ob-now"] = async () => { if (!needOnline()) return; await OB.kick(); await refreshBadges(); A["sync-open"](); };
+A["ob-retry"] = async (el) => { const it = await WDB.get("outbox", el.dataset.id); if (it) { it.status = "pending"; it.error = null; await WDB.put("outbox", it); } await OB.kick(); A["sync-open"](); };
+A["ob-del"] = async (el) => { if (!(await confirmBox("Futa kazi hii isiyotumwa? Haitarudi.", "Futa", true))) return; await WDB.del("outbox", el.dataset.id); await OB.recount(); refreshView(true); A["sync-open"](); };
+
+/* =====================================================================
+ * WORKSPACES, TASKS, SHARED REPORTS
+ * ===================================================================== */
+
+/* ---------- shared picker ---------- */
+function pickOfficer(title, onPick, opts = {}) {
+  S._pick = onPick;
+  openModal(`<h3>${esc(title)}</h3><div class="field"><input type="search" class="input" id="pk-q" placeholder="Tafuta afisa kwa jina, kituo, mkoa…" autocomplete="off"></div>
+    <div id="pk-res">${skeleton(2)}</div><div class="btn-row"><button class="btn btn-ghost" data-act="close-modal">Funga</button></div>`, () => {
+    const run = async () => {
+      const q = $("#pk-q").value.trim();
+      try {
+        const rows = (await rpc("search_officers", { p_q: q, p_limit: 20, p_offset: 0 })).filter((p) => !(opts.exclude || []).includes(p.id)); rememberProfiles(rows);
+        const box = $("#pk-res"); if (!box) return;
+        box.innerHTML = rows.map((p) => officerRow(p, "")).join("") || empty("🔎", "Hakuna afisa aliyepatikana");
+        $$("#pk-res .item").forEach((it) => { it.dataset.act = "pick-officer"; });
+      } catch (e) { const box = $("#pk-res"); if (box) box.innerHTML = errCard(e); }
+    };
+    $("#pk-q").addEventListener("input", debounce(run, 300)); run();
+  });
+}
+A["pick-officer"] = async (el) => { const cb = S._pick; closeModal(); if (cb) await cb(el.dataset.id); };
+A["open-file"] = async (el) => { const u = await signedUrl(el.dataset.path); window.open(u, "_blank"); };
+
+/* =====================================================================
+ * WORKSPACES
+ * ===================================================================== */
+VIEWS.workspaces = async (r, rid) => {
+  if (r.id) return wsDetail(r, rid);
+  const uid = S.me.id;
+  const [mem, invs, obs] = await Promise.all([
+    cached("ws-list", () => rest("workspace_members", `select=role,workspaces(*)&user_id=eq.${uid}&order=joined_at.desc`)),
+    cached("wsinv", () => rest("workspace_invitations", `select=id,expires_at,workspaces(name),inviter_id&invitee_id=eq.${uid}&status=eq.pending&order=created_at.desc`)),
+    OB.list(),
+  ]);
+  const ids = mem.map((m) => m.workspaces && m.workspaces.id).filter(Boolean);
+  let counts = {};
+  if (ids.length) { try { (await rest("workspace_members", `select=workspace_id&workspace_id=in.${inList(ids)}&limit=3000`)).forEach((x) => (counts[x.workspace_id] = (counts[x.workspace_id] || 0) + 1)); } catch (e) {} }
+  await getProfiles(invs.map((i) => i.inviter_id));
+  const drafts = obs.filter((o) => o.op === "workspace");
+  paint(rid, `
+  ${invs.length ? `<div class="card"><div class="card-title">Mialiko ya workspace</div>${invs.map((i) => `<div class="item" style="cursor:default"><div class="grow"><div class="t">${esc((i.workspaces || {}).name)}</div>
+    <div class="s">kutoka ${esc(pname(i.inviter_id))} · inaisha ${fmtDate(i.expires_at)}</div></div>
+    <button class="btn btn-sm btn-primary" data-act="inv-accept" data-k="ws" data-id="${i.id}">Kubali</button><button class="btn btn-sm btn-ghost" data-act="inv-reject" data-k="ws" data-id="${i.id}">Kataa</button></div>`).join("")}</div>` : ""}
+  ${drafts.map((d) => `<div class="item" style="cursor:default;border-style:dashed"><div class="grow"><div class="t">${esc(d.payload.row.name)}</div>
+    <div class="s">${d.status === "failed" ? "Imeshindwa: " + esc(d.error) : "Inasubiri kutumwa kwa seva…"}</div></div>${badge(d.status === "failed" ? "Imeshindwa" : "Rasimu", d.status === "failed" ? "b-bad" : "b-warn")}</div>`).join("")}
+  ${mem.length ? mem.filter((m) => m.workspaces).map((m) => { const w = m.workspaces; return `<div class="item" data-go="workspaces/${w.id}"><div class="avatar">🧩</div>
+    <div class="grow"><div class="t ellip">${esc(w.name)}</div><div class="s ellip">${esc(w.description || "—")}</div>
+    <div class="s">Wanachama ${counts[w.id] || 1} · ${fmtDate(w.created_at)}</div></div><div>${badge(w.status === "open" ? "Wazi" : "Imefungwa", w.status === "open" ? "b-ok" : "b-bad")}${m.role === "leader" ? "<br>" + badge("Leader", "b-info") : ""}</div></div>`; }).join("")
+  : drafts.length ? "" : empty("🧩", "Bado hujajiunga na workspace yoyote. Anzisha ya kwanza!")}
+  <button class="fab" data-act="ws-new" title="Workspace mpya">＋</button>`);
+};
+A["ws-new"] = () => openModal(`<h3>Workspace mpya</h3><form data-form="ws-new">
+  <div class="field"><label>Jina</label><input type="text" name="name" required minlength="2" maxlength="120" placeholder="mf. Fire Investigation Team"></div>
+  <div class="field"><label>Maelezo</label><textarea name="description" maxlength="500"></textarea></div>
+  <p class="muted">Ukiwa offline, workspace itahifadhiwa kama rasimu na kutumwa mtandao ukirudi.</p><div class="form-error"></div>
+  <div class="btn-row"><button class="btn btn-primary" type="submit">Unda</button><button type="button" class="btn btn-ghost" data-act="close-modal">Ghairi</button></div></form>`);
+F["ws-new"] = async (f) => {
+  const d = new FormData(f); const row = { id: uuid(), name: String(d.get("name")).trim(), description: String(d.get("description") || "").trim() || null };
+  await OB.add("workspace", { row }); closeModal(); toast(navigator.onLine ? "Inaundwa…" : "Imehifadhiwa kama rasimu – itatumwa mtandao ukirudi", navigator.onLine ? "ok" : ""); refreshView(true);
+};
+
+async function wsDetail(r, rid) {
+  const id = r.id, uid = S.me.id, tab = r.sub || "members";
+  const [wsRows, members] = await Promise.all([
+    cached("ws:" + id, () => rest("workspaces", `select=*&id=eq.${id}`)),
+    cached("wsm:" + id, () => rest("workspace_members", `select=*,p:profiles(id,full_name,rank,station,avatar)&workspace_id=eq.${id}&order=joined_at`)),
+  ]);
+  const ws = wsRows[0]; if (!ws) return paint(rid, backBtn("workspaces") + empty("🧩", "Workspace haipatikani"));
+  rememberProfiles(members.map((m) => m.p).filter(Boolean));
+  const mine = members.find((m) => m.user_id === uid);
+  if (!mine) { // si mwanachama – labda ana mwaliko
+    const inv = (await rest("workspace_invitations", `select=id&workspace_id=eq.${id}&invitee_id=eq.${uid}&status=eq.pending`).catch(() => []))[0];
+    return paint(rid, `${backBtn("workspaces")}<div class="card"><h2>${esc(ws.name)}</h2><p class="dim">${esc(ws.description || "")}</p>
+      ${inv ? `<div class="btn-row"><button class="btn btn-primary" data-act="inv-accept" data-k="ws" data-id="${inv.id}">Kubali mwaliko</button><button class="btn" data-act="inv-reject" data-k="ws" data-id="${inv.id}">Kataa</button></div>` : '<p class="muted">Wewe si mwanachama wa workspace hii.</p>'}</div>`);
+  }
+  const leader = mine.role === "leader", canInvite = leader || mine.can_invite, open = ws.status === "open";
+  let body = "";
+  if (tab === "members") {
+    let pend = [];
+    if (leader) pend = await rest("workspace_invitations", `select=id,expires_at,p:profiles!workspace_invitations_invitee_id_fkey(full_name)&workspace_id=eq.${id}&status=eq.pending`).catch(() => []);
+    body = `${canInvite && open ? `<button class="btn btn-primary btn-sm mb" data-act="ws-invite" data-id="${id}">＋ Alika afisa</button>` : ""}
+    ${members.map((m) => { const p = m.p || {}; const isCreator = m.user_id === ws.creator_id;
+      return `<div class="item" style="cursor:default">${avatarHtml(p)}<div class="grow" data-act="open-officer" data-id="${m.user_id}"><div class="t ellip">${esc(p.full_name || "Afisa")}${m.user_id === uid ? " (wewe)" : ""}</div>
+        <div class="s ellip">${esc([p.rank, p.station].filter(Boolean).join(" · "))}</div><div>${badge(isCreator ? "Muanzilishi" : m.role === "leader" ? "Team Leader" : "Mwanachama", m.role === "leader" ? "b-info" : "")}${m.can_invite ? badge("Anaalika", "") : ""}${m.can_assign_tasks ? badge("Anagawa kazi", "") : ""}</div></div>
+        ${leader && !isCreator ? `<button class="btn btn-sm btn-ghost" data-act="ws-member-menu" data-ws="${id}" data-uid="${m.user_id}">⋯</button>` : ""}</div>`; }).join("")}
+    ${pend.length ? `<div class="card-title mt">Mialiko inayosubiri</div>${pend.map((i) => `<div class="item" style="cursor:default"><div class="grow"><div class="t">${esc((i.p || {}).full_name)}</div><div class="s">inaisha ${fmtDate(i.expires_at)}</div></div>
+      <button class="btn btn-sm btn-ghost" data-act="ws-inv-cancel" data-id="${i.id}">Futa</button></div>`).join("")}` : ""}`;
+  } else if (tab === "tasks") {
+    const tasks = await cached("wstasks:" + id, () => rest("tasks", `select=*&workspace_id=eq.${id}&order=created_at.desc&limit=100`));
+    await getProfiles(tasks.flatMap((t) => [t.assigned_by, t.assigned_to]));
+    body = `${(leader || mine.can_assign_tasks) && open ? `<button class="btn btn-primary btn-sm mb" data-act="task-new" data-ctx="ws:${id}">＋ Gawa jukumu</button>` : ""}${tasks.map(taskCard).join("") || empty("✅", "Hakuna kazi kwenye workspace hii")}`;
+  } else if (tab === "reports") {
+    const rows = await cached("wsrep:" + id, () => rest("report_permissions", `select=permission,r:shared_reports(id,title,report_number,approval_status,updated_at)&workspace_id=eq.${id}`));
+    body = rows.filter((x) => x.r).map((x) => reportCard(x.r, x.permission)).join("") || empty("📄", "Hakuna ripoti zilizoshirikishwa na timu hii");
+  }
+  paint(rid, `${backBtn("workspaces")}
+  <div class="card"><div class="row" style="align-items:flex-start"><div class="avatar lg">🧩</div><div class="grow"><h2 style="margin:0">${esc(ws.name)}</h2>
+    <div class="dim">${esc(ws.description || "")}</div><div class="mt">${badge(open ? "Wazi" : "Imefungwa", open ? "b-ok" : "b-bad")}${leader ? badge("Leader", "b-info") : ""}</div>
+    <div class="muted mt">Imeanzishwa ${fmtDate(ws.created_at)} na ${esc(pname(ws.creator_id))}${ws.closed_at ? " · Imefungwa " + fmtDate(ws.closed_at) : ""}</div></div></div>
+    <div class="btn-row mt"><button class="btn btn-sm" data-act="ws-chat" data-id="${id}">💬 Chat ya timu</button>
+    ${leader ? `<button class="btn btn-sm ${open ? "btn-danger" : ""}" data-act="ws-toggle" data-id="${id}" data-open="${open ? 1 : 0}">${open ? "Funga workspace" : "Fungua tena"}</button>` : ""}
+    <button class="btn btn-sm btn-ghost" data-act="ws-leave" data-id="${id}" data-creator="${ws.creator_id === uid ? 1 : 0}">Ondoka</button></div></div>
+  <div class="tabs">${[["members", "Wanachama"], ["tasks", "Kazi"], ["reports", "Ripoti"]].map(([k, l]) => `<button class="${tab === k ? "sel" : ""}" data-go="workspaces/${id}/${k}">${l}</button>`).join("")}</div>${body}`);
+}
+A["ws-chat"] = async (el) => { const c = await rest("conversations", `select=id&workspace_id=eq.${el.dataset.id}`); if (c[0]) go("messages/" + c[0].id); else toast("Chat bado haijaundwa", "err"); };
+A["ws-toggle"] = async (el) => {
+  if (!needOnline()) return; const open = el.dataset.open === "1";
+  if (open && !(await confirmBox("Kufunga workspace kutazuia kazi mpya na mialiko mipya. Unaweza kuifungua tena baadaye.", "Funga", true))) return;
+  await rest("workspaces", `id=eq.${el.dataset.id}`, { method: "PATCH", body: { status: open ? "closed" : "open" }, prefer: "return=minimal" }); toast(open ? "Workspace imefungwa" : "Workspace imefunguliwa", "ok"); refreshView(true);
+};
+A["ws-leave"] = async (el) => {
+  if (el.dataset.creator === "1") return toast("Muanzilishi hawezi kuondoka. Funga workspace badala yake.", "err");
+  if (!needOnline() || !(await confirmBox("Unataka kuondoka kwenye workspace hii?", "Ondoka", true))) return;
+  await rest("workspace_members", `workspace_id=eq.${el.dataset.id}&user_id=eq.${S.me.id}`, { method: "DELETE", prefer: "return=minimal" }); toast("Umeondoka", "ok"); go("workspaces");
+};
+A["ws-inv-cancel"] = async (el) => { if (!needOnline()) return; await rest("workspace_invitations", `id=eq.${el.dataset.id}`, { method: "DELETE", prefer: "return=minimal" }); refreshView(true); };
+async function sendWsInvite(wsId, userId) {
+  try { await rest("workspace_invitations", "", { method: "POST", body: { workspace_id: wsId, invitee_id: userId }, prefer: "return=minimal" }); toast("Mwaliko umetumwa", "ok"); }
+  catch (e) { if (e instanceof ApiError && (e.status === 409 || /duplicate/i.test(e.raw && e.raw.message || ""))) toast("Mwaliko tayari upo", "err"); else throw e; }
+}
+A["ws-invite"] = (el) => { if (!needOnline()) return; const wsId = el.dataset.id; pickOfficer("Alika afisa kwenye workspace", async (uid) => { await sendWsInvite(wsId, uid); refreshView(true); }); };
+A["invite-ws"] = async (el) => {
+  if (!needOnline()) return; const uid = S.me.id;
+  const rows = (await rest("workspace_members", `select=role,can_invite,workspaces(id,name,status)&user_id=eq.${uid}`)).filter((x) => x.workspaces && x.workspaces.status === "open" && (x.role === "leader" || x.can_invite));
+  if (!rows.length) return toast("Huna workspace unayoweza kualika watu", "err");
+  S._inviteUser = el.dataset.id;
+  openModal(`<h3>Alika ${esc(pname(el.dataset.id))}</h3>${rows.map((x) => `<div class="item" data-act="invite-ws-do" data-ws="${x.workspaces.id}"><div class="avatar">🧩</div><div class="grow t">${esc(x.workspaces.name)}</div></div>`).join("")}
+    <div class="btn-row"><button class="btn btn-ghost" data-act="close-modal">Funga</button></div>`);
+};
+A["invite-ws-do"] = async (el) => { await sendWsInvite(el.dataset.ws, S._inviteUser); closeModal(); };
+A["ws-member-menu"] = async (el) => {
+  const wsId = el.dataset.ws, u = el.dataset.uid; const m = (await rest("workspace_members", `select=*&workspace_id=eq.${wsId}&user_id=eq.${u}`))[0]; if (!m) return;
+  openModal(`<h3>${esc(pname(u))}</h3>
+    <div class="switch-row"><span>Team Leader</span><input type="checkbox" data-act="wsm-flag" data-f="leader" data-ws="${wsId}" data-uid="${u}" ${m.role === "leader" ? "checked" : ""}></div>
+    <div class="switch-row"><span>Anaweza kualika</span><input type="checkbox" data-act="wsm-flag" data-f="can_invite" data-ws="${wsId}" data-uid="${u}" ${m.can_invite ? "checked" : ""}></div>
+    <div class="switch-row"><span>Anaweza kugawa kazi</span><input type="checkbox" data-act="wsm-flag" data-f="can_assign_tasks" data-ws="${wsId}" data-uid="${u}" ${m.can_assign_tasks ? "checked" : ""}></div>
+    <div class="btn-row"><button class="btn btn-danger" data-act="wsm-remove" data-ws="${wsId}" data-uid="${u}">Ondoa kwenye workspace</button><button class="btn btn-ghost" data-act="close-modal">Funga</button></div>`);
+};
+A["wsm-flag"] = async (el) => {
+  if (!needOnline()) { el.checked = !el.checked; return; }
+  const body = el.dataset.f === "leader" ? { role: el.checked ? "leader" : "member" } : { [el.dataset.f]: el.checked };
+  try { await rest("workspace_members", `workspace_id=eq.${el.dataset.ws}&user_id=eq.${el.dataset.uid}`, { method: "PATCH", body, prefer: "return=minimal" }); toast("Imehifadhiwa", "ok"); }
+  catch (e) { el.checked = !el.checked; throw e; }
+};
+A["wsm-remove"] = async (el) => {
+  if (!needOnline() || !(await confirmBox("Ondoa mwanachama huyu?", "Ondoa", true))) return;
+  await rest("workspace_members", `workspace_id=eq.${el.dataset.ws}&user_id=eq.${el.dataset.uid}`, { method: "DELETE", prefer: "return=minimal" }); closeModal(); toast("Ameondolewa", "ok"); refreshView(true);
+};
+
+/* =====================================================================
+ * TASKS
+ * ===================================================================== */
+const TASKS = { tab: "mine", offset: 0 };
+function isOverdue(t) { return t.deadline && new Date(t.deadline) < new Date() && !["completed", "rejected"].includes(t.status); }
+function taskCard(t, pendingUpd) {
+  const st = TASK_STATUS[t.status] || ["?", ""]; const od = isOverdue(t);
+  S.taskMap = S.taskMap || new Map(); S.taskMap.set(t.id, t);
+  const me = S.me.id; const who = t.assigned_to === me ? `Kutoka ${esc(pname(t.assigned_by))}` : `Kwa ${esc(pname(t.assigned_to))}`;
+  return `<div class="item" data-act="task-open" data-id="${t.id}"><div class="grow"><div class="row between"><span class="t ellip">${esc(t.title)}</span>${badge(st[0], st[1])}</div>
+    <div class="s">${who} · ${PRIORITY[t.priority] || ""}${t.deadline ? ` · <span style="color:${od ? "var(--danger)" : "inherit"}">${od ? "Imechelewa " : "Mwisho "}${fmtDT(t.deadline)}</span>` : ""}</div>
+    <div class="bar mt"><i style="width:${t.progress || 0}%"></i></div>${pendingUpd ? '<div class="muted mt">⏳ Mabadiliko yanasubiri kuthibitishwa na seva</div>' : ""}</div></div>`;
+}
+VIEWS.tasks = async (r, rid) => {
+  const uid = S.me.id, tab = TASKS.tab, now = new Date().toISOString();
+  const base = "select=*&order=deadline.asc.nullslast,created_at.desc&limit=" + PAGE + "&offset=" + TASKS.offset;
+  const q = {
+    mine: `assigned_to=eq.${uid}&status=neq.completed`,
+    assigned: `assigned_by=eq.${uid}&assigned_to=neq.${uid}&status=neq.completed`,
+    done: `status=eq.completed&or=(assigned_to.eq.${uid},assigned_by.eq.${uid})`,
+    overdue: `deadline=lt.${now}&status=not.in.(completed,rejected)&or=(assigned_to.eq.${uid},assigned_by.eq.${uid})`,
+    team: `assigned_to=neq.${uid}&assigned_by=neq.${uid}&or=(workspace_id.not.is.null,group_id.not.is.null)`,
+  }[tab];
+  const [tasks, obs] = await Promise.all([cached(`tasks:${tab}:${TASKS.offset}`, () => rest("tasks", `${q}&${base}`)), OB.list()]);
+  await getProfiles(tasks.flatMap((t) => [t.assigned_by, t.assigned_to]));
+  const pendNew = tab === "mine" ? obs.filter((o) => o.op === "task" && o.payload.row.assigned_to === uid) : tab === "assigned" ? obs.filter((o) => o.op === "task" && o.payload.row.assigned_to !== uid) : [];
+  const pendUpd = new Set(obs.filter((o) => o.op === "taskupdate").map((o) => o.payload.id));
+  paint(rid, `<div class="chips">${[["mine", "Zangu"], ["assigned", "Nilizogawa"], ["done", "Zilizokamilika"], ["overdue", "Zilizochelewa"], ["team", "Timu"]].map(([k, l]) => `<span class="chip ${tab === k ? "sel" : ""}" data-act="task-tab" data-tab="${k}">${l}</span>`).join("")}</div>
+  ${pendNew.map((o) => `<div class="item" style="cursor:default;border-style:dashed"><div class="grow"><div class="t">${esc(o.payload.row.title)}</div><div class="s">${o.status === "failed" ? "Imeshindwa: " + esc(o.error) : "⏳ Inasubiri kutumwa kwa seva"}</div></div>${badge(o.status === "failed" ? "Imeshindwa" : "Rasimu", o.status === "failed" ? "b-bad" : "b-warn")}</div>`).join("")}
+  ${tasks.map((t) => taskCard(t, pendUpd.has(t.id))).join("") || (pendNew.length ? "" : empty("✅", "Hakuna kazi hapa"))}
+  <div class="row" style="justify-content:center">${TASKS.offset ? `<button class="btn btn-sm" data-act="task-page" data-d="-1">← Zilizotangulia</button>` : ""}${tasks.length === PAGE ? `<button class="btn btn-sm" data-act="task-page" data-d="1">Zinazofuata →</button>` : ""}</div>
+  <button class="fab" data-act="task-new" title="Jukumu jipya">＋</button>`);
+  if (rid === S.rid && r.q.get("open")) { const id = r.q.get("open"); history.replaceState(null, "", "#/tasks"); A["task-open"]({ dataset: { id } }); }
+};
+A["task-tab"] = (el) => { TASKS.tab = el.dataset.tab; TASKS.offset = 0; render(); };
+A["task-page"] = (el) => { TASKS.offset = Math.max(0, TASKS.offset + PAGE * Number(el.dataset.d)); render(); };
+
+async function myTaskContexts() {
+  const uid = S.me.id;
+  const [w, g] = await Promise.all([
+    cached("ws-assign", () => rest("workspace_members", `select=role,can_assign_tasks,workspaces(id,name,status)&user_id=eq.${uid}`)).catch(() => []),
+    cached("gr-admin", () => rest("group_members", `select=role,professional_groups(id,name)&user_id=eq.${uid}&role=eq.admin`)).catch(() => []),
+  ]);
+  return { ws: w.filter((x) => x.workspaces && x.workspaces.status === "open" && (x.role === "leader" || x.can_assign_tasks)).map((x) => x.workspaces), gr: g.map((x) => x.professional_groups).filter(Boolean) };
+}
+async function ctxAssignees(ctx) {
+  if (ctx.startsWith("ws:")) return (await cached("wsm:" + ctx.slice(3), () => rest("workspace_members", `select=*,p:profiles(id,full_name,rank,station,avatar)&workspace_id=eq.${ctx.slice(3)}&order=joined_at`))).map((m) => m.p).filter(Boolean);
+  if (ctx.startsWith("gr:")) return (await cached("grm:" + ctx.slice(3), () => rest("group_members", `select=p:profiles(id,full_name,rank,station,avatar)&group_id=eq.${ctx.slice(3)}`))).map((m) => m.p).filter(Boolean);
+  const mu = await cached("mutual", () => rpc("mutual_followers", { p_user: S.me.id })).catch(() => []);
+  return [S.me, ...mu];
+}
+A["task-new"] = async (el) => {
+  const preset = (el && el.dataset && el.dataset.ctx) || "me";
+  const [ctxs, reports] = await Promise.all([myTaskContexts(), localReports()]);
+  openModal(`<h3>Jukumu jipya</h3><form data-form="task-new">
+    <div class="field"><label>Kichwa cha jukumu</label><input type="text" name="title" required minlength="2" maxlength="200"></div>
+    <div class="field"><label>Maelezo</label><textarea name="description"></textarea></div>
+    <div class="field"><label>Mahali pa jukumu</label><select name="ctx" id="tk-ctx"><option value="me">Binafsi (mimi au mutual follower)</option>
+      ${ctxs.ws.map((w) => `<option value="ws:${w.id}" ${preset === "ws:" + w.id ? "selected" : ""}>Workspace: ${esc(w.name)}</option>`).join("")}
+      ${ctxs.gr.map((g) => `<option value="gr:${g.id}" ${preset === "gr:" + g.id ? "selected" : ""}>Kikundi: ${esc(g.name)}</option>`).join("")}</select></div>
+    <div class="field"><label>Gawa kwa</label><select name="assigned_to" id="tk-to"><option value="">Inapakia…</option></select></div>
+    <div class="field"><label>Tukio husika (Fire Report)</label><select name="related_incident"><option value="">— hakuna —</option>
+      ${reports.slice(0, 100).map((x) => `<option value="${esc(x.reportNumber || x.incidentId)}">${esc((x.reportNumber || x.incidentId) + " · " + ((x.incident || {}).type || "") + " · " + ((x.incident || {}).date || ""))}</option>`).join("")}</select></div>
+    <div class="field-row"><div class="field"><label>Kipaumbele</label><select name="priority"><option value="low">Chini</option><option value="medium" selected>Wastani</option><option value="high">Juu</option><option value="critical">Dharura</option></select></div>
+    <div class="field"><label>Tarehe ya kuanza</label><input type="date" name="start_date"></div></div>
+    <div class="field"><label>Deadline</label><input type="datetime-local" name="deadline"></div>
+    <div class="field"><label>Viambatisho (picha/PDF/nyaraka, ≤ MB 10)</label><input type="file" name="files" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt"></div>
+    <p class="muted">Ukiwa offline, jukumu litahifadhiwa na kutumwa mtandao ukirudi. Hali ya "Imetumwa" itaonekana baada ya seva kuthibitisha.</p>
+    <div class="form-error"></div><div class="btn-row"><button class="btn btn-primary" type="submit">Gawa jukumu</button><button type="button" class="btn btn-ghost" data-act="close-modal">Ghairi</button></div></form>`, async () => {
+    const sel = $("#tk-to"), ctx = $("#tk-ctx");
+    const fill = async () => {
+      sel.innerHTML = '<option value="">Inapakia…</option>';
+      const list = await ctxAssignees(ctx.value).catch(() => [S.me]); rememberProfiles(list);
+      sel.innerHTML = list.map((p) => `<option value="${p.id}">${esc(p.id === S.me.id ? "Mimi mwenyewe" : p.full_name)}</option>`).join("");
+    };
+    ctx.addEventListener("change", fill); fill();
+  });
+};
+F["task-new"
