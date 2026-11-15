@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Workplace — Fire Report</title>
+<meta name="theme-color" content="#4a4687">
+<style>
+/* ============================================================
+   FIRE REPORT – WORKPLACE
+   Design tokens copied from login.html (same palette)
+   ============================================================ */
+:root {
+  --bg: #f3f4f8; --card: #ffffff; --text: #1f2333; --muted: #6a7087;
+  --line: #e1e4ee; --brand: #4a4687; --accent: #cf4a24;
+  --accent-text: #ffffff; --ok: #1f8a4c; --warn: #b7791f;
+  --err: #c53030; --field: #f7f8fc;
+  --shadow: 0 6px 20px rgba(40, 44, 80, .08);
+  --radius: 16px;
+}
+:root[data-theme="dark"] {
+  --bg: #0e1420; --card: #172033; --text: #eef2f8; --muted: #9aa4b2;
+  --line: #26324a; --brand: #3a3670; --accent: #e2562e;
+  --accent-text: #ffffff; --ok: #46c27a; --warn: #e0a93b;
+  --err: #ff7a6b; --field: #101827;
+  --shadow: 0 6px 20px rgba(0, 0, 0, .35);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 15px; line-height: 1.45; min-height: 100vh;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 70px);
+}
+
+/* ---------- Topbar ---------- */
+header.top {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--brand); color: #fff;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 12px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+header.top h1 { font-size: 17px; margin: 0; font-weight: 600; flex: 1; }
+header.top button {
+  width: 38px; height: 38px; border: 0; border-radius: 50%;
+  background: rgba(255,255,255,.16); color: #fff; font-size: 18px;
+  cursor: pointer; position: relative; flex: none;
+}
+.badge-dot {
+  position: absolute; top: 4px; right: 4px;
+  min-width: 16px; height: 16px; border-radius: 8px;
+  background: var(--accent); color: #fff; font-size: 10px;
+  font-weight: 700; display: grid; place-items: center;
+  padding: 0 4px; border: 2px solid var(--brand);
+}
+
+/* ---------- Bottom nav ---------- */
+nav.bottom {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+  background: var(--card); border-top: 1px solid var(--line);
+  padding: 6px 2px calc(env(safe-area-inset-bottom, 0px) + 6px);
+  display: flex; justify-content: space-around;
+  box-shadow: 0 -4px 14px rgba(0,0,0,.06);
+}
+nav.bottom button {
+  flex: 1; border: 0; background: transparent; color: var(--muted);
+  font: inherit; font-size: 10px; font-weight: 600;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 6px 0; border-radius: 10px; cursor: pointer; position: relative;
+}
+nav.bottom button .ic { font-size: 17px; line-height: 1; }
+nav.bottom button.active { color: var(--brand); }
+:root[data-theme="dark"] nav.bottom button.active { color: #a9a4f0; }
+nav.bottom .nav-badge {
+  position: absolute; top: 2px; right: 50%; transform: translateX(12px);
+  min-width: 14px; height: 14px; border-radius: 7px;
+  background: var(--accent); color: #fff; font-size: 9px;
+  font-weight: 700; display: grid; place-items: center; padding: 0 3px;
+}
+
+/* ---------- Main ---------- */
+main { max-width: 720px; margin: 0 auto; padding: 14px 12px 24px; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: var(--radius); padding: 16px;
+  box-shadow: var(--shadow); margin-bottom: 12px;
+}
+.card-title {
+  font-size: 15px; font-weight: 700; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.muted { color: var(--muted); font-size: 13px; }
+.hint { color: var(--muted); font-size: 13px; padding: 12px 4px; text-align: center; }
+.empty-state { text-align: center; padding: 30px 12px; color: var(--muted); }
+.empty-state .ic { font-size: 40px; margin-bottom: 8px; opacity: .55; }
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 1.5px solid var(--line); background: var(--field); color: var(--text);
+  border-radius: 12px; padding: 10px 14px; font: inherit; font-weight: 600;
+  cursor: pointer; transition: transform .06s, background .15s;
+}
+.btn:active { transform: scale(.98); }
+.btn.primary { background: var(--brand); color: #fff; border-color: transparent; }
+.btn.accent { background: var(--accent); color: #fff; border-color: transparent; }
+.btn.danger { color: var(--err); border-color: var(--err); }
+.btn.sm { padding: 6px 10px; font-size: 13px; border-radius: 10px; }
+.btn.block { width: 100%; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-row .btn { flex: 1; min-width: 120px; }
+
+/* ---------- Fields ---------- */
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.field input, .field textarea, .field select {
+  width: 100%; padding: 11px 12px; font: inherit; color: var(--text);
+  background: var(--field); border: 1.5px solid var(--line);
+  border-radius: 11px; outline: none;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(74,70,135,.18);
+}
+.field textarea { resize: vertical; min-height: 80px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex; overflow-x: auto; gap: 4px; margin-bottom: 12px;
+  border-bottom: 1px solid var(--line); padding-bottom: 2px;
+}
+.tabs button {
+  border: 0; background: transparent; color: var(--muted);
+  padding: 8px 12px; font: inherit; font-weight: 600; font-size: 13px;
+  cursor: pointer; border-radius: 8px 8px 0 0; white-space: nowrap;
+}
+.tabs button.active { color: var(--text); background: var(--field); }
+
+/* ---------- List item ---------- */
+.list-item {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 13px; padding: 12px; margin-bottom: 8px;
+  cursor: pointer; transition: background .12s;
+}
+.list-item:hover { background: var(--field); }
+.list-item .row1 { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.list-item .name { font-weight: 700; font-size: 14px; flex: 1; }
+.list-item .meta { font-size: 12px; color: var(--muted); }
+.avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--brand); color: #fff; font-weight: 700;
+  display: grid; place-items: center; font-size: 15px; flex: none;
+}
+.avatar.sm { width: 30px; height: 30px; font-size: 12px; }
+
+/* ---------- Pills ---------- */
+.pill {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 11px; font-weight: 700;
+}
+.pill.ok { background: rgba(31,138,76,.15); color: var(--ok); }
+.pill.warn { background: rgba(183,121,31,.15); color: var(--warn); }
+.pill.err { background: rgba(197,48,48,.15); color: var(--err); }
+.pill.info { background: rgba(74,70,135,.15); color: var(--brand); }
+:root[data-theme="dark"] .pill.info { color: #a9a4f0; }
+
+/* ---------- Messages ---------- */
+.msg-bubble {
+  max-width: 82%; padding: 8px 12px; border-radius: 14px;
+  background: var(--field); border: 1px solid var(--line);
+  margin-bottom: 6px; font-size: 14px; word-wrap: break-word;
+}
+.msg-bubble.mine {
+  margin-left: auto; background: var(--brand); color: #fff; border-color: transparent;
+}
+.msg-bubble .when { font-size: 10px; opacity: .7; margin-top: 3px; display: block; }
+.msg-bubble .sender { font-size: 11px; font-weight: 700; color: var(--accent); margin-bottom: 2px; }
+
+/* ---------- Modal ---------- */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.55);
+  z-index: 50; display: flex; align-items: flex-end; justify-content: center;
+  animation: fadeIn .15s;
+}
+.modal {
+  background: var(--card); width: 100%; max-width: 520px;
+  border-radius: 20px 20px 0 0; padding: 18px 16px
+    calc(env(safe-area-inset-bottom, 0px) + 18px);
+  max-height: 88vh; overflow-y: auto;
+  animation: slideUp .22s cubic-bezier(.2,.9,.25,1);
+}
+.modal h3 { margin: 0 0 12px; font-size: 17px; }
+@keyframes fadeIn { from { opacity: 0; } }
+@keyframes slideUp { from { transform: translateY(30px); } }
+
+/* ---------- Toast ---------- */
+#toast {
+  position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  transform: translateX(-50%) translateY(20px);
+  background: #1f2333; color: #fff; padding: 11px 18px;
+  border-radius: 22px; font-size: 13px; max-width: 92vw;
+  opacity: 0; pointer-events: none; transition: all .25s; z-index: 100;
+  text-align: center;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.err { background: var(--err); }
+#toast.ok { background: var(--ok); }
+
+/* ---------- Sync banner ---------- */
+.sync-banner {
+  padding: 8px 12px; border-radius: 10px; font-size: 12px;
+  font-weight: 600; margin-bottom: 10px; text-align: center;
+}
+.sync-banner.local { background: rgba(183,121,31,.15); color: var(--warn); }
+.sync-banner.offline { background: rgba(197,48,48,.12); color: var(--err); }
+.sync-banner.online { background: rgba(31,138,76,.12); color: var(--ok); }
+
+/* ---------- Search ---------- */
+.search-bar { position: relative; margin-bottom: 10px; }
+.search-bar input {
+  width: 100%; padding: 11px 12px 11px 38px; font: inherit;
+  background: var(--field); border: 1.5px solid var(--line);
+  border-radius: 12px; outline: none; color: var(--text);
+}
+.search-bar::before {
+  content: "🔍"; position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%); font-size: 15px; opacity: .6;
+}
+
+/* ---------- Stat grid ---------- */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.stat-box {
+  background: var(--card); border: 1px solid var(--line);
+  border-radius: 13px; padding: 12px 10px; text-align: center;
+  box-shadow: var(--shadow);
+}
+.stat-box .num { font-size: 22px; font-weight: 800; color: var(--brand); }
+:root[data-theme="dark"] .stat-box .num { color: #a9a4f0; }
+.stat-box .label { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 600; }
+
+.divider { height: 1px; background: var(--line); margin: 10px 0; }
+
+/* ---------- Auth gate ---------- */
+.auth-gate {
+  max-width: 460px; margin: 40px auto; padding: 24px 20px;
+  text-align: center;
+}
+.auth-gate .big { font-size: 60px; margin-bottom: 12px; }
+.auth-gate h2 { margin: 0 0 8px; font-size: 20px; }
+.auth-gate p { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+.auth-gate .btn { max-width: 260px; margin: 0 auto; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <button id="back" aria-label="Rudi">&larr;</button>
+  <h1>Workplace</h1>
+  <button id="notif-btn" aria-label="Notifications">🔔<span class="badge-dot" id="notif-badge" hidden>0</span></button>
+</header>
+
+<main id="view"></main>
+
+<nav class="bottom" id="bottom-nav" hidden>
+  <button data-route="overview"><span class="ic">🏠</span>Overview</button>
+  <button data-route="network"><span class="ic">👥</span>Network</button>
+  <button data-route="workspaces"><span class="ic">🧩</span>Workspaces</button>
+  <button data-route="reports"><span class="ic">📄</span>Shared</button>
+  <button data-route="messages"><span class="ic">💬</span>Messages<span class="nav-badge" id="msg-badge" hidden>0</span></button>
+  <button data-route="tasks"><span class="ic">✅</span>Tasks</button>
+  <button data-route="more"><span class="ic">⋯</span>More</button>
+</nav>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ================================================================
+   FIRE REPORT – WORKPLACE  (workspace.html) — v2
+   Auto sign-in: reads current user from CloudSync (login.html flow).
+   NO local placeholder user, NO seeded sample officers.
+   All workplace data is stored in IndexedDB (namespaced `wb_*`).
+   ================================================================ */
+(function () {
+"use strict";
+
+/* ---------------------------------------------------------------
+   0) Helpers
+   --------------------------------------------------------------- */
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const uid = (p) => (p||"wb") + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,8);
+const now = () => new Date().toISOString();
+const fmtDate = (iso) => {
+  if (!iso) return "–";
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  return d.toLocaleDateString() + " " + d.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+};
+const fmtShort = (iso) => {
+  if (!iso) return "–";
+  const d = new Date(iso); if (isNaN(d)) return iso;
+  return d.toLocaleDateString();
+};
+
+function toast(msg, kind) {
+  const el = $("#toast");
+  el.textContent = msg;
+  el.className = (kind || "") + " show";
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = (kind||""), 2600);
+}
+
+/* ---------------------------------------------------------------
+   1) IndexedDB layer (namespaced `wb_*`)
+   --------------------------------------------------------------- */
+const WB = (function () {
+  const DB_NAME = "fire_workplace_db";
+  const DB_VER  = 1;
+  const STORES = [
+    "wb_profiles", "wb_follows", "wb_workspaces", "wb_ws_members",
+    "wb_ws_invites", "wb_shared_reports", "wb_tasks",
+    "wb_conversations", "wb_messages", "wb_groups",
+    "wb_notifications", "wb_activity", "wb_sync_queue"
+  ];
+  let db = null;
+
+  function open() {
+    if (db) return Promise.resolve(db);
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(DB_NAME, DB_VER);
+      req.onupgradeneeded = (e) => {
+        const d = e.target.result;
+        STORES.forEach((name) => {
+          if (!d.objectStoreNames.contains(name)) {
+            const store = d.createObjectStore(name, { keyPath: "id" });
+            if (name === "wb_follows") {
+              store.createIndex("follower",  "followerId");
+              store.createIndex("following", "followingId");
+            }
+            if (name === "wb_ws_members") {
+              store.createIndex("workspace", "workspaceId");
+              store.createIndex("user",      "userId");
+            }
+            if (name === "wb_messages") {
+              store.createIndex("conversation", "conversationId");
+            }
+            if (name === "wb_tasks") {
+              store.createIndex("assignee", "assignedTo");
+              store.createIndex("workspace", "workspaceId");
+            }
+            if (name === "wb_notifications") {
+              store.createIndex("user", "userId");
+            }
+          }
+        });
+      };
+      req.onsuccess = () => { db = req.result; resolve(db); };
+      req.onerror   = () => reject(req.error);
+    });
+  }
+
+  function tx(storeName, mode) {
+    return open().then((d) => d.transaction(storeName, mode || "readonly").objectStore(storeName));
+  }
+  const wrap = (req) => new Promise((res, rej) => {
+    req.onsuccess = () => res(req.result);
+    req.onerror   = () => rej(req.error);
+  });
+
+  return {
+    async getAll(store)        { return wrap((await tx(store)).getAll()); },
+    async get(store, id)       { return wrap((await tx(store)).get(id)); },
+    async put(store, obj)      { return wrap((await tx(store, "readwrite")).put(obj)); },
+    async del(store, id)       { return wrap((await tx(store, "readwrite")).delete(id)); },
+    async byIndex(store, idxName, value) {
+      const s = await tx(store);
+      return wrap(s.index(idxName).getAll(value));
+    }
+  };
+})();
+
+/* ---------------------------------------------------------------
+   2) Session — auto sign-in from CloudSync (login.html already did auth)
+   --------------------------------------------------------------- */
+const Session = {
+  user: null,
+  async load() {
+    // 1) Try CloudSync directly (login.html + cloud-sync.js)
+    let cu = null;
+    try {
+      if (window.CloudSync) {
+        if (typeof CloudSync.currentUser === "function") {
+          cu = await CloudSync.currentUser();
+        } else if (CloudSync.currentUser) {
+          cu = CloudSync.currentUser;
+        }
+      }
+    } catch (e) { console.warn("CloudSync.currentUser failed:", e); }
+
+    // 2) Fallback: read cached user from localStorage (written by cloud-sync.js)
+    if (!cu || !cu.email) {
+      try {
+        const cached = JSON.parse(localStorage.getItem("rescueCloudUser") || "null");
+        if (cached && cached.email) cu = cached;
+      } catch (e) {}
+    }
+
+    // 3) No user → return null (page will show auth gate)
+    if (!cu || !cu.email) {
+      this.user = null;
+      return null;
+    }
+
+    // 4) Build session user (stable id derived from email)
+    const id = "u-" + btoa(cu.email).replace(/=/g,"").replace(/[+/]/g, "_");
+    this.user = {
+      id,
+      email: cu.email,
+      raw: cu
+    };
+
+    // 5) Ensure a profile record exists (create once from email)
+    let prof = await WB.get("wb_profiles", id);
+    if (!prof) {
+      prof = {
+        id,
+        email: cu.email,
+        fullName: (cu.email.split("@")[0] || "Officer")
+          .replace(/[._-]+/g, " ")
+          .replace(/\b\w/g, (m) => m.toUpperCase()),
+        rank: "", station: "", region: "",
+        serviceNumber: "", skills: [], bio: "",
+        joinedAt: now(), avatarEmoji: "🧑‍🚒"
+      };
+      await WB.put("wb_profiles", prof);
+    }
+    return this.user;
+  }
+};
+
+/* ---------------------------------------------------------------
+   3) Backend status banner
+   --------------------------------------------------------------- */
+const BACKEND = {
+  mode() {
+    if (window.CloudSync && Session.user && !Session.user.raw?.isLocal) return "cloud";
+    return "local-fallback";
+  },
+  label() {
+    if (!navigator.onLine) {
+      return { cls:"offline", txt:"Offline — mabadiliko yanahifadhiwa kwenye kifaa" };
+    }
+    const m = this.mode();
+    if (m === "cloud") {
+      return { cls:"online", txt:"Imeunganishwa kama " + (Session.user?.email || "") };
+    }
+    return { cls:"local", txt:"Data inahifadhiwa kwenye kifaa hiki (IndexedDB). Sync ya wakati mmoja itahitaji Supabase." };
+  }
+};
+function syncBanner() {
+  const s = BACKEND.label();
+  return `<div class="sync-banner ${s.cls}">${esc(s.txt)}</div>`;
+}
+
+/* ---------------------------------------------------------------
+   4) Router
+   --------------------------------------------------------------- */
+const routes = {};
+function register(name, fn) { routes[name] = fn; }
+function navigate(r) {
+  if (location.hash === "#/" + r) render();
+  else location.hash = "#/" + r;
+}
+function currentRoute() {
+  const h = location.hash.slice(1) || "/overview";
+  return h.split("/")[1] || "overview";
+}
+
+window.addEventListener("hashchange", render);
+function render() {
+  // If not signed in, show auth gate and stop
+  if (!Session.user) {
+    renderAuthGate();
+    return;
+  }
+  $("#bottom-nav").hidden = false;
+
+  State.route = currentRoute();
+  $$("#bottom-nav button").forEach((b) => {
+    const r = b.dataset.route;
+    const active = r === State.route ||
+      (r === "more" && ["profile","groups","activity","notifications","settings"].includes(State.route));
+    b.classList.toggle("active", active);
+  });
+  const fn = routes[State.route] || routes.overview;
+  const view = $("#view");
+  view.innerHTML = '<div class="hint">Inapakia…</div>';
+  Promise.resolve(fn()).catch((e) => {
+    console.error(e);
+    view.innerHTML = `<div class="card"><div class="card-title">Hitilafu</div>
+      <p class="muted">Ukurasa haukupakia: ${esc(e.message||"")}</p>
+      <button class="btn block" onclick="location.reload()">Pakia upya</button></div>`;
+  });
+  updateBadges();
+}
+
+function renderAuthGate() {
+  $("#bottom-nav").hidden = true;
+  $("#view").innerHTML = `
+    <div class="auth-gate">
+      <div class="big">🔒</div>
+      <h2>Ingia kwanza</h2>
+      <p>Workplace inahitaji akaunti. Tafadhali ingia kupitia ukurasa wa Akaunti, kisha rudi hapa.</p>
+      <button class="btn primary block" id="gate-login">Nenda kwenye Login</button>
+      <button class="btn block" id="gate-back" style="margin-top:8px;">Rudi kwenye App</button>
+    </div>`;
+  $("#gate-login").addEventListener("click", () => location.href = "login.html");
+  $("#gate-back").addEventListener("click", () => location.href = "index.html");
+}
+
+/* ---------------------------------------------------------------
+   5) State + badges
+   --------------------------------------------------------------- */
+const State = { route: "overview" };
+
+async function updateBadges() {
+  if (!Session.user) return;
+  try {
+    const notifs = (await WB.byIndex("wb_notifications","user",Session.user.id)).filter(n => !n.read);
+    const nb = $("#notif-badge");
+    if (notifs.length) { nb.textContent = notifs.length > 9 ? "9+" : notifs.length; nb.hidden = false; }
+    else nb.hidden = true;
+
+    const convs = (await WB.getAll("wb_conversations"))
+      .filter(c => (c.memberIds||[]).includes(Session.user.id));
+    let unread = 0;
+    for (const c of convs) {
+      const msgs = await WB.byIndex("wb_messages","conversation",c.id);
+      unread += msgs.filter(m => m.senderId !== Session.user.id && !(m.readBy||[]).includes(Session.user.id)).length;
+    }
+    const mb = $("#msg-badge");
+    if (unread) { mb.textContent = unread > 9 ? "9+" : unread; mb.hidden = false; }
+    else mb.hidden = true;
+  } catch (e) { /* ignore */ }
+}
+
+/* ---------------------------------------------------------------
+   6) ROUTE: Overview
+   --------------------------------------------------------------- */
+register("overview", async () => {
+  const me = Session.user;
+  const meProfile = await WB.get("wb_profiles", me.id);
+  const myFollows   = (await WB.byIndex("wb_follows","follower",me.id)).length;
+  const myFollowers = (await WB.byIndex("wb_follows","following",me.id)).length;
+
+  const wss = await WB.getAll("wb_workspaces");
+  let myWsCount = 0;
+  for (const w of wss) {
+    const mem = await WB.byIndex("wb_ws_members","workspace",w.id);
+    if (mem.some(m => m.userId === me.id)) myWsCount++;
+  }
+
+  const myOpenTasks = (await WB.byIndex("wb_tasks","assignee",me.id))
+    .filter(t => t.status !== "Completed" && t.status !== "Rejected").length;
+
+  const notifs = (await WB.byIndex("wb_notifications","user",me.id)).filter(n => !n.read);
+
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card" style="display:flex;align-items:center;gap:12px;">
+      <div class="avatar" style="width:52px;height:52px;font-size:22px;">${esc(meProfile.avatarEmoji || "🧑‍🚒")}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;">${esc(meProfile.fullName)}</div>
+        <div class="muted" style="font-size:12px;">
+          ${esc(meProfile.rank || "Fire Officer")}${meProfile.station ? " · " + esc(meProfile.station) : ""}
+        </div>
+        <div class="muted" style="font-size:11px;">${esc(me.email)}</div>
+      </div>
+      <button class="btn sm" data-nav="profile">Profile</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box"><div class="num">${myFollows}</div><div class="label">Following</div></div>
+      <div class="stat-box"><div class="num">${myFollowers}</div><div class="label">Followers</div></div>
+      <div class="stat-box"><div class="num">${myWsCount}</div><div class="label">Workspaces</div></div>
+      <div class="stat-box"><div class="num">${myOpenTasks}</div><div class="label">Open Tasks</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick Actions</div>
+      <div class="btn-row">
+        <button class="btn primary" data-action="new-workspace">➕ Workspace</button>
+        <button class="btn" data-action="new-task">✅ Task</button>
+        <button class="btn" data-nav="network">👥 Find Officers</button>
+        <button class="btn" data-nav="messages">💬 Messages</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <div id="feed-mini">${await miniFeedHtml()}</div>
+    </div>
+
+    ${notifs.length ? `<div class="card">
+      <div class="card-title">Notifications (${notifs.length})</div>
+      ${notifs.slice(0,3).map(n => `<div class="list-item" data-notif="${esc(n.id)}">
+        <div class="name">${esc(n.title)}</div>
+        <div class="meta">${esc(n.body||"")} · ${fmtDate(n.at)}</div>
+      </div>`).join("")}
+    </div>` : ""}
+  `;
+  bindCommon($("#view"));
+});
+
+async function miniFeedHtml() {
+  const acts = (await WB.getAll("wb_activity")).sort((a,b) => b.at.localeCompare(a.at)).slice(0,5);
+  if (!acts.length) return '<div class="hint">Hakuna shughuli bado. Anza kuunda workspace au kufuata maafisa.</div>';
+  return acts.map(a => `<div class="list-item">
+    <div class="name">${esc(a.text)}</div>
+    <div class="meta">${fmtDate(a.at)}</div>
+  </div>`).join("");
+}
+
+/* ---------------------------------------------------------------
+   7) ROUTE: Network (Follow)
+   --------------------------------------------------------------- */
+register("network", async () => {
+  const me = Session.user;
+  const allProfiles = (await WB.getAll("wb_profiles")).filter(p => p.id !== me.id);
+  const myFollows = new Set((await WB.byIndex("wb_follows","follower",me.id)).map(f => f.followingId));
+
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="tabs" id="net-tabs">
+      <button class="active" data-tab="search">Search Officers</button>
+      <button data-tab="following">Following</button>
+      <button data-tab="followers">Followers</button>
+    </div>
+    <div id="net-body"></div>
+  `;
+
+  function renderSearch(q) {
+    q = (q||"").trim().toLowerCase();
+    const list = allProfiles.filter(p => {
+      if (!q) return true;
+      const hay = [p.fullName,p.rank,p.station,p.region,(p.skills||[]).join(" ")].join(" ").toLowerCase();
+      return hay.includes(q);
+    });
+    $("#net-body").innerHTML = `
+      <div class="search-bar"><input id="net-search" placeholder="Tafuta jina, kituo, mkoa, utaalamu…" value="${esc(q)}"></div>
+      ${list.length
+        ? list.map(p => officerCardHtml(p, myFollows.has(p.id))).join("")
+        : '<div class="hint">Hakuna maafisa waliofanana na utafutaji wako. Maafisa wataonekana hapa baada ya kujiunga na wakafuata network.</div>'}
+    `;
+    const inp = $("#net-search");
+    let t;
+    inp.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => renderSearch(inp.value), 220); });
+    $$("[data-follow]").forEach(b => b.addEventListener("click", () => toggleFollow(b.dataset.follow)));
+  }
+
+  async function renderFollowing() {
+    const ids = [...myFollows];
+    const list = allProfiles.filter(p => ids.includes(p.id));
+    $("#net-body").innerHTML = list.length
+      ? list.map(p => officerCardHtml(p, true)).join("")
+      : '<div class="hint">Haujachagua mtu yeyote bado. Tumia "Search Officers".</div>';
+    $$("[data-follow]").forEach(b => b.addEventListener("click", () => toggleFollow(b.dataset.follow)));
+  }
+
+  async function renderFollowers() {
+    const ids = (await WB.byIndex("wb_follows","following",me.id)).map(f => f.followerId);
+    const list = allProfiles.filter(p => ids.includes(p.id));
+    $("#net-body").innerHTML = list.length
+      ? list.map(p => officerCardHtml(p, myFollows.has(p.id))).join("")
+      : '<div class="hint">Hakuna anayekufuata bado.</div>';
+    $$("[data-follow]").forEach(b => b.addEventListener("click", () => toggleFollow(b.dataset.follow)));
+  }
+
+  async function toggleFollow(targetId) {
+    if (targetId === me.id) return toast("Hauwezi kujifuata mwenyewe","err");
+    const existing = (await WB.byIndex("wb_follows","follower",me.id))
+      .find(x => x.followingId === targetId);
+    if (existing) {
+      await WB.del("wb_follows", existing.id);
+      toast("Umekoma kumfuata","ok");
+    } else {
+      await WB.put("wb_follows", {
+        id: uid("f"), followerId: me.id, followingId: targetId, createdAt: now()
+      });
+      // Notify target
+      await pushNotification(targetId, "follow", "Mfuasi mpya", `${me.email} amekufuata`, "#/network");
+      toast("Umefuata afisa","ok");
+      addActivity("follow", `Umefuata afisa mpya`);
+    }
+    const active = $("#net-tabs .active").dataset.tab;
+    if (active === "search") renderSearch($("#net-search")?.value || "");
+    else if (active === "following") renderFollowing();
+    else renderFollowers();
+  }
+
+  $$("#net-tabs button").forEach(b => {
+    b.addEventListener("click", () => {
+      $$("#net-tabs button").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      if (b.dataset.tab === "search") renderSearch("");
+      else if (b.dataset.tab === "following") renderFollowing();
+      else renderFollowers();
+    });
+  });
+  renderSearch("");
+});
+
+function officerCardHtml(p, isFollowing) {
+  const initials = (p.fullName||"?").split(" ").map(x=>x[0]).join("").slice(0,2).toUpperCase();
+  return `<div class="list-item">
+    <div class="row1">
+      <div class="avatar">${esc(initials)}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="name">${esc(p.fullName)}</div>
+        <div class="meta">${esc(p.rank||"Officer")} · ${esc(p.station||"—")} · ${esc(p.region||"—")}</div>
+        <div class="meta" style="font-size:11px;">${(p.skills||[]).slice(0,3).map(s=>`<span class="pill info">${esc(s)}</span>`).join(" ")}</div>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-top:8px;">
+      <button class="btn sm ${isFollowing?"":"primary"}" data-follow="${esc(p.id)}">${isFollowing?"✓ Following":"+ Follow"}</button>
+      <button class="btn sm" data-action="start-dm" data-id="${esc(p.id)}">💬 Message</button>
+    </div>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------
+   8) ROUTE: Profile
+   --------------------------------------------------------------- */
+register("profile", async () => {
+  const me = Session.user;
+  const p = await WB.get("wb_profiles", me.id);
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">My Professional Profile</div>
+      <div class="field"><label>Avatar (emoji)</label>
+        <input id="pf-emoji" value="${esc(p.avatarEmoji||"🧑‍🚒")}" maxlength="4">
+      </div>
+      <div class="field"><label>Full Name</label>
+        <input id="pf-name" value="${esc(p.fullName||"")}">
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Rank / Position</label>
+          <input id="pf-rank" value="${esc(p.rank||"")}" placeholder="e.g. Fire Officer">
+        </div>
+        <div class="field"><label>Service Number</label>
+          <input id="pf-svc" value="${esc(p.serviceNumber||"")}">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Fire Station</label>
+          <input id="pf-station" value="${esc(p.station||"")}">
+        </div>
+        <div class="field"><label>Region</label>
+          <input id="pf-region" value="${esc(p.region||"")}">
+        </div>
+      </div>
+      <div class="field"><label>Skills (comma separated)</label>
+        <input id="pf-skills" value="${esc((p.skills||[]).join(", "))}">
+      </div>
+      <div class="field"><label>Professional Bio</label>
+        <textarea id="pf-bio">${esc(p.bio||"")}</textarea>
+      </div>
+      <button class="btn primary block" id="pf-save">💾 Hifadhi Profile</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Akaunti</div>
+      <div class="row" style="padding:10px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font-size:14px;">
+        <span class="muted">Email</span><strong>${esc(me.email)}</strong>
+      </div>
+      <div style="margin-top:10px;">
+        <button class="btn block" id="pf-logout">Toka kwenye Akaunti</button>
+      </div>
+    </div>
+  `;
+  $("#pf-save").addEventListener("click", async () => {
+    p.avatarEmoji = ($("#pf-emoji").value||"🧑‍🚒").trim().slice(0,4);
+    p.fullName    = $("#pf-name").value.trim();
+    p.rank        = $("#pf-rank").value.trim();
+    p.serviceNumber = $("#pf-svc").value.trim();
+    p.station     = $("#pf-station").value.trim();
+    p.region      = $("#pf-region").value.trim();
+    p.skills      = $("#pf-skills").value.split(",").map(s=>s.trim()).filter(Boolean);
+    p.bio         = $("#pf-bio").value.trim();
+    await WB.put("wb_profiles", p);
+    toast("Profile imehifadhiwa","ok");
+  });
+  $("#pf-logout").addEventListener("click", async () => {
+    if (!confirm("Toka kwenye akaunti? Data ya kifaa itabaki.")) return;
+    try {
+      if (window.CloudSync && CloudSync.signOut) await CloudSync.signOut();
+    } catch (e) {}
+    localStorage.removeItem("rescueCloudUser");
+    Session.user = null;
+    location.href = "login.html";
+  });
+});
+
+/* ---------------------------------------------------------------
+   9) ROUTE: Workspaces
+   --------------------------------------------------------------- */
+register("workspaces", async () => {
+  const me = Session.user;
+  const all = await WB.getAll("wb_workspaces");
+  const my = [];
+  for (const w of all) {
+    const members = await WB.byIndex("wb_ws_members","workspace",w.id);
+    if (members.some(m => m.userId === me.id)) my.push({ ...w, _members: members });
+  }
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">My Workspaces (${my.length})</div>
+      ${my.length ? my.map(w => workspaceCardHtml(w)).join("") : '<div class="hint">Bado hujaunda workspace. Bonyeza hapa chini.</div>'}
+    </div>
+    <button class="btn primary block" data-action="new-workspace">➕ Create Workspace</button>
+  `;
+  bindCommon($("#view"));
+});
+
+function workspaceCardHtml(w) {
+  const memberCount = (w._members||[]).length;
+  const isLeader = (w._members||[]).some(m => m.userId === Session.user.id && m.role === "leader");
+  return `<div class="list-item" data-ws="${esc(w.id)}">
+    <div class="name">${esc(w.name)} ${isLeader?'<span class="pill ok">Leader</span>':''}</div>
+    <div class="meta">${esc(w.description||"")}</div>
+    <div class="meta" style="font-size:11px;margin-top:4px;">👥 ${memberCount} members · Created ${fmtShort(w.createdAt)}</div>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------
+   10) ROUTE: Shared Reports
+   --------------------------------------------------------------- */
+register("reports", async () => {
+  const me = Session.user;
+  const all = await WB.getAll("wb_shared_reports");
+  const sharedToMe = all.filter(r => r.sharedWith === me.id);
+  const sharedByMe = all.filter(r => r.ownerId === me.id);
+
+  let myReports = [];
+  try {
+    if (window.RescueDB && RescueDB.getAllReports) {
+      myReports = await RescueDB.getAllReports();
+    }
+  } catch (e) {}
+
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">Share a Report</div>
+      ${myReports.length ? `
+        <div class="field"><label>Chagua ripoti</label>
+          <select id="share-report-id">
+            ${myReports.map(r => `<option value="${esc(r.incidentId)}">${esc(r.reportNumber || r.incidentId)} — ${esc((r.incident&&r.incident.type)||"")}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Officer ID/Email</label>
+            <input id="share-officer" placeholder="email ya afisa">
+          </div>
+          <div class="field"><label>Permission</label>
+            <select id="share-perm">
+              <option value="viewer">Viewer</option>
+              <option value="contributor">Contributor</option>
+              <option value="editor">Editor</option>
+              <option value="reviewer">Reviewer</option>
+              <option value="supervisor">Supervisor</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn primary block" id="share-do">📤 Share Report</button>
+      ` : '<div class="hint">Hakuna ripoti kwenye kifaa bado. Unda ripoti kwenye app kuu kwanza.</div>'}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Shared With Me (${sharedToMe.length})</div>
+      ${sharedToMe.length ? sharedToMe.map(r => `
+        <div class="list-item">
+          <div class="name">${esc(r.reportId)}</div>
+          <div class="meta">From ${esc(r.ownerId)} · <span class="pill info">${esc(r.permission)}</span></div>
+          <div class="meta" style="font-size:11px;">${fmtDate(r.createdAt)}</div>
+        </div>`).join("") : '<div class="hint">Hakuna ripoti iliyoshirikishwa na wewe bado.</div>'}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Shared By Me (${sharedByMe.length})</div>
+      ${sharedByMe.length ? sharedByMe.map(r => `
+        <div class="list-item">
+          <div class="name">${esc(r.reportId)}</div>
+          <div class="meta">To ${esc(r.sharedWith)} · ${esc(r.permission)} · ${fmtDate(r.createdAt)}</div>
+        </div>`).join("") : '<div class="hint">Bado hujashirikisha ripoti yoyote.</div>'}
+    </div>
+  `;
+  const btn = $("#share-do");
+  if (btn) btn.addEventListener("click", async () => {
+    const reportId = $("#share-report-id").value;
+    const officerEmail = $("#share-officer").value.trim();
+    const perm = $("#share-perm").value;
+    if (!officerEmail) return toast("Andika email ya afisa","err");
+    const profiles = await WB.getAll("wb_profiles");
+    const target = profiles.find(p => p.email === officerEmail || p.id === officerEmail);
+    if (!target) return toast("Afisa hakupatikana. Hakikisha ameingia Workplace kwanza.","err");
+    if (target.id === me.id) return toast("Hauwezi kujishirikisha mwenyewe","err");
+    await WB.put("wb_shared_reports", {
+      id: uid("sh"), reportId, ownerId: me.id, sharedWith: target.id, permission: perm, createdAt: now()
+    });
+    await pushNotification(target.id, "shared_report", "Ripoti imeshirikishwa",
+      `${me.email} ameshirikisha ripoti ${reportId}`, "#/reports");
+    toast("Ripoti imeshirikishwa","ok");
+    render();
+  });
+});
+
+/* ---------------------------------------------------------------
+   11) ROUTE: Messages
+   --------------------------------------------------------------- */
+register("messages", async () => {
+  const me = Session.user;
+  const convs = (await WB.getAll("wb_conversations"))
+    .filter(c => (c.memberIds||[]).includes(me.id))
+    .sort((a,b) => (b.createdAt||"").localeCompare(a.createdAt||""));
+  const profiles = await WB.getAll("wb_profiles");
+  const nameOf = (id) => (profiles.find(p => p.id === id) || {}).fullName || id;
+
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">Conversations</div>
+      ${convs.length ? convs.map(c => {
+        const other = (c.memberIds||[]).find(id => id !== me.id);
+        return `<div class="list-item" data-conv="${esc(c.id)}">
+          <div class="name">${esc(c.name || nameOf(other))}</div>
+          <div class="meta">${esc(c.type)} · ${c.memberIds.length} members</div>
+        </div>`;
+      }).join("") : '<div class="hint">Hakuna mazungumzo bado. Anza kutoka Network → Message.</div>'}
+    </div>
+  `;
+  $$("[data-conv]").forEach(el => {
+    el.addEventListener("click", () => navigate("conversation/" + el.dataset.conv));
+  });
+});
+
+register("conversation", async () => {
+  const me = Session.user;
+  const convId = location.hash.split("/")[2];
+  if (!convId) return navigate("messages");
+  const conv = await WB.get("wb_conversations", convId);
+  if (!conv) return navigate("messages");
+  const msgs = (await WB.byIndex("wb_messages","conversation",convId))
+    .sort((a,b) => a.at.localeCompare(b.at));
+  const profiles = await WB.getAll("wb_profiles");
+  const nameOf = (id) => (profiles.find(p => p.id === id) || {}).fullName || id;
+
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card" style="min-height:200px;">
+      <div class="card-title">${esc(conv.name || "Conversation")}</div>
+      <div id="msg-list">${msgs.length ? msgs.map(m => msgBubbleHtml(m, me.id, nameOf(m.senderId))).join("") : '<div class="hint">Anza mazungumzo…</div>'}</div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:6px;">
+        <input id="msg-input" placeholder="Andika ujumbe…" style="flex:1;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:var(--field);color:var(--text);font:inherit;">
+        <button class="btn primary" id="msg-send">Tuma</button>
+      </div>
+    </div>
+  `;
+  for (const m of msgs) {
+    if (m.senderId !== me.id && !(m.readBy||[]).includes(me.id)) {
+      m.readBy = [...(m.readBy||[]), me.id];
+      await WB.put("wb_messages", m);
+    }
+  }
+  updateBadges();
+  $("#msg-list").scrollTop = $("#msg-list").scrollHeight;
+
+  const send = async () => {
+    const text = $("#msg-input").value.trim();
+    if (!text) return;
+    await WB.put("wb_messages", {
+      id: uid("msg"), conversationId: convId, senderId: me.id,
+      text, at: now(), readBy: [me.id]
+    });
+    $("#msg-input").value = "";
+    render();
+  };
+  $("#msg-send").addEventListener("click", send);
+  $("#msg-input").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+});
+
+function msgBubbleHtml(m, myId, senderName) {
+  const mine = m.senderId === myId;
+  return `<div class="msg-bubble ${mine?"mine":""}">
+    ${mine?"":`<div class="sender">${esc(senderName)}</div>`}
+    ${esc(m.text)}
+    <span class="when">${fmtDate(m.at)}</span>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------
+   12) ROUTE: Tasks
+   --------------------------------------------------------------- */
+register("tasks", async () => {
+  const me = Session.user;
+  const all = await WB.getAll("wb_tasks");
+  const mine = all.filter(t => t.assignedTo === me.id);
+  const assigned = all.filter(t => t.assignedBy === me.id);
+
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="tabs" id="task-tabs">
+      <button class="active" data-tab="mine">My Tasks (${mine.length})</button>
+      <button data-tab="assigned">Assigned (${assigned.length})</button>
+      <button data-tab="done">Completed</button>
+    </div>
+    <div id="task-body"></div>
+    <button class="btn primary block" data-action="new-task" style="margin-top:10px;">➕ New Task</button>
+  `;
+
+  function renderTab(tab) {
+    let list = [];
+    if (tab === "mine") list = mine.filter(t => t.status !== "Completed");
+    else if (tab === "assigned") list = assigned;
+    else list = [...mine, ...assigned].filter(t => t.status === "Completed");
+    $("#task-body").innerHTML = list.length ? list.map(taskCardHtml).join("") : '<div class="hint">Hakuna kazi hapa.</div>';
+    $$("[data-task-status]").forEach(sel => {
+      sel.addEventListener("change", async () => {
+        const id = sel.dataset.taskStatus;
+        const t = await WB.get("wb_tasks", id);
+        t.status = sel.value;
+        t.progress = t.status === "Completed" ? 100 : t.progress;
+        await WB.put("wb_tasks", t);
+        toast("Status imebadilishwa","ok");
+        renderTab(tab);
+      });
+    });
+  }
+  $$("#task-tabs button").forEach(b => b.addEventListener("click", () => {
+    $$("#task-tabs button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    renderTab(b.dataset.tab);
+  }));
+  renderTab("mine");
+  bindCommon($("#view"));
+});
+
+function taskCardHtml(t) {
+  const priClass = t.priority === "High" ? "err" : t.priority === "Low" ? "ok" : "warn";
+  const overdue = t.deadline && new Date(t.deadline) < new Date() && t.status !== "Completed";
+  return `<div class="list-item">
+    <div class="row1">
+      <div class="name" style="flex:1;">${esc(t.title)}</div>
+      <span class="pill ${priClass}">${esc(t.priority||"Normal")}</span>
+    </div>
+    <div class="meta">${esc(t.description||"")}</div>
+    <div class="meta" style="font-size:11px;margin-top:4px;">
+      ${t.deadline ? `Deadline: <strong>${fmtShort(t.deadline)}</strong>${overdue?' <span class="pill err">Overdue</span>':''}` : ""}
+      · Status: <select data-task-status="${esc(t.id)}" style="font:inherit;font-size:11px;padding:2px 4px;border-radius:6px;border:1px solid var(--line);background:var(--field);color:var(--text);">
+        ${["Pending","Accepted","In Progress","Under Review","Completed","Rejected"].map(s => `<option ${t.status===s?"selected":""}>${s}</option>`).join("")}
+      </select>
+    </div>
+  </div>`;
+}
+
+/* ---------------------------------------------------------------
+   13) ROUTE: Groups
+   --------------------------------------------------------------- */
+register("groups", async () => {
+  const me = Session.user;
+  const groups = await WB.getAll("wb_groups");
+  const mine = groups.filter(g => (g.members||[]).includes(me.id));
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">Professional Groups</div>
+      ${mine.length ? mine.map(g => `
+        <div class="list-item">
+          <div class="name">${esc(g.name)} <span class="pill info">${esc(g.privacy)}</span></div>
+          <div class="meta">${esc(g.description||"")}</div>
+          <div class="meta" style="font-size:11px;">👥 ${(g.members||[]).length} members</div>
+        </div>`).join("") : '<div class="hint">Hakuna kikundi bado.</div>'}
+    </div>
+    <button class="btn primary block" id="new-group-btn">➕ Create Group</button>
+  `;
+  $("#new-group-btn").addEventListener("click", () => openGroupModal());
+});
+
+/* ---------------------------------------------------------------
+   14) ROUTE: Activity Feed
+   --------------------------------------------------------------- */
+register("activity", async () => {
+  const acts = (await WB.getAll("wb_activity")).sort((a,b) => b.at.localeCompare(a.at)).slice(0,50);
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">Professional Activity</div>
+      ${acts.length ? acts.map(a => `<div class="list-item">
+        <div class="name">${esc(a.text)}</div>
+        <div class="meta">${fmtDate(a.at)}</div>
+      </div>`).join("") : '<div class="hint">Hakuna shughuli bado.</div>'}
+    </div>
+  `;
+});
+
+/* ---------------------------------------------------------------
+   15) ROUTE: Notifications
+   --------------------------------------------------------------- */
+register("notifications", async () => {
+  const me = Session.user;
+  const list = (await WB.byIndex("wb_notifications","user",me.id))
+    .sort((a,b) => b.at.localeCompare(a.at));
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">Notifications
+        <button class="btn sm" id="mark-all-read">Mark all read</button>
+      </div>
+      ${list.length ? list.map(n => `<div class="list-item" data-notif-open="${esc(n.id)}" style="${n.read?'opacity:.6;':''}">
+        <div class="name">${esc(n.title)} ${n.read?"":'<span class="pill err">New</span>'}</div>
+        <div class="meta">${esc(n.body||"")} · ${fmtDate(n.at)}</div>
+      </div>`).join("") : '<div class="hint">Hakuna notifications.</div>'}
+    </div>
+  `;
+  $("#mark-all-read").addEventListener("click", async () => {
+    for (const n of list) { n.read = true; await WB.put("wb_notifications", n); }
+    updateBadges(); render();
+  });
+  $$("[data-notif-open]").forEach(el => el.addEventListener("click", async () => {
+    const n = await WB.get("wb_notifications", el.dataset.notifOpen);
+    n.read = true;
+    await WB.put("wb_notifications", n);
+    updateBadges();
+    if (n.link) { location.hash = n.link; }
+    else render();
+  }));
+});
+
+/* ---------------------------------------------------------------
+   16) ROUTE: More
+   --------------------------------------------------------------- */
+register("more", async () => {
+  $("#view").innerHTML = `
+    ${syncBanner()}
+    <div class="card">
+      <div class="card-title">More</div>
+      <button class="btn block" data-nav="profile" style="margin-bottom:8px;">👤 My Profile</button>
+      <button class="btn block" data-nav="groups" style="margin-bottom:8px;">👥 Groups</button>
+      <button class="btn block" data-nav="activity" style="margin-bottom:8px;">📰 Activity Feed</button>
+      <button class="btn block" data-nav="notifications" style="margin-bottom:8px;">🔔 Notifications</button>
+      <button class="btn block" id="export-wb">📦 Export Workplace Data (JSON)</button>
+    </div>
+    <div class="card">
+      <div class="card-title">Hali ya Backend</div>
+      <p class="muted">${esc(BACKEND.label().txt)}</p>
+      <p class="muted" style="font-size:12px;">Workplace sasa inatumia kifaa hiki (IndexedDB) kwa data ya kikazi. Kuwezesha ushirikiano wa maafisa wengi kwa wakati mmoja, unahitaji kuunganisha Supabase tables (profiles, follows, workspaces, messages, n.k.).</p>
+    </div>
+  `;
+  bindCommon($("#view"));
+  $("#export-wb").addEventListener("click", async () => {
+    const data = {};
+    for (const store of ["wb_profiles","wb_follows","wb_workspaces","wb_ws_members","wb_tasks","wb_conversations","wb_messages","wb_groups","wb_notifications","wb_activity"]) {
+      data[store] = await WB.getAll(store);
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `workplace-export-${Date.now()}.json`;
+    a.click();
+    toast("Export imepakuliwa","ok");
+  });
+});
+
+/* ---------------------------------------------------------------
+   17) Common binding
+   --------------------------------------------------------------- */
+function bindCommon(root) {
+  $$("[data-nav]", root).forEach(el => el.addEventListener("click", () => navigate(el.dataset.nav)));
+  $$("[data-action='new-workspace']", root).forEach(el => el.addEventListener("click", openNewWorkspaceModal));
+  $$("[data-action='new-task']", root).forEach(el => el.addEventListener("click", openNewTaskModal));
+  $$("[data-action='start-dm']", root).forEach(el => el.addEventListener("click", async () => {
+    const other = el.dataset.id;
+    const convs = (await WB.getAll("wb_conversations")).filter(c => (c.memberIds||[]).includes(Session.user.id));
+    let conv = convs.find(c => (c.memberIds||[]).includes(other) && c.memberIds.length === 2);
+    if (!conv) {
+      conv = { id: uid("conv"), type: "dm", name: "", memberIds: [Session.user.id, other], createdAt: now() };
+      await WB.put("wb_conversations", conv);
+    }
+    location.hash = "#/conversation/" + conv.id;
+  }));
+  $$("[data-ws]", root).forEach(el => el.addEventListener("click", () => openWorkspaceDetail(el.dataset.ws)));
+}
+
+/* ---------------------------------------------------------------
+   18) Modals
+   --------------------------------------------------------------- */
+function modal(html, onMount) {
+  const bg = document.createElement("div");
+  bg.className = "modal-bg";
+  bg.innerHTML = `<div class="modal">${html}</div>`;
+  document.body.appendChild(bg);
+  bg.addEventListener("click", (e) => { if (e.target === bg) bg.remove(); });
+  $$("[data-close]", bg).forEach(b => b.addEventListener("click", () => bg.remove()));
+  if (onMount) onMount(bg);
+  return bg;
+}
+
+function openNewWorkspaceModal() {
+  modal(`
+    <h3>New Workspace</h3>
+    <div class="field"><label>Workspace Name</label><input id="ws-name" placeholder="e.g. Fire Investigation Team"></div>
+    <div class="field"><label>Description</label><textarea id="ws-desc" placeholder="Kazi ya workspace hii…"></textarea></div>
+    <div class="btn-row">
+      <button class="btn" data-close>Ghairi</button>
+      <button class="btn primary" id="ws-create">Unda</button>
+    </div>
+  `, (bg) => {
+    $("#ws-create", bg).addEventListener("click", async () => {
+      const name = $("#ws-name", bg).value.trim();
+      const desc = $("#ws-desc", bg).value.trim();
+      if (!name) return toast("Weka jina","err");
+      const ws = { id: uid("ws"), name, description: desc, createdBy: Session.user.id, createdAt: now(), status: "open" };
+      await WB.put("wb_workspaces", ws);
+      await WB.put("wb_ws_members", {
+        id: uid("wm"), workspaceId: ws.id, userId: Session.user.id, role: "leader", joinedAt: now()
+      });
+      await addActivity("workspace", `Workspace mpya: ${name}`);
+      bg.remove();
+      toast("Workspace imeundwa","ok");
+      render();
+    });
+  });
+}
+
+function openNewTaskModal() {
+  modal(`
+    <h3>New Task</h3>
+    <div class="field"><label>Title</label><input id="tk-title" placeholder="Task title"></div>
+    <div class="field"><label>Description</label><textarea id="tk-desc"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Priority</label>
+        <select id="tk-pri"><option>Low</option><option selected>Normal</option><option>High</option></select>
+      </div>
+      <div class="field"><label>Deadline</label>
+        <input id="tk-dl" type="date">
+      </div>
+    </div>
+    <div class="field"><label>Assign to (Officer Email)</label>
+      <input id="tk-assignee" placeholder="email ya afisa">
+    </div>
+    <div class="btn-row">
+      <button class="btn" data-close>Ghairi</button>
+      <button class="btn primary" id="tk-create">Unda</button>
+    </div>
+  `, (bg) => {
+    $("#tk-create", bg).addEventListener("click", async () => {
+      const title = $("#tk-title", bg).value.trim();
+      if (!title) return toast("Weka title","err");
+      const assignee = $("#tk-assignee", bg).value.trim();
+      const profiles = await WB.getAll("wb_profiles");
+      const target = profiles.find(p => p.email === assignee || p.id === assignee);
+      const task = {
+        id: uid("tk"), workspaceId: "", title,
+        description: $("#tk-desc", bg).value.trim(),
+        assignedBy: Session.user.id,
+        assignedTo: target ? target.id : Session.user.id,
+        priority: $("#tk-pri", bg).value,
+        deadline: $("#tk-dl", bg).value,
+        status: "Pending", progress: 0, createdAt: now()
+      };
+      await WB.put("wb_tasks", task);
+      if (target && target.id !== Session.user.id) {
+        await pushNotification(target.id, "task", "Task mpya",
+          `${Session.user.email} amekupa kazi: ${title}`, "#/tasks");
+      }
+      await addActivity("task", `Task mpya: ${title}`);
+      bg.remove();
+      toast("Task imeundwa","ok");
+      render();
+    });
+  });
+}
+
+function openGroupModal() {
+  modal(`
+    <h3>New Group</h3>
+    <div class="field"><label>Group Name</label><input id="gp-name"></div>
+    <div class="field"><label>Description</label><textarea id="gp-desc"></textarea></div>
+    <div class="field"><label>Privacy</label>
+      <select id="gp-priv"><option value="public">Public</option><option value="private">Private</option><option value="invite">Invitation only</option></select>
+    </div>
+    <div class="btn-row">
+      <button class="btn" data-close>Ghairi</button>
+      <button class="btn primary" id="gp-create">Unda</button>
+    </div>
+  `, (bg) => {
+    $("#gp-create", bg).addEventListener("click", async () => {
+      const name = $("#gp-name", bg).value.trim();
+      if (!name) return toast("Weka jina","err");
+      await WB.put("wb_groups", {
+        id: uid("gp"), name, description: $("#gp-desc", bg).value.trim(),
+        creatorId: Session.user.id, privacy: $("#gp-priv", bg).value,
+        members: [Session.user.id], admins: [Session.user.id], createdAt: now()
+      });
+      bg.remove();
+      toast("Group imeundwa","ok");
+      navigate("groups");
+    });
+  });
+}
+
+async function openWorkspaceDetail(wsId) {
+  const ws = await WB.get("wb_workspaces", wsId);
+  if (!ws) return;
+  const members = await WB.byIndex("wb_ws_members","workspace",wsId);
+  const profiles = await WB.getAll("wb_profiles");
+  const nameOf = (id) => (profiles.find(p => p.id === id) || {}).fullName || id;
+  modal(`
+    <h3>${esc(ws.name)}</h3>
+    <p class="muted">${esc(ws.description||"")}</p>
+    <div class="divider"></div>
+    <div class="card-title">Members (${members.length})</div>
+    ${members.map(m => `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);">
+      <div class="avatar sm">${esc(nameOf(m.userId).split(" ").map(x=>x[0]).join("").slice(0,2))}</div>
+      <div style="flex:1;font-size:13px;">${esc(nameOf(m.userId))}</div>
+      <span class="pill info">${esc(m.role)}</span>
+    </div>`).join("")}
+    <div class="btn-row" style="margin-top:12px;">
+      <button class="btn" data-close>Funga</button>
+    </div>
+  `);
+}
+
+/* ---------------------------------------------------------------
+   19) Helpers: notifications + activity
+   --------------------------------------------------------------- */
+async function pushNotification(userId, type, title, body, link) {
+  await WB.put("wb_notifications", {
+    id: uid("nt"), userId, type, title, body, link, read: false, at: now()
+  });
+  updateBadges();
+}
+async function addActivity(type, text) {
+  await WB.put("wb_activity", {
+    id: uid("ac"), actorId: Session.user ? Session.user.id : "system",
+    type, text, at: now(), visibility: "public"
+  });
+}
+
+/* ---------------------------------------------------------------
+   20) Boot — auto sign-in via CloudSync
+   --------------------------------------------------------------- */
+async function boot() {
+  // 1) Theme — same as login.html: read from RescueDB settings
+  try {
+    const s = await (window.RescueDB && RescueDB.getAllSettings ? RescueDB.getAllSettings() : Promise.resolve({}));
+    const theme = s.theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", theme);
+  } catch (e) {
+    document.documentElement.setAttribute("data-theme", "dark");
+  }
+
+  // 2) Bottom nav wiring (safe even if hidden)
+  $$("#bottom-nav button").forEach(b => b.addEventListener("click", () => navigate(b.dataset.route)));
+  $("#back").addEventListener("click", () => {
+    if (history.length > 1) history.back();
+    else location.href = "index.html";
+  });
+  $("#notif-btn").addEventListener("click", () => {
+    if (Session.user) navigate("notifications");
+    else location.href = "login.html";
+  });
+
+  // 3) Network status listener
+  window.addEventListener("online", () => { if (Session.user) render(); });
+  window.addEventListener("offline", () => { if (Session.user) render(); });
+
+  // 4) Attempt auto sign-in from CloudSync (login.html already did auth)
+  try {
+    await Session.load();
+  } catch (e) {
+    console.warn("Session load failed:", e);
+    Session.user = null;
+  }
+
+  // 5) First render (auth gate OR overview)
+  if (!location.hash) location.hash = "#/overview";
+  render();
+  if (Session.user) updateBadges();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  boot().catch((e) => {
+    console.error(e);
+    document.body.innerHTML = `<div style="padding:24px;font-family:sans-serif;">
+      <h3>Workplace imeshindwa kuanza</h3>
+      <p>${esc(e.message||"")}</p>
+      <button onclick="location.reload()">Pakia upya</button>
+    </div>`;
+  });
+});
+
+})();
+</script>
+</body>
+</html>
