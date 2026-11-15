@@ -4,116 +4,89 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Mazungumzo — Rescue Report</title>
-<meta name="theme-color" content="#4a4687">
+<meta name="theme-color" content="#075e54">
 <style>
-:root {
-  --bg: #f3f4f8; --card: #ffffff; --text: #1f2333; --muted: #6a7087; --line: #e1e4ee;
-  --brand: #4a4687; --accent: #cf4a24; --accent-text: #ffffff;
-  --ok: #1f8a4c; --warn: #b7791f; --err: #c53030; --field: #f7f8fc;
-  --shadow: 0 6px 20px rgba(40, 44, 80, .08);
-  --msg-me: #4a4687; --msg-them: #ffffff;
-}
-:root[data-theme="dark"] {
-  --bg: #0e1420; --card: #172033; --text: #eef2f8; --muted: #9aa4b2; --line: #26324a;
-  --brand: #3a3670; --accent: #e2562e; --accent-text: #ffffff;
-  --ok: #46c27a; --warn: #e0a93b; --err: #ff7a6b; --field: #101827;
-  --shadow: 0 6px 20px rgba(0, 0, 0, .35);
-  --msg-me: #3a3670; --msg-them: #172033;
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; background: var(--bg); color: var(--text); }
-body { font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.45; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-header.top {
-  flex: none; z-index: 5; background: var(--brand); color: #fff;
-  padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 12px; display: flex; align-items: center; gap: 10px;
-}
-header.top h1 { font-size: 17px; margin: 0; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-header.top .sub { font-size: 12px; opacity: .8; }
-#back { width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255,255,255,.16); color: #fff; font-size: 20px; cursor: pointer; flex: none; }
-#search-btn { width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(255,255,255,.16); color: #fff; font-size: 18px; cursor: pointer; flex: none; }
-main { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.wrap { max-width: 560px; margin: 0 auto; padding: 14px 12px 20px; }
-.search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
-.search-bar input { flex: 1; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--field); color: var(--text); font: inherit; outline: none; }
-.search-bar input:focus { border-color: var(--brand); }
-.search-bar button { border: 0; border-radius: 12px; padding: 0 16px; background: var(--accent); color: #fff; font-weight: 700; cursor: pointer; }
-.sec { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin: 16px 4px 8px; }
-.chat-list { display: flex; flex-direction: column; gap: 6px; }
-.chat-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 14px; cursor: pointer; border: 1px solid var(--line); background: var(--card); }
-.chat-item:active { background: var(--field); }
-.chat-avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 19px; flex: none; }
-.chat-avatar.unread { background: var(--accent); }
-.chat-meta { flex: 1; min-width: 0; }
-.chat-meta .n { font-weight: 600; font-size: 15px; }
-.chat-meta .m { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.chat-time { font-size: 12px; color: var(--muted); text-align: right; }
-.chat-unread { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; border-radius: 10px; padding: 2px 6px; display: inline-block; margin-top: 4px; }
-.note { color: var(--muted); font-size: 14px; text-align: center; padding: 30px 10px; }
-/* Chat view */
-#chat-view { display: flex; flex-direction: column; height: 100%; }
-.messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
-.bubble { max-width: 80%; padding: 10px 13px; border-radius: 16px; font-size: 15px; word-wrap: break-word; position: relative; }
-.bubble.me { align-self: flex-end; background: var(--msg-me); color: #fff; border-bottom-right-radius: 4px; }
-.bubble.them { align-self: flex-start; background: var(--msg-them); color: var(--text); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
-.bubble .time { font-size: 11px; opacity: .7; margin-top: 3px; text-align: right; }
-.bubble .sender { font-size: 12px; font-weight: 700; margin-bottom: 3px; color: var(--brand); }
-:root[data-theme="dark"] .bubble.them .sender { color: #a9a4f0; }
-.composer { flex: none; display: flex; gap: 8px; padding: 10px 12px calc(env(safe-area-inset-bottom, 0px) + 10px); background: var(--card); border-top: 1px solid var(--line); align-items: flex-end; }
-.composer textarea { flex: 1; resize: none; border: 1.5px solid var(--line); border-radius: 20px; padding: 10px 14px; font: inherit; background: var(--field); color: var(--text); outline: none; max-height: 120px; min-height: 42px; }
-.composer textarea:focus { border-color: var(--brand); }
-.icon-btn { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--field); color: var(--brand); font-size: 20px; cursor: pointer; flex: none; display: grid; place-items: center; }
-.icon-btn.send { background: var(--accent); color: #fff; }
-.icon-btn.share { background: var(--field); color: var(--accent); }
-.icon-btn:disabled { opacity: .5; }
-/* Share sheet */
-.sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
-.sheet { background: var(--card); width: 100%; max-width: 560px; border-radius: 20px 20px 0 0; padding: 16px 16px calc(env(safe-area-inset-bottom, 0px) + 16px); max-height: 80vh; overflow-y: auto; }
-.sheet h3 { margin: 0 0 12px; font-size: 17px; }
-.share-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--field); margin-bottom: 8px; cursor: pointer; text-align: left; width: 100%; font: inherit; color: var(--text); }
-.share-item:active { background: var(--card); }
-.share-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 20px; flex: none; }
-.share-item .t { flex: 1; }
-.share-item .t .ttl { font-weight: 600; font-size: 15px; }
-.share-item .t .sub { font-size: 13px; color: var(--muted); }
-#toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 22px); transform: translateX(-50%); background: #1f2333; color: #fff; padding: 11px 18px; border-radius: 24px; font-size: 14px; max-width: 90vw; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 100; }
-#toast.show { opacity: 1; }
-[hidden] { display: none !important; }
+:root{--bg:#f0f2f5;--card:#fff;--text:#111b21;--muted:#667781;--line:#e9edef;--head:#075e54;--accent:#25d366;--send:#00a884;--field:#fff;--me:#d9fdd3;--them:#fff;--wall:#efeae2;--err:#c53030;--sh:0 1px 1px rgba(11,20,26,.13)}
+:root[data-theme=dark]{--bg:#0b141a;--card:#111b21;--text:#e9edef;--muted:#8696a0;--line:#222d34;--head:#202c33;--accent:#00a884;--send:#00a884;--field:#2a3942;--me:#005c4b;--them:#202c33;--wall:#0b141a;--sh:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text)}
+body{font:16px/1.4 Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header.top{flex:none;background:var(--head);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 8px) 8px 8px;display:flex;align-items:center;gap:8px;z-index:5}
+header .ib{width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:#fff;font-size:20px;cursor:pointer;flex:none}
+header .ib:active{background:rgba(255,255,255,.16)}
+#top-av{width:38px;height:38px;border-radius:50%;background:#6b7c85;display:grid;place-items:center;font-weight:700;flex:none}
+.hd{flex:1;min-width:0}.hd h1{margin:0;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hd .sub{font-size:12px;opacity:.8}
+main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.wrap{max-width:600px;margin:0 auto;padding:8px 0 24px}
+.search-bar{display:flex;gap:8px;margin:6px 12px 10px}
+.search-bar input{flex:1;padding:11px 16px;border-radius:24px;border:0;background:var(--field);color:var(--text);font:inherit;outline:none;box-shadow:var(--sh)}
+.search-bar button{border:0;border-radius:24px;padding:0 16px;background:var(--send);color:#fff;font-weight:700;cursor:pointer}
+.sec{font-size:13px;font-weight:600;color:var(--send);margin:12px 16px 4px}
+.chat-item{display:flex;align-items:center;gap:13px;padding:10px 16px;cursor:pointer;background:var(--card);border-bottom:1px solid var(--line)}
+.chat-item:active{background:var(--bg)}
+.av{width:49px;height:49px;border-radius:50%;background:#6b7c85;color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px;flex:none}
+.cm{flex:1;min-width:0}.cm .n{font-weight:600}.cm .m{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct{text-align:right;font-size:12px;color:var(--muted)}.ct.u{color:var(--accent)}
+.badge{background:var(--accent);color:#fff;font-size:12px;font-weight:700;border-radius:11px;min-width:21px;height:21px;padding:0 6px;display:inline-grid;place-items:center;margin-top:4px}
+.note{color:var(--muted);font-size:14px;text-align:center;padding:30px 14px}
+#chat-view{display:flex;flex-direction:column;height:100%}
+.messages{flex:1;overflow-y:auto;padding:10px 10px 6px;display:flex;flex-direction:column;gap:2px;background-color:var(--wall);background-image:radial-gradient(rgba(128,128,128,.10) 1.2px,transparent 1.2px);background-size:22px 22px}
+.day{align-self:center;background:var(--card);color:var(--muted);font-size:12px;padding:4px 11px;border-radius:8px;margin:8px 0;box-shadow:var(--sh)}
+.bubble{max-width:82%;padding:6px 8px 5px 9px;border-radius:9px;font-size:15px;word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap;box-shadow:var(--sh);position:relative;margin-top:2px}
+.bubble.me{align-self:flex-end;background:var(--me);border-top-right-radius:2px}
+.bubble.them{align-self:flex-start;background:var(--them);border-top-left-radius:2px}
+.meta{display:block;text-align:right;font-size:11px;color:var(--muted);margin:1px 0 0 14px;float:right;line-height:1.6;white-space:nowrap}
+.bubble.me .meta{color:rgba(17,27,33,.55)}:root[data-theme=dark] .bubble.me .meta{color:rgba(233,237,239,.65)}
+.bubble.pending{opacity:.75}.bubble.fail{outline:1.5px solid var(--err)}
+.card{white-space:normal;min-width:220px}.card .k{font-size:11px;font-weight:700;color:var(--send);text-transform:uppercase;letter-spacing:.04em}
+.card .t{font-weight:700;margin:2px 0 4px}.card .r{font-size:13.5px;display:flex;gap:6px}.card .r b{color:var(--muted);font-weight:500;flex:none}
+.card .more{display:block;margin-top:6px;padding-top:6px;border-top:1px solid rgba(128,128,128,.25);color:var(--send);font-weight:600;font-size:14px;text-align:center;cursor:pointer}
+.composer{flex:none;display:flex;gap:6px;align-items:flex-end;padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px);background:var(--wall)}
+.box{flex:1;display:flex;align-items:flex-end;background:var(--field);border-radius:24px;padding:2px 4px 2px 6px;box-shadow:var(--sh)}
+.box textarea{flex:1;resize:none;border:0;background:transparent;color:var(--text);font:inherit;padding:10px 6px;max-height:120px;min-height:42px;outline:none}
+.ico{width:40px;height:42px;border:0;background:transparent;font-size:21px;cursor:pointer;color:var(--muted);flex:none}
+.sendb{width:46px;height:46px;border-radius:50%;border:0;background:var(--send);color:#fff;font-size:19px;cursor:pointer;flex:none;display:grid;place-items:center}
+.bd{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);width:100%;max-width:600px;border-radius:18px 18px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 14px);max-height:82vh;overflow-y:auto}
+.sheet h3{margin:0 0 10px;font-size:17px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}.tabs button{flex:1;border:0;border-radius:18px;padding:9px;background:var(--bg);color:var(--muted);font:inherit;font-weight:600;cursor:pointer}.tabs button.on{background:var(--send);color:#fff}
+.sheet input.f{width:100%;padding:10px 14px;border-radius:20px;border:1px solid var(--line);background:var(--field);color:var(--text);font:inherit;margin-bottom:10px;outline:none}
+.si{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);margin-bottom:7px;cursor:pointer;width:100%;font:inherit;color:var(--text);text-align:left}
+.si .ic{width:38px;height:38px;border-radius:50%;background:var(--send);color:#fff;display:grid;place-items:center;font-size:18px;flex:none}
+.si .tt{flex:1;min-width:0}.si .a{font-weight:600;font-size:15px}.si .b{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dr{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px}.dr b{width:38%;color:var(--muted);font-weight:500;flex:none}.dr span{flex:1;word-break:break-word}
+.row2{display:flex;gap:8px;margin-top:12px}.row2 button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:700;cursor:pointer;background:var(--bg);color:var(--text)}.row2 .p{background:var(--send);color:#fff}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);transform:translateX(-50%);background:#233138;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s;z-index:100}
+#toast.show{opacity:1}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
-<header class="top" id="top-header">
-  <button id="back" type="button" aria-label="Rudi">&#8592;</button>
-  <div style="flex:1;min-width:0;">
-    <h1 id="top-title">Mazungumzo</h1>
-    <div class="sub" id="top-sub"></div>
-  </div>
-  <button id="search-btn" type="button" aria-label="Tafuta">🔍</button>
+<header class="top">
+  <button id="back" class="ib" type="button" aria-label="Rudi">&#8592;</button>
+  <div id="top-av" hidden></div>
+  <div class="hd"><h1 id="top-title">Mazungumzo</h1><div class="sub" id="top-sub"></div></div>
+  <button id="search-btn" class="ib" type="button" aria-label="Tafuta">🔍</button>
 </header>
-
 <main id="main-area">
-  <!-- LIST VIEW -->
   <div class="wrap" id="list-view">
-    <div class="search-bar">
-      <input type="text" id="search-input" placeholder="Tafuta mtumiaji kwa jina au email…">
-      <button id="search-go" type="button">Tafuta</button>
-    </div>
-    <div class="sec">Mazungumzo yako</div>
-    <div id="chats-list" class="chat-list"></div>
+    <div class="search-bar"><input type="text" id="search-input" placeholder="Tafuta mtumiaji (jina au email)…"><button id="search-go" type="button">Tafuta</button></div>
+    <div class="sec">Mazungumzo</div>
+    <div id="chats-list"></div>
     <div class="sec" id="search-sec" hidden>Matokeo ya utafutaji</div>
-    <div id="search-list" class="chat-list"></div>
+    <div id="search-list"></div>
   </div>
-
-  <!-- CHAT VIEW -->
-  <div id="chat-view" hidden style="height:100%;">
+  <div id="chat-view" hidden>
     <div class="messages" id="messages"></div>
     <div class="composer">
-      <button class="icon-btn share" id="share-btn" type="button" title="Shiriki">📎</button>
-      <textarea id="msg-input" rows="1" placeholder="Andika ujumbe…"></textarea>
-      <button class="icon-btn send" id="send-btn" type="button" title="Tuma">➤</button>
+      <div class="box">
+        <textarea id="msg-input" rows="1" placeholder="Andika ujumbe"></textarea>
+        <button class="ico" id="share-btn" type="button" title="Shiriki taarifa">📎</button>
+      </div>
+      <button class="sendb" id="send-btn" type="button" aria-label="Tuma">➤</button>
     </div>
   </div>
 </main>
-
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="core.js?v=5"></script>
@@ -122,279 +95,194 @@ main { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 (function () {
   "use strict";
   var $ = function (id) { return document.getElementById(id); };
-  var params = new URLSearchParams(location.search);
-  var peerUid = params.get("uid");
-  var peerUser = null;
-  var me = null;
-  var unsubMessages = null;
+  var peerUid = new URLSearchParams(location.search).get("uid");
+  var peerUser = null, me = null, lastDay = "", seen = {}, pending = [];
 
-  /* theme */
-  (async function applyTheme() {
-    var theme = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    try {
-      var s = await RescueDB.getAllSettings();
-      if (s && s.theme) theme = s.theme === "light" ? "light" : "dark";
-    } catch (e) { }
-    document.documentElement.setAttribute("data-theme", theme);
+  (async function () {
+    var th = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    try { var s = await RescueDB.getAllSettings(); if (s && s.theme) th = s.theme === "light" ? "light" : "dark"; } catch (e) { }
+    document.documentElement.setAttribute("data-theme", th);
   })();
 
-  var toastTimer;
-  function toast(t) {
-    var el = $("toast"); el.textContent = t; el.classList.add("show");
-    clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.classList.remove("show"); }, 2600);
+  var tt;
+  function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { el.classList.remove("show"); }, 2600); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function hm(ts) { return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
+  function dayLabel(ts) {
+    var d = new Date(ts), n = new Date(), y = new Date(Date.now() - 864e5);
+    if (d.toDateString() === n.toDateString()) return "Leo";
+    if (d.toDateString() === y.toDateString()) return "Jana";
+    return d.toLocaleDateString([], { day: "numeric", month: "long", year: "numeric" });
   }
-  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function fmtTime(ts) {
-    var d = new Date(ts), now = new Date();
-    var same = d.toDateString() === now.toDateString();
-    if (same) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    return d.toLocaleDateString([], { day: "2-digit", month: "short" }) + " " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  function ago(ts) {
+    var d = new Date(ts), df = (Date.now() - d) / 1000;
+    if (df < 60) return "sasa"; if (df < 3600) return Math.floor(df / 60) + "m";
+    if (df < 86400) return hm(ts); return d.toLocaleDateString([], { day: "2-digit", month: "short" });
   }
-  function timeAgo(ts) {
-    var d = new Date(ts), diff = (Date.now() - d) / 1000;
-    if (diff < 60) return "sasa";
-    if (diff < 3600) return Math.floor(diff / 60) + "m";
-    if (diff < 86400) return Math.floor(diff / 3600) + "h";
-    return d.toLocaleDateString();
+  function go(uid) { location.href = "chat.html?uid=" + encodeURIComponent(uid); }
+
+  $("back").addEventListener("click", function () { location.href = peerUid ? "chat.html" : "account.html"; });
+  $("search-btn").addEventListener("click", function () { $("search-input").focus(); });
+
+  /* ===== LIST ===== */
+  function itemHtml(c, right) {
+    var nm = c.name || c.displayName || c.email || "Mtumiaji", un = c.unread > 0;
+    return '<div class="chat-item" data-uid="' + esc(c.uid) + '"><div class="av">' + esc(nm.charAt(0).toUpperCase()) + '</div>'
+      + '<div class="cm"><div class="n">' + esc(nm) + '</div><div class="m">' + esc(c.lastMessage != null ? (c.lastMessage || "Anza mazungumzo…") : (c.email || "")) + '</div></div>'
+      + '<div><div class="ct' + (un ? ' u' : '') + '">' + (right || (c.time ? ago(c.time) : "")) + '</div>' + (un ? '<span class="badge">' + c.unread + '</span>' : '') + '</div></div>';
   }
+  function bind(box) { box.querySelectorAll(".chat-item").forEach(function (el) { el.addEventListener("click", function () { go(el.getAttribute("data-uid")); }); }); }
 
-  $("back").addEventListener("click", function () {
-    if (peerUid) { location.href = "chat.html"; }
-    else { location.href = "account.html"; }
-  });
-
-  $("search-btn").addEventListener("click", function () {
-    $("search-input").focus();
-    $("search-input").scrollIntoView({ behavior: "smooth", block: "center" });
-  });
-
-  /* ===== LIST VIEW ===== */
   async function loadChats() {
+    var box = $("chats-list");
     try {
-      var chats = await CloudSync.getRecentChats(50);
-      var box = $("chats-list");
-      if (!chats.list || chats.list.length === 0) {
-        box.innerHTML = '<p class="note">Hakuna mazungumzo bado.<br>Tafuta mtumiaji juu ili kuanza.</p>';
-        return;
-      }
-      box.innerHTML = chats.list.map(chatItemHtml).join("");
-      bindChatItems(box);
+      var r = await CloudSync.getRecentChats(50);
+      if (!r.list || !r.list.length) { box.innerHTML = '<p class="note">Hakuna mazungumzo bado.<br>Tafuta mtumiaji juu ili kuanza.</p>'; return; }
+      box.innerHTML = r.list.map(function (c) { return itemHtml(c); }).join(""); bind(box);
     } catch (e) { toast("Hitilafu: " + e.message); }
   }
-
-  function chatItemHtml(c) {
-    var initial = (c.name || "?").charAt(0).toUpperCase();
-    var unread = c.unread > 0 ? '<div class="chat-unread">' + c.unread + '</div>' : '';
-    return '<div class="chat-item" data-uid="' + c.uid + '">'
-      + '<div class="chat-avatar' + (c.unread > 0 ? ' unread' : '') + '">' + initial + '</div>'
-      + '<div class="chat-meta"><div class="n">' + escapeHtml(c.name || c.email || "Mtumiaji") + '</div>'
-      + '<div class="m">' + escapeHtml(c.lastMessage || "Anza mazungumzo…") + '</div></div>'
-      + '<div><div class="chat-time">' + (c.time ? timeAgo(c.time) : '') + '</div>' + unread + '</div>'
-      + '</div>';
-  }
-  function bindChatItems(box) {
-    box.querySelectorAll(".chat-item").forEach(function (el) {
-      el.addEventListener("click", function () {
-        location.href = "chat.html?uid=" + encodeURIComponent(el.getAttribute("data-uid"));
-      });
-    });
-  }
-
-  /* search users */
   async function doSearch() {
     var q = $("search-input").value.trim();
-    if (q.length < 2) { toast("Andika angalau herufi 2"); return; }
-    $("search-sec").hidden = false;
-    $("search-list").innerHTML = '<p class="note">Inatafuta…</p>';
+    if (q.length < 2) return toast("Andika angalau herufi 2");
+    $("search-sec").hidden = false; $("search-list").innerHTML = '<p class="note">Inatafuta…</p>';
     try {
-      var users = await CloudSync.searchUsers(q);
-      if (!users || users.length === 0) {
-        $("search-list").innerHTML = '<p class="note">Hakuna mtumiaji aliyepatikana.</p>';
-        return;
-      }
-      $("search-list").innerHTML = users.map(function (u) {
-        var initial = (u.displayName || "?").charAt(0).toUpperCase();
-        return '<div class="chat-item" data-uid="' + u.uid + '">'
-          + '<div class="chat-avatar">' + initial + '</div>'
-          + '<div class="chat-meta"><div class="n">' + escapeHtml(u.displayName || u.email) + '</div>'
-          + '<div class="m">' + escapeHtml(u.email || "") + '</div></div>'
-          + '<div class="chat-time">Anza →</div>'
-          + '</div>';
-      }).join("");
-      $("search-list").querySelectorAll(".chat-item").forEach(function (el) {
-        el.addEventListener("click", function () {
-          location.href = "chat.html?uid=" + encodeURIComponent(el.getAttribute("data-uid"));
-        });
-      });
+      var u = await CloudSync.searchUsers(q);
+      if (!u || !u.length) { $("search-list").innerHTML = '<p class="note">Hakuna mtumiaji aliyepatikana.</p>'; return; }
+      $("search-list").innerHTML = u.map(function (x) { return itemHtml({ uid: x.uid, name: x.displayName || x.email, email: x.email }, "Anza ›"); }).join("");
+      bind($("search-list"));
     } catch (e) { toast("Hitilafu: " + e.message); }
   }
   $("search-go").addEventListener("click", doSearch);
   $("search-input").addEventListener("keydown", function (e) { if (e.key === "Enter") doSearch(); });
 
-  /* ===== CHAT VIEW ===== */
-  async function openChat() {
-    $("list-view").hidden = true;
-    $("chat-view").hidden = false;
-    $("main-area").style.overflow = "hidden";
-    $("search-btn").hidden = true;
-
-    try {
-      peerUser = await CloudSync.getUser(peerUid);
-    } catch (e) { toast("Mtumiaji hakupatikana"); location.href = "chat.html"; return; }
-    if (!peerUser) { toast("Mtumiaji hakupatikana"); location.href = "chat.html"; return; }
-
-    $("top-title").textContent = peerUser.displayName || peerUser.email || "Mtumiaji";
-    $("top-sub").textContent = peerUser.online ? "Mtandaoni" : "Nje ya mtandao";
-
-    document.title = (peerUser.displayName || "Chat") + " — Rescue Report";
-
-    await loadMessages();
-    await markRead();
-    // Realtime listener
-    unsubMessages = CloudSync.watchMessages(peerUid, function (msg) {
-      appendMessage(msg, true);
-      markRead();
+  /* ===== TAARIFA HALISI (kutoka data ya app) ===== */
+  function pretty(k) { return k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").replace(/^./, function (c) { return c.toUpperCase(); }); }
+  function toFields(r) {
+    var skip = /^(id|_id|photos?|images?|picha|blob|attachments?|thumb|signature|pin)/i, out = [];
+    Object.keys(r || {}).forEach(function (k) {
+      if (skip.test(k)) return;
+      var v = r[k]; if (v == null || v === "") return;
+      if (v instanceof Date) v = v.toLocaleString();
+      else if (typeof v === "object") { if (Array.isArray(v) && v.every(function (x) { return x == null || typeof x !== "object"; })) v = v.join(", "); else return; }
+      else if (typeof v === "number" && v > 1e11 && /(date|time|at|tarehe|muda)/i.test(k)) v = new Date(v).toLocaleString();
+      v = String(v); if (/^data:/.test(v)) return;
+      if (v.length > 400) v = v.slice(0, 400) + "…";
+      out.push([pretty(k), v]);
     });
-
-    // composer
-    var input = $("msg-input");
-    input.addEventListener("input", function () {
-      input.style.height = "auto";
-      input.style.height = Math.min(120, input.scrollHeight) + "px";
-    });
-    input.addEventListener("keydown", function (e) {
-      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-    });
-    $("send-btn").addEventListener("click", sendMessage);
-    $("share-btn").addEventListener("click", openShareSheet);
+    return out.slice(0, 30);
+  }
+  function titleOf(r) { return r.title || r.name || r.type || r.category || r.kind || ("Taarifa #" + (r.id || "?")); }
+  function subOf(r) { return r.location || r.place || r.address || r.eneo || r.date || r.createdAt || ""; }
+  async function getSources() {
+    var rep = [], inc = [];
+    try { rep = await RescueDB.getAllReports(); } catch (e) { }
+    try { if (typeof RescueDB.getAllIncidents === "function") inc = await RescueDB.getAllIncidents(); } catch (e) { }
+    return { reports: rep || [], incidents: inc || [] };
   }
 
-  async function markRead() {
-    try { await CloudSync.markChatRead(peerUid); } catch (e) { }
-  }
+  function openSheet(html) { var b = document.createElement("div"); b.className = "bd"; b.innerHTML = '<div class="sheet">' + html + '</div>'; b.addEventListener("click", function (e) { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
 
-  async function loadMessages() {
-    $("messages").innerHTML = '<p class="note">Inapakia…</p>';
-    try {
-      var msgs = await CloudSync.getMessages(peerUid, 100);
-      var box = $("messages");
-      if (!msgs || msgs.length === 0) {
-        box.innerHTML = '<p class="note">Anza mazungumzo kwa kutuma ujumbe.</p>';
-        return;
-      }
-      box.innerHTML = "";
-      msgs.forEach(function (m) { appendMessage(m, false); });
-      box.scrollTop = box.scrollHeight;
-    } catch (e) { $("messages").innerHTML = '<p class="note">Hitilafu kupakia ujumbe.</p>'; }
-  }
-
-  function appendMessage(m, scroll) {
-    var box = $("messages");
-    var note = box.querySelector(".note"); if (note) note.remove();
-    var meUid = me && (me.uid || me.id);
-    var isMe = m.from === meUid;
-    var div = document.createElement("div");
-    div.className = "bubble " + (isMe ? "me" : "them");
-    if (m.type === "share") {
-      var payload = m.share || {};
-      div.innerHTML = '<div style="font-weight:700;margin-bottom:4px;">📋 ' + escapeHtml(payload.title || "Taarifa") + '</div>'
-        + (payload.summary ? '<div style="font-size:14px;opacity:.9;">' + escapeHtml(payload.summary) + '</div>' : '')
-        + (payload.kind ? '<div style="font-size:12px;opacity:.75;margin-top:4px;">Aina: ' + escapeHtml(payload.kind) + '</div>' : '')
-        + '<div class="time">' + fmtTime(m.at) + '</div>';
-    } else {
-      div.innerHTML = escapeHtml(m.text || "")
-        + '<div class="time">' + fmtTime(m.at) + '</div>';
+  async function openShare() {
+    var src = await getSources(), tab = src.incidents.length ? "inc" : "rep";
+    var b = openSheet('<h3>Shiriki taarifa halisi</h3><div class="tabs" id="sh-tabs"></div><input class="f" id="sh-q" placeholder="Tafuta…"><div id="sh-list"></div>');
+    function draw() {
+      var q = b.querySelector("#sh-q").value.trim().toLowerCase();
+      var arr = (tab === "inc" ? src.incidents : src.reports).filter(function (r) { return !q || JSON.stringify(r).toLowerCase().indexOf(q) > -1; }).slice(0, 60);
+      b.querySelector("#sh-tabs").innerHTML = '<button data-t="rep" class="' + (tab === "rep" ? "on" : "") + '">Ripoti (' + src.reports.length + ')</button>'
+        + (src.incidents.length ? '<button data-t="inc" class="' + (tab === "inc" ? "on" : "") + '">Matukio (' + src.incidents.length + ')</button>' : '')
+        + '<button data-t="txt">Muhtasari</button>';
+      b.querySelectorAll("#sh-tabs button").forEach(function (x) { x.onclick = function () { var t = x.getAttribute("data-t"); if (t === "txt") { b.remove(); sendSummary(src); } else { tab = t; draw(); } }; });
+      var L = b.querySelector("#sh-list");
+      if (!arr.length) { L.innerHTML = '<p class="note">Hakuna taarifa zilizopatikana.</p>'; return; }
+      L.innerHTML = arr.map(function (r, i) { return '<button class="si" data-i="' + i + '"><div class="ic">' + (tab === "inc" ? "🚨" : "📄") + '</div><div class="tt"><div class="a">' + esc(titleOf(r)) + '</div><div class="b">' + esc(subOf(r) || "Gusa kutuma") + '</div></div></button>'; }).join("");
+      L.querySelectorAll(".si").forEach(function (x) { x.onclick = function () { var r = arr[+x.getAttribute("data-i")]; b.remove(); sendShare(r, tab === "inc" ? "Tukio" : "Ripoti"); }; });
     }
-    box.appendChild(div);
+    b.querySelector("#sh-q").addEventListener("input", draw); draw();
+  }
+  function sendShare(r, kind) { dispatch({ type: "share", share: { kind: kind, title: titleOf(r), summary: subOf(r) ? String(subOf(r)) : "", fields: toFields(r), reportId: r.id != null ? String(r.id) : "" } }); }
+  function sendSummary(src) {
+    var f = [["Ripoti kwenye akaunti yangu", String(src.reports.length)]]; if (src.incidents.length) f.push(["Matukio", String(src.incidents.length)]);
+    dispatch({ type: "share", share: { kind: "Muhtasari", title: "Muhtasari wa taarifa zangu", summary: "", fields: f } });
+  }
+  function openDetail(p) {
+    var rows = (p.fields || []).map(function (f) { return '<div class="dr"><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></div>'; }).join("") || '<p class="note">Hakuna maelezo zaidi.</p>';
+    var b = openSheet('<h3>' + esc(p.title || "Taarifa") + '</h3>' + rows + '<div class="row2"><button id="dc">Nakili</button><button class="p" id="dx">Funga</button></div>');
+    b.querySelector("#dx").onclick = function () { b.remove(); };
+    b.querySelector("#dc").onclick = function () {
+      var t = (p.title || "") + "\n" + (p.fields || []).map(function (f) { return f[0] + ": " + f[1]; }).join("\n");
+      try { navigator.clipboard.writeText(t).then(function () { toast("Imenakiliwa"); }); } catch (e) { toast("Haikunakiliwa"); }
+    };
+  }
+
+  /* ===== CHAT ===== */
+  function cardHtml(p) {
+    var rows = (p.fields || []).slice(0, 4).map(function (f) { return '<div class="r"><b>' + esc(f[0]) + ':</b><span>' + esc(f[1]) + '</span></div>'; }).join("");
+    return '<div class="card"><div class="k">📋 ' + esc(p.kind || "Taarifa") + '</div><div class="t">' + esc(p.title || "Taarifa") + '</div>'
+      + (p.summary ? '<div class="r"><span>' + esc(p.summary) + '</span></div>' : '') + rows
+      + ((p.fields || []).length > 4 ? '<span class="more">Angalia taarifa kamili ›</span>' : ((p.fields || []).length ? '<span class="more">Fungua ›</span>' : '')) + '</div>';
+  }
+  function keyOf(m) { return m.type === "share" ? "s:" + ((m.share || {}).title || "") : "t:" + (m.text || ""); }
+  function render(div, m, status) {
+    var isMe = m.from === (me.uid || me.id);
+    div.className = "bubble " + (isMe ? "me" : "them") + (status === "pending" ? " pending" : status === "fail" ? " fail" : "");
+    var tick = isMe ? (status === "pending" ? " 🕓" : status === "fail" ? " ⚠" : " ✓") : "";
+    div.innerHTML = (m.type === "share" ? cardHtml(m.share || {}) : esc(m.text || "")) + '<span class="meta">' + hm(m.at || Date.now()) + tick + '</span>';
+    if (m.type === "share") { var mo = div.querySelector(".more"); if (mo) mo.onclick = function () { openDetail(m.share || {}); }; }
+  }
+  function appendMessage(m, scroll) {
+    var box = $("messages"), n = box.querySelector(".note"); if (n) n.remove();
+    var meUid = me.uid || me.id;
+    if (m.id) { if (seen[m.id]) return; seen[m.id] = 1; }
+    if (m.from === meUid) {
+      for (var i = 0; i < pending.length; i++) if (pending[i].key === keyOf(m)) { render(pending[i].el, m, ""); pending.splice(i, 1); return; }
+    }
+    var dl = dayLabel(m.at || Date.now());
+    if (dl !== lastDay) { lastDay = dl; var d = document.createElement("div"); d.className = "day"; d.textContent = dl; box.appendChild(d); }
+    var div = document.createElement("div"); render(div, m, ""); box.appendChild(div);
     if (scroll) box.scrollTop = box.scrollHeight;
   }
+  async function dispatch(payload) {
+    var meUid = me.uid || me.id, m = Object.assign({ from: meUid, at: Date.now() }, payload);
+    appendMessage(Object.assign({}, m, { id: null }), false);
+    var box = $("messages"), el = box.lastChild; render(el, m, "pending");
+    var p = { el: el, key: keyOf(m) }; pending.push(p); box.scrollTop = box.scrollHeight;
+    try { await CloudSync.sendMessage(peerUid, payload); setTimeout(function () { var k = pending.indexOf(p); if (k > -1) { pending.splice(k, 1); render(el, m, ""); } }, 2500); }
+    catch (e) { var k = pending.indexOf(p); if (k > -1) pending.splice(k, 1); render(el, m, "fail"); toast("Imeshindikana kutuma: " + e.message); }
+  }
+  function sendText() {
+    var i = $("msg-input"), t = i.value.trim(); if (!t) return;
+    i.value = ""; i.style.height = "auto"; i.focus();
+    dispatch({ type: "text", text: t });
+  }
 
-  async function sendMessage() {
-    var input = $("msg-input");
-    var text = input.value.trim();
-    if (!text) return;
-    input.value = ""; input.style.height = "auto";
+  async function openChat() {
+    $("list-view").hidden = true; $("chat-view").hidden = false; $("main-area").style.overflow = "hidden"; $("search-btn").hidden = true;
+    try { peerUser = await CloudSync.getUser(peerUid); } catch (e) { }
+    if (!peerUser) { toast("Mtumiaji hakupatikana"); location.href = "chat.html"; return; }
+    var nm = peerUser.displayName || peerUser.email || "Mtumiaji";
+    $("top-title").textContent = nm; $("top-sub").textContent = peerUser.online ? "mtandaoni" : "";
+    var av = $("top-av"); av.hidden = false; av.textContent = nm.charAt(0).toUpperCase();
+    document.title = nm + " — Rescue Report";
+    var box = $("messages");
     try {
-      await CloudSync.sendMessage(peerUid, { type: "text", text: text });
-    } catch (e) { toast("Imeshindikana kutuma: " + e.message); }
+      var msgs = await CloudSync.getMessages(peerUid, 100);
+      if (!msgs || !msgs.length) box.innerHTML = '<p class="note">Anza mazungumzo kwa kutuma ujumbe.</p>';
+      else { msgs.forEach(function (m) { appendMessage(m, false); }); box.scrollTop = box.scrollHeight; }
+    } catch (e) { box.innerHTML = '<p class="note">Hitilafu kupakia ujumbe.</p>'; }
+    try { await CloudSync.markChatRead(peerUid); } catch (e) { }
+    CloudSync.watchMessages(peerUid, function (m) { appendMessage(m, true); CloudSync.markChatRead(peerUid).catch(function () { }); });
+    var inp = $("msg-input");
+    inp.addEventListener("input", function () { inp.style.height = "auto"; inp.style.height = Math.min(120, inp.scrollHeight) + "px"; });
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey && !/Mobi|Android/i.test(navigator.userAgent)) { e.preventDefault(); sendText(); } });
+    $("send-btn").addEventListener("click", sendText);
+    $("share-btn").addEventListener("click", openShare);
   }
 
-  /* ===== SHARE SHEET ===== */
-  async function openShareSheet() {
-    var reports = [];
-    try { reports = await RescueDB.getAllReports(); } catch (e) { }
-    var sheet = document.createElement("div");
-    sheet.className = "sheet-backdrop";
-    sheet.innerHTML = '<div class="sheet"><h3>Shiriki na ' + escapeHtml(peerUser.displayName || peerUser.email) + '</h3>'
-      + '<button class="share-item" data-kind="text"><div class="share-icon">💬</div><div class="t"><div class="ttl">Ujumbe wa maandishi</div><div class="sub">Tuma maandishi tu</div></div></button>'
-      + '<button class="share-item" data-kind="summary"><div class="share-icon">📊</div><div class="t"><div class="ttl">Muhtasari wa ripoti zangu</div><div class="sub">Ripoti ' + reports.length + ' zilizopo</div></div></button>';
-
-    // Chagua ripoti moja
-    if (reports.length > 0) {
-      reports.slice(0, 30).forEach(function (r) {
-        var title = r.title || r.name || r.type || r.category || ("Ripoti #" + (r.id || "?"));
-        sheet.querySelector(".sheet").innerHTML += '<button class="share-item" data-kind="report" data-rid="' + (r.id || "") + '">'
-          + '<div class="share-icon">📄</div><div class="t"><div class="ttl">' + escapeHtml(title) + '</div>'
-          + '<div class="sub">' + escapeHtml(r.location || r.place || r.address || "Ripoti") + '</div></div></button>';
-      });
-    }
-
-    sheet.querySelector(".sheet").innerHTML += '<button class="share-item" data-kind="cancel"><div class="share-icon" style="background:var(--muted)">✕</div><div class="t"><div class="ttl">Ghairi</div></div></button>';
-    document.body.appendChild(sheet);
-    sheet.addEventListener("click", function (e) { if (e.target === sheet) sheet.remove(); });
-    sheet.querySelectorAll(".share-item").forEach(function (btn) {
-      btn.addEventListener("click", async function () {
-        var kind = btn.getAttribute("data-kind");
-        sheet.remove();
-        if (kind === "cancel") return;
-        if (kind === "text") {
-          var t = prompt("Andika ujumbe wa kushiriki:");
-          if (!t) return;
-          try { await CloudSync.sendMessage(peerUid, { type: "text", text: t }); } catch (e) { toast(e.message); }
-          return;
-        }
-        if (kind === "summary") {
-          var summary = "Nina ripoti " + reports.length + " kwenye akaunti yangu.";
-          try { await CloudSync.sendMessage(peerUid, { type: "share", share: { kind: "summary", title: "Muhtasari wa ripoti", summary: summary } }); } catch (e) { toast(e.message); }
-          return;
-        }
-        if (kind === "report") {
-          var rid = btn.getAttribute("data-rid");
-          var rep = reports.find(function (x) { return String(x.id) === String(rid); });
-          if (!rep) return;
-          var title = rep.title || rep.name || rep.type || "Ripoti";
-          var summary = (rep.location || rep.place || rep.address || "") + (rep.description ? " — " + rep.description : "");
-          try {
-            await CloudSync.sendMessage(peerUid, {
-              type: "share",
-              share: { kind: "report", title: title, summary: summary, reportId: rid }
-            });
-          } catch (e) { toast(e.message); }
-          return;
-        }
-      });
-    });
-  }
-
-  /* ===== start ===== */
   (async function start() {
-    if (!window.CloudSync || !window.RescueDB) {
-      toast("Faili za app hazikupatikana");
-      return;
-    }
-    try {
-      me = await CloudSync.currentUser();
-      if (!me) { location.href = "login.html"; return; }
-    } catch (e) { location.href = "login.html"; return; }
-
-    if (peerUid) {
-      await openChat();
-    } else {
-      // LIST view
-      await loadChats();
-      // Auto-refresh list
-      setInterval(loadChats, 15000);
-    }
+    if (!window.CloudSync || !window.RescueDB) { toast("Faili za app hazikupatikana"); return; }
+    try { me = await CloudSync.currentUser(); if (!me) { location.href = "login.html"; return; } }
+    catch (e) { location.href = "login.html"; return; }
+    if (peerUid) openChat(); else loadChats();
   })();
 })();
 </script>
