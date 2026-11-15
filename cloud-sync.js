@@ -147,15 +147,18 @@
     await init();
     var cred = await auth.createUserWithEmailAndPassword(email, password);
     var user = cred.user;
-    if (displayName) await user.updateProfile({ displayName: displayName });
+    var finalName = displayName || email.split("@")[0];
+    if (displayName) await user.updateProfile({ displayName: finalName });
+    
     await userDoc(user.uid).set({
       uid: user.uid,
-      email: user.email,
-      displayName: displayName || email.split("@")[0],
-      displayNameLower: (displayName || email.split("@")[0]).toLowerCase(),
+      email: user.email || "",
+      displayName: finalName,
+      displayNameLower: finalName.toLowerCase(),
       createdAt: global.firebase.firestore.FieldValue.serverTimestamp(),
       lastSeen: global.firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
+    
     remember(user);
     return user;
   }
@@ -164,9 +167,16 @@
     await init();
     var cred = await auth.signInWithEmailAndPassword(email, password);
     var user = cred.user;
+    
+    var finalName = user.displayName || email.split("@")[0];
     await userDoc(user.uid).set({
+      uid: user.uid,
+      email: user.email || "",
+      displayName: finalName,
+      displayNameLower: finalName.toLowerCase(),
       lastSeen: global.firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true });
+    
     remember(user);
     return user;
   }
@@ -424,8 +434,8 @@
     return Object.keys(results).map(function (uid) {
       return {
         uid: uid,
-        email: results[uid].email,
-        displayName: results[uid].displayName || results[uid].email,
+        email: results[uid].email || "Mtumiaji",
+        displayName: results[uid].displayName || results[uid].email || "Mtumiaji",
         online: results[uid].lastSeen && (Date.now() - results[uid].lastSeen.toMillis() < 5 * 60 * 1000)
       };
     });
@@ -434,12 +444,12 @@
   async function getUserProfile(uid) {
     await init();
     var doc = await userDoc(uid).get();
-    if (!doc.exists) return null;
+    if (!doc.exists) return { displayName: "Mtumiaji", email: "", online: false };
     var d = doc.data();
     return {
       uid: doc.id,
-      email: d.email,
-      displayName: d.displayName || d.email,
+      email: d.email || "",
+      displayName: d.displayName || d.email || "Mtumiaji",
       online: d.lastSeen && (Date.now() - d.lastSeen.toMillis() < 5 * 60 * 1000)
     };
   }
@@ -449,8 +459,13 @@
     var me = auth.currentUser;
     if (!me) throw new Error("Hujaingia");
     var cid = chatId(me.uid, toUid);
+    
     var myProfile = await getUserProfile(me.uid);
     var toProfile = await getUserProfile(toUid);
+    
+    // Kinga kali: Hakikisha jina lipo, kama halipo tumia Email, kama email haipo tumia "Mtumiaji"
+    var myName = (myProfile && myProfile.displayName) ? myProfile.displayName : (me.email || "Mtumiaji");
+    var toName = (toProfile && toProfile.displayName) ? toProfile.displayName : "Mtumiaji";
     
     var msg = {
       from: me.uid,
@@ -466,19 +481,19 @@
     
     var lastPreview = payload.type === "share" ? "📎 " + (payload.share && payload.share.title || "Taarifa") : (payload.text || "");
     
-    // Update mpokeaji (unread +1)
+    // Update mpokeaji (unread +1) - Tumia myName
     await userDoc(toUid).collection("chats").doc(cid).set({
       peer: me.uid,
-      peerName: myProfile.displayName,
+      peerName: myName, 
       lastMessage: lastPreview,
       lastAt: global.firebase.firestore.FieldValue.serverTimestamp(),
       unread: global.firebase.firestore.FieldValue.increment(1)
     }, { merge: true });
 
-    // Update mtumaji (unread 0)
+    // Update mtumaji (unread 0) - Tumia toName
     await userDoc(me.uid).collection("chats").doc(cid).set({
       peer: toUid,
-      peerName: toProfile.displayName,
+      peerName: toName,
       lastMessage: lastPreview,
       lastAt: global.firebase.firestore.FieldValue.serverTimestamp(),
       unread: 0
