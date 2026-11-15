@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mafaili</title>
+<style>
+  :root { --bg:#ffffff; --fg:#1d1d2b; --muted:#6b6b80; --line:#e4e4ee; --card:#f3f4f9; --accent:#cf4a24; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1b1b26; --fg:#f1f1f6; --muted:#a0a0b5; --line:#33334a; --card:#26263a; }
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { margin:0; height:100%; color:var(--fg);
+    font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  body { background:var(--bg); }
+  #sheet { height:100%; display:flex; flex-direction:column; background:var(--bg); }
+
+  /* Ikifunguliwa peke yake (si ndani ya dashboard): ionekane kama half sheet */
+  body.standalone { background:rgba(0,0,0,.45); }
+  body.standalone #sheet { position:fixed; left:0; right:0; bottom:0; height:50vh;
+    border-radius:18px 18px 0 0; box-shadow:0 -6px 24px rgba(0,0,0,.25); }
+
+  .grip { width:44px; height:5px; border-radius:3px; background:var(--line); margin:10px auto 4px; flex:none; }
+  header { display:flex; align-items:center; justify-content:space-between; padding:8px 18px 10px; border-bottom:1px solid var(--line); flex:none; }
+  header h1 { font-size:18px; margin:0; }
+  #close { border:0; background:var(--card); color:var(--fg); width:36px; height:36px; border-radius:50%; font-size:18px; cursor:pointer; }
+  main { padding:12px 14px calc(16px + env(safe-area-inset-bottom, 0px)); overflow-y:auto; flex:1; }
+  a.item { display:flex; align-items:center; gap:14px; padding:14px; margin-bottom:10px;
+    background:var(--card); border:1px solid var(--line); border-radius:14px; color:inherit; text-decoration:none; }
+  a.item:active { border-color:var(--accent); }
+  .ic { font-size:28px; width:44px; text-align:center; }
+  .tx { flex:1; min-width:0; }
+  .tx b { display:block; font-size:16px; }
+  .tx small { color:var(--muted); font-size:13px; }
+  .go { color:var(--muted); font-size:20px; }
+</style>
+</head>
+<body>
+  <div id="sheet">
+    <div class="grip"></div>
+    <header>
+      <h1>Mafaili</h1>
+      <button id="close" aria-label="Funga">&#x2715;</button>
+    </header>
+    <main id="list"></main>
+  </div>
+
+<script>
+"use strict";
+/* ===== Orodha ya mafaili =====
+ * Ongeza faili jipya hapa tu: { icon, title, desc, href }
+ */
+var FILES = [
+  { icon: "\uD83D\uDD0D", title: "Tafuta Tukio (Incident Search)", desc: "Fungua ukurasa wa kutafuta matukio", href: "incident-search.html" }
+];
+
+var inFrame = window.parent && window.parent !== window;
+if (!inFrame) document.body.classList.add("standalone");
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function (c) {
+    return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c];
+  });
+}
+
+document.getElementById("list").innerHTML = FILES.map(function (f) {
+  /* target="_top" => ukurasa mzima unahamia kwenye faili, si ndani ya sheet tu */
+  return '<a class="item" target="_top" href="' + esc(f.href) + '">' +
+    '<span class="ic">' + f.icon + '</span>' +
+    '<span class="tx"><b>' + esc(f.title) + '</b><small>' + esc(f.desc) + '</small></span>' +
+    '<span class="go">&#x203A;</span></a>';
+}).join("");
+
+function closeMe() {
+  if (inFrame) window.parent.postMessage({ type: "close-files-sheet" }, "*");
+  else history.back();
+}
+document.getElementById("close").addEventListener("click", closeMe);
+/* Kubonyeza eneo jeusi nje ya sheet (standalone) pia kunafunga */
+document.body.addEventListener("click", function (e) { if (e.target === document.body) closeMe(); });
+</script>
+</body>
+</html>
