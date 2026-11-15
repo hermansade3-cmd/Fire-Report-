@@ -77,6 +77,44 @@ el.textContent = msg;
 host.appendChild(el);
 setTimeout(() => el.remove(), 2600);
 }
+/* ---------------- Mafaili (half sheet ya vidoti 3) ----------------
+ * Kitufe cha \u22EE kwenye header ya Dashboard kinafungua mafaili.html nusu skrini.
+ * Mtumiaji anabaki kwenye Dashboard hadi abonyeze faili ndani ya sheet (mf. incident-search.html).
+ */
+const FILES_SHEET_URL = "mafaili.html";
+function closeFilesSheet() {
+const wrap = document.getElementById("files-sheet");
+if (!wrap)
+return;
+wrap.firstChild.style.transform = "translateY(100%)";
+wrap.style.background = "rgba(0,0,0,0)";
+setTimeout(() => wrap.remove(), 250);
+}
+function openFilesSheet() {
+if (document.getElementById("files-sheet"))
+return;
+const wrap = document.createElement("div");
+wrap.id = "files-sheet";
+wrap.style.cssText = "position:fixed;left:0;top:0;right:0;bottom:0;z-index:9999;background:rgba(0,0,0,0);display:flex;align-items:flex-end;transition:background .25s;";
+const panel = document.createElement("div");
+panel.style.cssText = "width:100%;height:50vh;border-radius:18px 18px 0 0;overflow:hidden;transform:translateY(100%);transition:transform .25s ease;box-shadow:0 -6px 24px rgba(0,0,0,.25);";
+const frame = document.createElement("iframe");
+frame.src = FILES_SHEET_URL;
+frame.title = "Mafaili";
+frame.style.cssText = "width:100%;height:100%;border:0;display:block;";
+panel.appendChild(frame);
+wrap.appendChild(panel);
+wrap.addEventListener("click", (e) => { if (e.target === wrap)
+closeFilesSheet(); });
+document.body.appendChild(wrap);
+requestAnimationFrame(() => {
+wrap.style.background = "rgba(0,0,0,.45)";
+panel.style.transform = "translateY(0)";
+});
+}
+window.addEventListener("message", (e) => { if (e.data && e.data.type === "close-files-sheet")
+closeFilesSheet(); });
+window.addEventListener("hashchange", closeFilesSheet);
 /* ---------------- APK Download ---------------- */
 const APK_FILE = "Fire_Report-v0.6.apk";
 const State = {
@@ -1766,7 +1804,7 @@ app.innerHTML = `
     <div class="content-col">
       <div class="offline-banner" id="offline-banner">Offline Mode \u2014 Data inahifadhiwa kwenye kifaa hiki</div>
       <div class="topbar">
-        <button class="back-btn" id="inc-search-btn" type="button" aria-label="Tafuta (Incident Search)" title="Incident Search" style="display:none;">\u25AB\uFE0F</button>
+        <button class="back-btn" id="inc-search-btn" type="button" aria-label="Mafaili" title="Mafaili" style="display:none;font-size:26px;font-weight:700;line-height:1;">\u22EE</button>
         <button class="back-btn" id="back-btn" aria-label="Back">\u2190</button>
         <h1 id="page-title">Dashboard</h1>
         <span class="save-indicator" id="save-indicator" style="display:none;"></span>
@@ -1787,7 +1825,7 @@ app.innerHTML = `
     <div id="toast-host"></div>
   `;
 $("#back-btn").addEventListener("click", () => { flushSave(); history.back(); });
-$("#inc-search-btn").addEventListener("click", () => { flushSave(); window.location.href = "incident-search.html"; });
+$("#inc-search-btn").addEventListener("click", () => { openFilesSheet(); });
 const fireBtn = $("#fire-science-btn");
 fireBtn.addEventListener("mouseenter", () => { fireBtn.style.background = "rgba(0,0,0,0.08)"; });
 fireBtn.addEventListener("mouseleave", () => { fireBtn.style.background = "transparent"; });
