@@ -13,6 +13,290 @@
 <meta name="apple-mobile-web-app-title" content="Rescue Report">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css?v=4">
+
+<!-- ============================================================
+     SETTINGS + THEME + AUTH (INLINE) — lazima iwe KABLA ya script.js
+     Hii inahakikisha theme inatumika mara moja bila flash,
+     na login inahifadhi taarifa zote za app.
+     ============================================================ -->
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+   * SEHEMU A: SETTINGS + THEME STORE
+   * ============================================================ */
+  const SETTINGS_KEY = "rescue_settings";
+  const THEME_KEY = "rescue_theme";
+  const USERS_KEY = "rescue_users";
+  const SESSION_KEY = "rescue_session";
+  const DEFAULT_THEME = "dark";
+
+  const DEFAULTS = {
+    defaultStation: "",
+    defaultRegion: "",
+    defaultDistrict: "",
+    defaultVehicle: "",
+    reportNumberFormat: "RPT-{YYYY}{MM}{DD}-{SEQ}",
+    theme: DEFAULT_THEME,
+    autoSaveInterval: 600,
+    backupReminder: false,
+    lastBackupReminderShown: 0,
+    appLockEnabled: false,
+    appPin: "",
+    hideSensitiveInList: false,
+    deletePasswordHash: "",
+    loggedInEmail: "",
+    loggedInName: "",
+  };
+
+  let cache = null;
+  const listeners = [];
+
+  function safeGet(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+  function safeSet(key, val) {
+    try { localStorage.setItem(key, val); return true; } catch (e) { return false; }
+  }
+  function safeRemove(key) {
+    try { localStorage.removeItem(key); } catch (e) {}
+  }
+
+  function load() {
+    if (cache) return cache;
+    let parsed = {};
+    try {
+      const raw = safeGet(SETTINGS_KEY);
+      parsed = raw ? JSON.parse(raw) : {};
+    } catch (e) { parsed = {}; }
+    cache = Object.assign({}, DEFAULTS, parsed);
+    const theme = safeGet(THEME_KEY);
+    if (theme === "light" || theme === "dark") {
+      cache.theme = theme;
+    } else {
+      safeSet(THEME_KEY, cache.theme);
+    }
+    return cache;
+  }
+
+  function persist() {
+    safeSet(SETTINGS_KEY, JSON.stringify(cache));
+    notify();
+  }
+
+  function notify() {
+    const snapshot = all();
+    listeners.forEach(function (cb) {
+      try { cb(snapshot); } catch (e) { console.error(e); }
+    });
+  }
+
+  /* ---------- Theme ---------- */
+  function getTheme() {
+    load();
+    return cache.theme === "light" ? "light" : "dark";
+  }
+  function applyTheme(theme) {
+    const t = (theme === "light" || theme === "dark") ? theme : getTheme();
+    document.documentElement.setAttribute("data-theme", t);
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "theme-color";
+      document.head.appendChild(meta);
+    }
+    meta.content = t === "light" ? "#ffffff" : "#0e1420";
+    if (document.body) {
+      document.body.classList.toggle("theme-light", t === "light");
+      document.body.classList.toggle("theme-dark", t === "dark");
+    }
+    return t;
+  }
+  function setTheme(theme) {
+    const t = theme === "light" ? "light" : "dark";
+    load();
+    cache.theme = t;
+    safeSet(THEME_KEY, t);
+    persist();
+    applyTheme(t);
+    return t;
+  }
+  function toggleTheme() {
+    return setTheme(getTheme() === "light" ? "dark" : "light");
+  }
+
+  /* ---------- Settings API ---------- */
+  function get(key) { load(); return cache[key]; }
+  function all() { load(); return Object.assign({}, cache); }
+  function set(key, value) {
+    load();
+    cache[key] = value;
+    if (key === "theme") return Promise.resolve(setTheme(value));
+    persist();
+    return Promise.resolve(value);
+  }
+  function onChange(cb) { if (typeof cb === "function") listeners.push(cb); }
+
+  /* ============================================================
+   * SEHEMU B: AUTH (Login / Register / Session)
+   * ============================================================ */
+  function safeParse(raw, fallback) {
+    try { return raw ? JSON.parse(raw) : fallback; } catch (e) { return fallback; }
+  }
+
+  function getUsers() {
+    return safeParse(safeGet(USERS_KEY), []);
+  }
+  function saveUsers(users) {
+    safeSet(USERS_KEY, JSON.stringify(users));
+  }
+
+  async function hashPassword(pwd) {
+    const data = new TextEncoder().encode(String(pwd));
+    const digest = await crypto.subtle.digest("SHA-256", data);
+    return Array.from(new Uint8Array(digest))
+      .map(function (b) { return b.toString(16).padStart(2, "0"); })
+      .join("");
+  }
+
+  async function registerUser(email, password, name) {
+    email = String(email || "").trim().toLowerCase();
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      throw new Error("Barua pepe si sahihi.");
+    }
+    if (!password || password.length < 6) {
+      throw new Error("Password iwe na angalau herufi 6.");
+    }
+    const users = getUsers();
+    if (users.some(function (u) { return u.email === email; })) {
+      throw new Error("Akaunti hii tayari ipo.");
+    }
+    const hash = await hashPassword(password);
+    users.push({
+      email: email,
+      name: String(name || "").trim() || email.split("@")[0],
+      passwordHash: hash,
+      createdAt: new Date().toISOString(),
+    });
+    saveUsers(users);
+    return true;
+  }
+
+  async function loginUser(email, password) {
+    email = String(email || "").trim().toLowerCase();
+    const users = getUsers();
+    const user = users.find(function (u) { return u.email === email; });
+    if (!user) throw new Error("Akaunti haipatikani.");
+    const hash = await hashPassword(password);
+    if (hash !== user.passwordHash) throw new Error("Password si sahihi.");
+    const session = {
+      email: user.email,
+      name: user.name,
+      loggedInAt: new Date().toISOString(),
+    };
+    safeSet(SESSION_KEY, JSON.stringify(session));
+    load();
+    cache.loggedInEmail = user.email;
+    cache.loggedInName = user.name;
+    persist();
+    return session;
+  }
+
+  function getSession() {
+    return safeParse(safeGet(SESSION_KEY), null);
+  }
+
+  function isLoggedIn() {
+    return !!getSession();
+  }
+
+  function logoutUser() {
+    safeRemove(SESSION_KEY);
+    load();
+    cache.loggedInEmail = "";
+    cache.loggedInName = "";
+    persist();
+    return true;
+  }
+
+  /* ============================================================
+   * SEHEMU C: PASSWORD HASHING (delete password)
+   * ============================================================ */
+  async function hashSecret(value) {
+    return hashPassword(value);
+  }
+  async function setDeletePassword(plain) {
+    if (!plain || plain.length < 6 || !/^\d+$/.test(plain)) {
+      throw new Error("Password iwe na angalau tarakimu 6.");
+    }
+    const hash = await hashSecret(plain);
+    await set("deletePasswordHash", hash);
+    return hash;
+  }
+  async function verifyDeletePassword(plain) {
+    const hash = get("deletePasswordHash");
+    if (!plain || !hash) return false;
+    return (await hashSecret(plain)) === hash;
+  }
+
+  /* ---------- Cross-tab sync ---------- */
+  window.addEventListener("storage", function (e) {
+    if (e.key === SETTINGS_KEY) {
+      cache = null; load(); notify();
+    } else if (e.key === THEME_KEY) {
+      cache = null; load(); applyTheme(); notify();
+    }
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+      const theme = safeGet(THEME_KEY);
+      if (theme === "light" || theme === "dark") {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+    }
+  });
+
+  /* ---------- Init mara moja ---------- */
+  load();
+  applyTheme();
+
+  /* ---------- Expose global ---------- */
+  window.Settings = {
+    // Settings
+    get: get,
+    set: set,
+    all: all,
+    onChange: onChange,
+    // Theme
+    getTheme: getTheme,
+    setTheme: setTheme,
+    toggleTheme: toggleTheme,
+    applyTheme: applyTheme,
+    // Password
+    hashSecret: hashSecret,
+    setDeletePassword: setDeletePassword,
+    verifyDeletePassword: verifyDeletePassword,
+    // Auth
+    register: registerUser,
+    login: loginUser,
+    logout: logoutUser,
+    getSession: getSession,
+    isLoggedIn: isLoggedIn,
+    getUsers: getUsers,
+    // Keys
+    SETTINGS_KEY: SETTINGS_KEY,
+    THEME_KEY: THEME_KEY,
+    USERS_KEY: USERS_KEY,
+    SESSION_KEY: SESSION_KEY,
+    DEFAULTS: DEFAULTS,
+  };
+})();
+</script>
+<!-- ============================================================
+     MWISHO WA SETTINGS + AUTH INLINE
+     ============================================================ -->
 </head>
 <body>
 <div id="app">
