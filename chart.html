@@ -1,0 +1,2447 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mazungumzo — Rescue Report</title>
+<meta name="theme-color" content="#075e54">
+<style>
+:root{--bg:#f0f2f5;--card:#fff;--text:#111b21;--muted:#667781;--line:#e9edef;--head:#075e54;--accent:#25d366;--send:#00a884;--field:#fff;--me:#d9fdd3;--them:#fff;--wall:#efeae2;--err:#c53030;--sh:0 1px 1px rgba(11,20,26,.13)}
+:root[data-theme=dark]{--bg:#0b141a;--card:#111b21;--text:#e9edef;--muted:#8696a0;--line:#222d34;--head:#202c33;--accent:#00a884;--send:#00a884;--field:#2a3942;--me:#005c4b;--them:#202c33;--wall:#0b141a;--sh:none}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text)}
+body{font:16px/1.4 Roboto,system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header.top{flex:none;background:var(--head);color:#fff;padding:calc(env(safe-area-inset-top,0px) + 8px) 8px 8px;display:flex;align-items:center;gap:6px;z-index:5}
+header .ib{width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:#fff;font-size:20px;cursor:pointer;flex:none}
+header .ib:active{background:rgba(255,255,255,.16)}
+#top-av{width:38px;height:38px;border-radius:50%;background:#6b7c85;display:grid;place-items:center;font-weight:700;flex:none;overflow:hidden}
+#top-av img{width:100%;height:100%;object-fit:cover}
+.hd{flex:1;min-width:0}.hd h1{margin:0;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.hd .sub{font-size:12px;opacity:.8;min-height:14px}
+main{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.wrap{max-width:600px;margin:0 auto;padding:8px 0 24px}
+.search-bar{display:flex;gap:8px;margin:6px 12px 10px}
+.search-bar input{flex:1;padding:11px 16px;border-radius:24px;border:0;background:var(--field);color:var(--text);font:inherit;outline:none;box-shadow:var(--sh);min-width:0}
+.search-bar button{border:0;border-radius:24px;padding:0 14px;background:var(--send);color:#fff;font-weight:700;cursor:pointer}
+.sec{font-size:13px;font-weight:600;color:var(--send);margin:12px 16px 4px}
+.chat-item{display:flex;align-items:center;gap:13px;padding:10px 16px;cursor:pointer;background:var(--card);border-bottom:1px solid var(--line)}
+.chat-item:active{background:var(--bg)}
+.av{width:49px;height:49px;border-radius:50%;background:#6b7c85;color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px;flex:none;overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.cm{flex:1;min-width:0}.cm .n{font-weight:600}.cm .m{font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct{text-align:right;font-size:12px;color:var(--muted)}.ct.u{color:var(--accent)}
+.badge{background:var(--accent);color:#fff;font-size:12px;font-weight:700;border-radius:11px;min-width:21px;height:21px;padding:0 6px;display:inline-grid;place-items:center;margin-top:4px}
+.kebab{border:0;background:transparent;color:var(--muted);font-size:20px;width:32px;height:36px;cursor:pointer;flex:none}
+.note{color:var(--muted);font-size:14px;text-align:center;padding:30px 14px}
+/* dashboard */
+.dash{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 12px 10px}
+.tile{background:var(--card);border-radius:14px;padding:10px 6px;text-align:center;box-shadow:var(--sh);cursor:pointer;border:0;color:var(--text);font:inherit}
+.tile b{display:block;font-size:20px;color:var(--send)}.tile span{font-size:11.5px;color:var(--muted)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 12px 8px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:0;border-radius:18px;padding:7px 13px;background:var(--card);color:var(--muted);font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:var(--sh)}
+.chip.on{background:var(--send);color:#fff}
+/* bottom nav */
+nav.bottom{flex:none;display:flex;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav.bottom button{flex:1;border:0;background:transparent;color:var(--muted);padding:7px 0 6px;font:inherit;font-size:11.5px;cursor:pointer;position:relative}
+nav.bottom button i{display:block;font-style:normal;font-size:21px;line-height:1.2}
+nav.bottom button.on{color:var(--send);font-weight:700}
+nav.bottom .nb{position:absolute;top:2px;left:calc(50% + 6px);background:var(--accent);color:#fff;border-radius:9px;font-size:10px;min-width:17px;height:17px;display:grid;place-items:center;padding:0 4px;font-weight:700}
+/* chat */
+#chat-view{display:flex;flex-direction:column;height:100%}
+.messages{flex:1;overflow-y:auto;padding:10px 10px 6px;display:flex;flex-direction:column;gap:2px;background-color:var(--wall);background-image:radial-gradient(rgba(128,128,128,.10) 1.2px,transparent 1.2px);background-size:22px 22px}
+.day{align-self:center;background:var(--card);color:var(--muted);font-size:12px;padding:4px 11px;border-radius:8px;margin:8px 0;box-shadow:var(--sh)}
+.bubble{max-width:82%;padding:6px 8px 5px 9px;border-radius:9px;font-size:15px;word-wrap:break-word;overflow-wrap:anywhere;white-space:pre-wrap;box-shadow:var(--sh);position:relative;margin-top:2px}
+.bubble.me{align-self:flex-end;background:var(--me);border-top-right-radius:2px}
+.bubble.them{align-self:flex-start;background:var(--them);border-top-left-radius:2px}
+.bubble.hl{outline:2px solid var(--accent)}
+.meta{display:block;text-align:right;font-size:11px;color:var(--muted);margin:1px 0 0 14px;float:right;line-height:1.6;white-space:nowrap}
+.bubble.me .meta{color:rgba(17,27,33,.55)}:root[data-theme=dark] .bubble.me .meta{color:rgba(233,237,239,.65)}
+.tk.rd{color:#34b7f1}
+.dd{position:absolute;top:1px;right:4px;font-size:12px;color:var(--muted);cursor:pointer;opacity:.7;padding:0 3px}
+.bubble.pending{opacity:.75}.bubble.fail{outline:1.5px solid var(--err)}
+.rep{white-space:normal;border-left:3px solid var(--send);background:rgba(128,128,128,.15);border-radius:6px;padding:3px 7px;margin-bottom:4px;font-size:13px;color:var(--muted);cursor:pointer}
+.rep b{display:block;color:var(--send);font-size:12px}
+.fwd{font-size:11.5px;color:var(--muted);font-style:italic;white-space:normal}
+.rx{white-space:normal;display:inline-flex;gap:3px;background:var(--card);border-radius:12px;padding:1px 6px;font-size:13px;box-shadow:var(--sh);margin-top:3px;cursor:pointer}
+.bubble img.pic,.bubble video{max-width:100%;border-radius:7px;display:block;max-height:300px}
+.bubble audio{max-width:100%;height:38px}
+.doc{white-space:normal;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text)}.doc i{font-style:normal;font-size:26px}
+.loc{white-space:normal;color:var(--text);text-decoration:none;display:block}.loc b{color:var(--send)}
+.edited{font-size:10.5px;color:var(--muted);margin-right:4px}
+.card{white-space:normal;min-width:220px}.card .k{font-size:11px;font-weight:700;color:var(--send);text-transform:uppercase;letter-spacing:.04em}
+.card .t{font-weight:700;margin:2px 0 4px}.card .r{font-size:13.5px;display:flex;gap:6px}.card .r b{color:var(--muted);font-weight:500;flex:none}
+.card .more{display:block;margin-top:6px;padding-top:6px;border-top:1px solid rgba(128,128,128,.25);color:var(--send);font-weight:600;font-size:14px;text-align:center;cursor:pointer}
+.composer{flex:none;background:var(--wall);padding:6px 8px calc(env(safe-area-inset-bottom,0px) + 6px)}
+.cin{display:flex;gap:6px;align-items:flex-end}
+.replybar{display:flex;align-items:center;gap:8px;background:var(--field);border-left:4px solid var(--send);border-radius:10px;padding:6px 10px;margin-bottom:6px;font-size:13px;color:var(--muted)}
+.replybar div{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.replybar button{border:0;background:transparent;color:var(--muted);font-size:18px;cursor:pointer}
+.box{flex:1;display:flex;align-items:flex-end;background:var(--field);border-radius:24px;padding:2px 4px 2px 6px;box-shadow:var(--sh)}
+.box textarea{flex:1;resize:none;border:0;background:transparent;color:var(--text);font:inherit;padding:10px 6px;max-height:120px;min-height:42px;outline:none}
+.ico{width:40px;height:42px;border:0;background:transparent;font-size:21px;cursor:pointer;color:var(--muted);flex:none}
+.sendb{width:46px;height:46px;border-radius:50%;border:0;background:var(--send);color:#fff;font-size:19px;cursor:pointer;flex:none;display:grid;place-items:center}
+.sendb.rec{background:var(--err);animation:pl 1s infinite}@keyframes pl{50%{opacity:.6}}
+.blockbar{text-align:center;padding:12px;color:var(--muted);font-size:14px}
+.blockbar button{border:0;background:var(--send);color:#fff;border-radius:16px;padding:7px 16px;font-weight:700;margin-left:6px;cursor:pointer}
+/* sheets */
+.bd{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.bd.mid{align-items:center}
+.sheet{background:var(--card);width:100%;max-width:600px;border-radius:18px 18px 0 0;padding:14px 14px calc(env(safe-area-inset-bottom,0px) + 14px);max-height:86vh;overflow-y:auto}
+.sheet h3{margin:0 0 10px;font-size:17px}
+.tabs{display:flex;gap:6px;margin-bottom:10px}.tabs button{flex:1;border:0;border-radius:18px;padding:9px;background:var(--bg);color:var(--muted);font:inherit;font-weight:600;cursor:pointer}.tabs button.on{background:var(--send);color:#fff}
+.sheet input.f,.sheet select.f,.sheet textarea.f{width:100%;padding:10px 14px;border-radius:20px;border:1px solid var(--line);background:var(--field);color:var(--text);font:inherit;margin-bottom:10px;outline:none}
+.sheet textarea.f{border-radius:14px;resize:vertical}
+.si{display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--bg);margin-bottom:7px;cursor:pointer;width:100%;font:inherit;color:var(--text);text-align:left}
+.si .ic{width:38px;height:38px;border-radius:50%;background:var(--send);color:#fff;display:grid;place-items:center;font-size:18px;flex:none}
+.si .tt{flex:1;min-width:0}.si .a{font-weight:600;font-size:15px}.si .b{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si.danger .a{color:var(--err)}
+.dr{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14.5px}.dr b{width:38%;color:var(--muted);font-weight:500;flex:none}.dr span{flex:1;word-break:break-word}
+.row2{display:flex;gap:8px;margin-top:12px}.row2 button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:700;cursor:pointer;background:var(--bg);color:var(--text)}.row2 .p{background:var(--send);color:#fff}
+.emo{display:flex;justify-content:space-around;background:var(--bg);border-radius:24px;padding:6px;margin-bottom:10px}.emo button{border:0;background:transparent;font-size:26px;cursor:pointer;padding:2px 6px}
+.sw{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line)}
+.sw input{width:22px;height:22px;accent-color:var(--send)}
+.pin{font-size:28px;letter-spacing:10px;text-align:center}
+.chk{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line)}.chk input{width:20px;height:20px;accent-color:var(--send)}
+#lock{position:fixed;inset:0;background:var(--head);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#fff;padding:20px}
+#lock input{width:200px;padding:12px;border-radius:14px;border:0;font-size:28px;text-align:center;letter-spacing:10px}
+#lock button{border:0;border-radius:20px;padding:11px 30px;background:var(--accent);color:#fff;font-weight:700;font-size:16px}
+.pf{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px}.pf .av{width:84px;height:84px;font-size:34px}
+.story{width:62px;text-align:center;font-size:12px;flex:none;cursor:pointer}.story .av{width:58px;height:58px;border:3px solid var(--accent)}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);transform:translateX(-50%);background:#233138;color:#fff;padding:10px 18px;border-radius:22px;font-size:14px;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s;z-index:300}
+#toast.show{opacity:1}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="top">
+  <button id="back" class="ib" type="button" aria-label="Rudi" hidden>&#8592;</button>
+  <div id="top-av" hidden></div>
+  <div class="hd"><h1 id="top-title">Mazungumzo</h1><div class="sub" id="top-sub"></div></div>
+  <button id="search-btn" class="ib" type="button" aria-label="Tafuta">🔍</button>
+  <button id="new-btn" class="ib" type="button" aria-label="Mpya">✏️</button>
+  <button id="chat-menu" class="ib" type="button" aria-label="Menyu" hidden>⋮</button>
+</header>
+<main id="main-area">
+  <div class="wrap" id="list-view">
+    <div id="tab-body"></div>
+  </div>
+  <div id="chat-view" hidden>
+    <div class="messages" id="messages"></div>
+    <div class="composer" id="composer">
+      <div id="replybar" class="replybar" hidden><div id="rb-t"></div><button id="rb-x" type="button">✕</button></div>
+      <div class="cin">
+        <div class="box">
+          <textarea id="msg-input" rows="1" placeholder="Andika ujumbe"></textarea>
+          <button class="ico" id="share-btn" type="button" title="Ambatisha">📎</button>
+        </div>
+        <button class="sendb" id="send-btn" type="button" aria-label="Tuma">🎤</button>
+      </div>
+    </div>
+    <div class="blockbar" id="blockbar" hidden>Umemzuia mtumiaji huyu. <button id="unblock-btn" type="button">Mruhusu</button></div>
+  </div>
+</main>
+<nav class="bottom" id="bnav">
+  <button data-tab="chats" class="on"><i>💬</i><span data-i="chats">Chats</span><em class="nb" id="nb-chats" hidden></em></button>
+  <button data-tab="status"><i>⭕</i><span data-i="status">Status</span></button>
+  <button data-tab="settings"><i>⚙️</i><span data-i="settings">Settings</span></button>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="file-in" hidden>
+
+<script>
+"use strict";
+/* ================================================================
+ * 1) db.js
+ * ================================================================ */
+/* db.js
+ * IndexedDB persistence layer for the Offline Incident & Rescue Report app.
+ * Stores: reports, photos, trash, settings, auditLogs
+ * Casualties / witnesses / vehicles / crew / actions / etc. are kept as
+ * arrays embedded inside each report document (they are always read/written
+ * together with the report, so embedding avoids extra transactions and keeps
+ * auto-save atomic). Photos are kept in their own store (binary blobs) keyed
+ * by incidentId so large binary data never blocks report auto-save.
+ */
+const DB_NAME = "rescueReportDB";
+const DB_VERSION = 2;
+let dbPromise = null;
+function openDB() {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains("reports")) {
+        const store = db.createObjectStore("reports", { keyPath: "incidentId" });
+        store.createIndex("status", "status", { unique: false });
+        store.createIndex("createdAt", "createdAt", { unique: false });
+        store.createIndex("incidentDate", "incident.date", { unique: false });
+        store.createIndex("reportNumber", "reportNumber", { unique: false });
+      }
+      if (!db.objectStoreNames.contains("trash")) {
+        db.createObjectStore("trash", { keyPath: "incidentId" });
+      }
+      if (!db.objectStoreNames.contains("photos")) {
+        const p = db.createObjectStore("photos", { keyPath: "photoId" });
+        p.createIndex("incidentId", "incidentId", { unique: false });
+      }
+      if (!db.objectStoreNames.contains("settings")) {
+        db.createObjectStore("settings", { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains("auditLogs")) {
+        const a = db.createObjectStore("auditLogs", { keyPath: "id", autoIncrement: true });
+        a.createIndex("incidentId", "incidentId", { unique: false });
+      }
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror = (e) => reject(e.target.error);
+  });
+  return dbPromise;
+}
+function tx(storeNames, mode = "readonly") {
+  return openDB().then((db) => db.transaction(storeNames, mode));
+}
+function promisifyRequest(req) {
+  return new Promise((resolve, reject) => {
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+const RescueDB = {
+  async putReport(report) {
+    const t = await tx(["reports"], "readwrite");
+    const store = t.objectStore("reports");
+    await promisifyRequest(store.put(report));
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res(report);
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async getReport(incidentId) {
+    const t = await tx(["reports"]);
+    return promisifyRequest(t.objectStore("reports").get(incidentId));
+  },
+  async getAllReports() {
+    const t = await tx(["reports"]);
+    return promisifyRequest(t.objectStore("reports").getAll());
+  },
+  async deleteReportHard(incidentId) {
+    const t = await tx(["reports"], "readwrite");
+    t.objectStore("reports").delete(incidentId);
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async moveToTrash(report) {
+    const t = await tx(["reports", "trash"], "readwrite");
+    t.objectStore("reports").delete(report.incidentId);
+    report.status = "DELETED";
+    report.deletedAt = new Date().toISOString();
+    t.objectStore("trash").put(report);
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async restoreFromTrash(incidentId, newStatus = "DRAFT") {
+    const t = await tx(["reports", "trash"], "readwrite");
+    const trashStore = t.objectStore("trash");
+    const report = await promisifyRequest(trashStore.get(incidentId));
+    if (report) {
+      trashStore.delete(incidentId);
+      report.status = newStatus;
+      delete report.deletedAt;
+      t.objectStore("reports").put(report);
+    }
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res(report);
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async getAllTrash() {
+    const t = await tx(["trash"]);
+    return promisifyRequest(t.objectStore("trash").getAll());
+  },
+  async purgeTrash() {
+    const items = await this.getAllTrash();
+    for (const r of items) await this.permanentlyDelete(r.incidentId);
+  },
+  async permanentlyDelete(incidentId) {
+    const photos = await this.getPhotosForIncident(incidentId);
+    const t = await tx(["reports", "trash", "photos"], "readwrite");
+    t.objectStore("reports").delete(incidentId);
+    t.objectStore("trash").delete(incidentId);
+    const photoStore = t.objectStore("photos");
+    photos.forEach((p) => photoStore.delete(p.photoId));
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+      t.onabort = () => rej(t.error || new Error("Transaction aborted"));
+    });
+  },
+  async putPhoto(photo) {
+    const t = await tx(["photos"], "readwrite");
+    t.objectStore("photos").put(photo);
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res(photo);
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async getPhotosForIncident(incidentId) {
+    const t = await tx(["photos"]);
+    const idx = t.objectStore("photos").index("incidentId");
+    return promisifyRequest(idx.getAll(IDBKeyRange.only(incidentId)));
+  },
+  async deletePhoto(photoId) {
+    const t = await tx(["photos"], "readwrite");
+    t.objectStore("photos").delete(photoId);
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async getAllPhotos() {
+    const t = await tx(["photos"]);
+    return promisifyRequest(t.objectStore("photos").getAll());
+  },
+  async getSetting(key, fallback = null) {
+    const t = await tx(["settings"]);
+    const row = await promisifyRequest(t.objectStore("settings").get(key));
+    return row ? row.value : fallback;
+  },
+  async setSetting(key, value) {
+    const t = await tx(["settings"], "readwrite");
+    t.objectStore("settings").put({ key, value });
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async getAllSettings() {
+    const t = await tx(["settings"]);
+    const rows = await promisifyRequest(t.objectStore("settings").getAll());
+    const out = {};
+    rows.forEach((r) => (out[r.key] = r.value));
+    return out;
+  },
+  async logAction(incidentId, action) {
+    const t = await tx(["auditLogs"], "readwrite");
+    t.objectStore("auditLogs").add({
+      incidentId,
+      action,
+      at: new Date().toISOString(),
+    });
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+    });
+  },
+  async getAuditLog(incidentId) {
+    const t = await tx(["auditLogs"]);
+    const idx = t.objectStore("auditLogs").index("incidentId");
+    return promisifyRequest(idx.getAll(IDBKeyRange.only(incidentId)));
+  },
+  async exportFullBackup() {
+    const [reports, trash, photos, settingsRows] = await Promise.all([
+      this.getAllReports(),
+      this.getAllTrash(),
+      this.getAllPhotos(),
+      (async () => {
+        const t = await tx(["settings"]);
+        return promisifyRequest(t.objectStore("settings").getAll());
+      })(),
+    ]);
+    return {
+      appName: "Offline Incident & Rescue Report",
+      createdBy: "Herman Sade",
+      exportedAt: new Date().toISOString(),
+      version: DB_VERSION,
+      reports,
+      trash,
+      photos,
+      settings: settingsRows,
+    };
+  },
+  async importFullBackup(data, mode = "keep") {
+    const t = await tx(["reports", "trash", "photos", "settings"], "readwrite");
+    const reportsStore = t.objectStore("reports");
+    const trashStore = t.objectStore("trash");
+    const photosStore = t.objectStore("photos");
+    const settingsStore = t.objectStore("settings");
+    const handleCollection = async (store, rows, keyField) => {
+      for (const row of rows || []) {
+        const existing = await promisifyRequest(store.get(row[keyField]));
+        if (!existing) {
+          store.put(row);
+        } else if (mode === "replace") {
+          store.put(row);
+        } else if (mode === "copy") {
+          const clone = Object.assign({}, row);
+          clone[keyField] = row[keyField] + "-copy-" + Date.now();
+          store.put(clone);
+        }
+      }
+    };
+    await handleCollection(reportsStore, data.reports, "incidentId");
+    await handleCollection(trashStore, data.trash, "incidentId");
+    await handleCollection(photosStore, data.photos, "photoId");
+    for (const row of data.settings || []) {
+      settingsStore.put(row);
+    }
+    return new Promise((res, rej) => {
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+    });
+  },
+};
+window.RescueDB = RescueDB;
+/* ================================================================
+ * 2) pdf-lite.js
+ * ================================================================ */
+/* pdf-lite.js — Kizio (module) cha kutengeneza PDF bila maktaba yoyote ya nje,
+ * bila CDN, na bila internet. Kinatumia herufi za msingi za PDF (Helvetica,
+ * fonti ya kawaida inayojumuishwa kwenye kila kisomaji cha PDF) kuandika
+ * hati ya maandishi (text) yenye kurasa nyingi (A4), vichwa vya habari na
+ * footer kwenye kila ukurasa.
+ *
+ * Haihitaji internet wala server — inatengeneza Blob ya PDF moja kwa moja
+ * kwenye kifaa (browser).
+ */
+(function () {
+  "use strict";
+  const PAGE_W = 595.28; // A4 pt
+  const PAGE_H = 841.89;
+  const MARGIN = 46;
+  const FONT_SIZE = 10;
+  const LINE_HEIGHT = 13.6;
+  const HEADER_H = 46;
+  const FOOTER_H = 30;
+  function toWinAnsi(str) {
+    let out = "";
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      out += code < 256 ? str[i] : "?";
+    }
+    return out;
+  }
+  function escapePdfString(s) {
+    return s.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+  }
+  function wrapLine(line, maxChars) {
+    if (line.length <= maxChars) return [line];
+    const words = line.split(" ");
+    const out = [];
+    let cur = "";
+    for (const w of words) {
+      const candidate = cur ? cur + " " + w : w;
+      if (candidate.length > maxChars) {
+        if (cur) out.push(cur);
+        if (w.length > maxChars) {
+          let rest = w;
+          while (rest.length > maxChars) {
+            out.push(rest.slice(0, maxChars));
+            rest = rest.slice(maxChars);
+          }
+          cur = rest;
+        } else {
+          cur = w;
+        }
+      } else {
+        cur = candidate;
+      }
+    }
+    if (cur) out.push(cur);
+    return out;
+  }
+  function buildLines(bodyText) {
+    const maxChars = Math.floor((PAGE_W - 2 * MARGIN) / (FONT_SIZE * 0.52));
+    const rawLines = bodyText.split("\n");
+    const lines = [];
+    rawLines.forEach((rl) => {
+      if (rl.trim() === "") {
+        lines.push("");
+        return;
+      }
+      wrapLine(rl, maxChars).forEach((l) => lines.push(l));
+    });
+    return lines;
+  }
+  function paginate(lines) {
+    const usableH = PAGE_H - MARGIN - HEADER_H - FOOTER_H - MARGIN;
+    const linesPerPage = Math.max(10, Math.floor(usableH / LINE_HEIGHT));
+    const pages = [];
+    for (let i = 0; i < lines.length; i += linesPerPage) {
+      pages.push(lines.slice(i, i + linesPerPage));
+    }
+    if (!pages.length) pages.push([]);
+    return pages;
+  }
+  function buildContentStream(pageLines, headerText, footerLeft, footerRight) {
+    let ops = [];
+    ops.push("BT");
+    ops.push("/F2 12 Tf");
+    ops.push(`${MARGIN} ${PAGE_H - MARGIN - 14} Td`);
+    ops.push(`(${escapePdfString(toWinAnsi(headerText))}) Tj`);
+    ops.push("ET");
+    const lineY = PAGE_H - MARGIN - HEADER_H + 8;
+    ops.push(`${MARGIN} ${lineY} m ${PAGE_W - MARGIN} ${lineY} l S`);
+    ops.push("BT");
+    ops.push(`/F1 ${FONT_SIZE} Tf`);
+    ops.push(`${LINE_HEIGHT} TL`);
+    ops.push(`${MARGIN} ${PAGE_H - MARGIN - HEADER_H - 6} Td`);
+    pageLines.forEach((line) => {
+      ops.push(`(${escapePdfString(toWinAnsi(line))}) Tj`);
+      ops.push("T*");
+    });
+    ops.push("ET");
+    ops.push("BT");
+    ops.push("/F1 8 Tf");
+    ops.push(`${MARGIN} ${MARGIN - 14} Td`);
+    ops.push(`(${escapePdfString(toWinAnsi(footerLeft))}) Tj`);
+    ops.push("ET");
+    ops.push("BT");
+    ops.push("/F1 8 Tf");
+    ops.push(`${PAGE_W - MARGIN - footerRight.length * 4.2} ${MARGIN - 14} Td`);
+    ops.push(`(${escapePdfString(toWinAnsi(footerRight))}) Tj`);
+    ops.push("ET");
+    return ops.join("\n");
+  }
+  /**
+   * Tengeneza PDF (Uint8Array) kutoka kwenye maandishi ya kawaida (plain text).
+   * opts: { headerText, bodyText, footerLeftPrefix }
+   */
+  function generate(opts) {
+    const headerText = opts.headerText || "";
+    const bodyText = opts.bodyText || "";
+    const footerLeftPrefix = opts.footerLeftPrefix || "Created by Herman Sade";
+    const lines = buildLines(bodyText);
+    const pages = paginate(lines);
+    const totalPages = pages.length;
+    const objects = []; // { num, body } — tutajaza num baadaye
+    const pageObjNums = [];
+    const contentObjNums = [];
+    const fontRegularNum = 3 + totalPages * 2;
+    const fontBoldNum = fontRegularNum + 1;
+    let nextNum = 3;
+    const pageEntries = [];
+    pages.forEach((pageLines, idx) => {
+      const pageNum = nextNum++;
+      const contentNum = nextNum++;
+      pageObjNums.push(pageNum);
+      contentObjNums.push(contentNum);
+      const footerRight = `Ukurasa ${idx + 1}/${totalPages}`;
+      const stream = buildContentStream(pageLines, headerText, footerLeftPrefix, footerRight);
+      pageEntries.push({ pageNum, contentNum, stream });
+    });
+    const objStrings = [];
+    objStrings[1] = `1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`;
+    objStrings[2] = `2 0 obj\n<< /Type /Pages /Kids [${pageObjNums.map((n) => n + " 0 R").join(" ")}] /Count ${totalPages} >>\nendobj\n`;
+    pageEntries.forEach(({ pageNum, contentNum }) => {
+      objStrings[pageNum] = `${pageNum} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] /Resources << /Font << /F1 ${fontRegularNum} 0 R /F2 ${fontBoldNum} 0 R >> >> /Contents ${contentNum} 0 R >>\nendobj\n`;
+    });
+    pageEntries.forEach(({ contentNum, stream }) => {
+      const bytesLen = new TextEncoder().encode(stream).length;
+      objStrings[contentNum] = `${contentNum} 0 obj\n<< /Length ${bytesLen} >>\nstream\n${stream}\nendstream\nendobj\n`;
+    });
+    objStrings[fontRegularNum] = `${fontRegularNum} 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n`;
+    objStrings[fontBoldNum] = `${fontBoldNum} 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\nendobj\n`;
+    const totalObjs = fontBoldNum;
+    const encoder = new TextEncoder();
+    const chunks = [];
+    let offset = 0;
+    const header = "%PDF-1.4\n%\xE2\xE3\xCF\xD3\n";
+    chunks.push(encoder.encode(header));
+    offset += chunks[chunks.length - 1].length;
+    const xrefOffsets = new Array(totalObjs + 1).fill(0);
+    for (let n = 1; n <= totalObjs; n++) {
+      xrefOffsets[n] = offset;
+      const bytes = encoder.encode(objStrings[n]);
+      chunks.push(bytes);
+      offset += bytes.length;
+    }
+    const xrefStart = offset;
+    let xref = `xref\n0 ${totalObjs + 1}\n0000000000 65535 f \n`;
+    for (let n = 1; n <= totalObjs; n++) {
+      xref += String(xrefOffsets[n]).padStart(10, "0") + " 00000 n \n";
+    }
+    chunks.push(encoder.encode(xref));
+    const trailer = `trailer\n<< /Size ${totalObjs + 1} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EOF`;
+    chunks.push(encoder.encode(trailer));
+    let totalLen = 0;
+    chunks.forEach((c) => (totalLen += c.length));
+    const out = new Uint8Array(totalLen);
+    let pos = 0;
+    chunks.forEach((c) => {
+      out.set(c, pos);
+      pos += c.length;
+    });
+    return out;
+  }
+  function generateBlob(opts) {
+    const bytes = generate(opts);
+    return new Blob([bytes], { type: "application/pdf" });
+  }
+  window.PdfLite = { generate, generateBlob };
+})();
+/* ================================================================
+ * 3) export.js
+ * ================================================================ */
+/* export.js — Ripoti (report) formatting, PDF, Copy, Share, Backup/Export
+ * kwa Offline Incident & Rescue Report. Hakuna maktaba ya nje/CDN — kila
+ * kitu kinafanya kazi 100% offline kwenye kifaa.
+ */
+(function () {
+  "use strict";
+  function escapeHtml(s) {
+    return (s == null ? "" : String(s)).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  const V = (x) => (x === undefined || x === null || x === "" ? "-" : String(x));
+
+  /* ---------- HELPERS MPYA (kwa muundo wa ripoti wa WhatsApp/PDF/Copy/View) ---------- */
+  const SW_DAYS = ["JUMAPILI", "JUMATATU", "JUMANNE", "JUMATANO", "ALHAMISI", "IJUMAA", "JUMAMOSI"];
+
+  function dayNameSw(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return "-";
+    return SW_DAYS[d.getDay()];
+  }
+
+  // "14:38" -> "Mchana", "08:10" -> "Asubuhi", "16:00" -> "Alasiri", "21:00" -> "Usiku"
+  function timeOfDaySw(timeStr) {
+    if (!timeStr) return "";
+    const m = String(timeStr).match(/(\d{1,2}):(\d{2})/);
+    if (!m) return "";
+    const h = parseInt(m[1], 10);
+    if (h >= 5 && h < 12) return "Asubuhi";
+    if (h >= 12 && h < 15) return "Mchana";
+    if (h >= 15 && h < 19) return "Alasiri";
+    return "Usiku";
+  }
+
+  function fmtTime(timeStr) {
+    if (!timeStr) return "-";
+    const label = timeOfDaySw(timeStr);
+    return label ? `${timeStr} Hrs ${label}` : `${timeStr} Hrs`;
+  }
+
+  const DEFAULT_MAONI =
+    "Tunaendelea kutoa elimu ya usalama kwa wananchi, pamoja na kuendelea kuelimisha " +
+    "wananchi kuhusu matumizi sahihi ya namba ya dharura 114.";
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  function downloadJSON(data, filename) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    downloadBlob(blob, filename);
+  }
+  function downloadTextFile(text, filename) {
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    downloadBlob(blob, filename);
+  }
+  function downloadHTML(innerHtml, filename) {
+    const full = `<!DOCTYPE html><html lang="sw"><head><meta charset="utf-8"><title>Taarifa ya Tukio</title>
+  <style>
+    body{font-family:sans-serif;background:#fff;color:#111;padding:26px;font-size:13.5px;line-height:1.6;max-width:720px;margin:0 auto;}
+    h2{font-size:16px;text-align:center;margin-bottom:2px;}
+    h3{font-size:13px;text-transform:uppercase;border-bottom:1px solid #ccc;padding-bottom:4px;margin:18px 0 8px 0;letter-spacing:.03em;}
+    .sub-center{text-align:center;color:#555;font-size:12px;margin-bottom:16px;}
+    .narrative-body{white-space:pre-wrap;}
+    .photo-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+    .photo-grid div{width:120px;}
+    .photo-grid img{width:100%;border-radius:4px;border:1px solid #ddd;}
+    .footer{text-align:center;color:#999;margin-top:28px;font-size:11px;}
+  </style></head><body>${innerHtml}<div class="footer">Incident &amp; Rescue Reporting System<br>Created by Herman Sade</div></body></html>`;
+    const blob = new Blob([full], { type: "text/html" });
+    downloadBlob(blob, filename);
+  }
+  function csvEscape(v) {
+    if (v == null) return "";
+    const s = String(v).replace(/"/g, '""');
+    return /[",\n]/.test(s) ? `"${s}"` : s;
+  }
+  function downloadReportsCSV(reports) {
+    const headers = [
+      "Incident ID", "Report Number", "Status", "Date", "Type", "Region", "District", "Ward",
+      "Street", "Response Time", "Scene Duration", "Total Duration", "Casualty Count",
+      "Deaths", "Reporter Name", "Reporter Phone", "Created At", "Updated At",
+    ];
+    const rows = reports.map((r) => {
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+      return [
+        r.incidentId, r.reportNumber, r.status,
+        (_a = r.incident) === null || _a === void 0 ? void 0 : _a.date,
+        (_b = r.incident) === null || _b === void 0 ? void 0 : _b.type,
+        (_c = r.location) === null || _c === void 0 ? void 0 : _c.region,
+        (_d = r.location) === null || _d === void 0 ? void 0 : _d.district,
+        (_e = r.location) === null || _e === void 0 ? void 0 : _e.ward,
+        (_f = r.location) === null || _f === void 0 ? void 0 : _f.street,
+        (_g = r.derived) === null || _g === void 0 ? void 0 : _g.responseTime,
+        (_h = r.derived) === null || _h === void 0 ? void 0 : _h.sceneDuration,
+        (_j = r.derived) === null || _j === void 0 ? void 0 : _j.totalDuration,
+        (r.casualties || []).length, (((_k = r.fatality) === null || _k === void 0 ? void 0 : _k.deceased) || []).length,
+        (_l = r.incident) === null || _l === void 0 ? void 0 : _l.reporterName,
+        (_m = r.incident) === null || _m === void 0 ? void 0 : _m.reporterPhone,
+        r.createdAt, r.updatedAt,
+      ];
+    });
+    const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+    downloadBlob(blob, `rescue-reports-${Date.now()}.csv`);
+  }
+  function incidentTypeLabel(i) {
+    if ((i.type === "Ajali nyingine" || i.type === "Tukio jingine") && i.otherType) return i.otherType;
+    return V(i.type);
+  }
+  function placeLabel(l) {
+    return [l.street, l.ward, l.landmark].filter(Boolean).join(", ") || "-";
+  }
+
+  /* ---------- MUUNDO MPYA WA buildNarrativeText (kama sample ya WhatsApp) ---------- */
+  function buildNarrativeText(r) {
+    const i = r.incident || {}, l = r.location || {}, t = r.timeline || {},
+      d = r.damage || {}, cz = r.cause || {}, ch = r.challenges || {},
+      cr = r.crew || {}, f = r.fatality || {};
+    const v0 = (r.vehiclesInvolved || [])[0] || {};
+    const lines = [];
+    const P = (s) => lines.push(s);
+    const blank = () => lines.push("");
+
+    P("JAMBO AFANDE");
+    blank();
+    P(`TAARIFA KAMILI YA TUKIO LA ${incidentTypeLabel(i).toUpperCase()} \u2013 ENEO LA ${V(l.street || l.landmark).toUpperCase()}, ${V(l.ward).toUpperCase()}, WILAYA YA ${V(l.district).toUpperCase()}, MKOA WA ${V(l.region).toUpperCase()}`);
+    blank();
+    P(`Leo tarehe ${V(i.date)}, majira ya saa ${fmtTime(i.timeReceived)}, Jeshi la Zimamoto na Uokoaji, Kituo cha ${V(cr.station)}, tulipokea taarifa ya tukio la ${incidentTypeLabel(i)} lililotokea katika eneo la ${V(l.street || l.landmark)}, ${V(l.ward)}, Wilaya ya ${V(l.district)}, Mkoa wa ${V(l.region)}, kama ilivyoripotiwa awali.`);
+    blank();
+
+    P("MTOA TAARIFA");
+    blank();
+    P(`Jina: ${V(i.reporterName)}`);
+    P(`Namba ya simu: ${V(i.reporterPhone)}`);
+    P(`Njia ya taarifa: ${V(i.reportMethod)}`);
+    blank();
+
+    P(`Majira ya saa ${fmtTime(t.timeDeparted)}, crew ya zamu iliondoka kituoni ikiongozwa na ${V(cr.shiftLeader)}, kuelekea eneo la tukio kwa kutumia gari ${V(v0.type)} ${V(v0.regNo)}, lililokuwa likiendeshwa na ${V(cr.driver)}.`);
+    blank();
+
+    P("TAARIFA ZA KIOFISI");
+    blank();
+    P(`WITO: ${V(r.callSign)}: ${V(l.district).toUpperCase()}/${V(l.region).toUpperCase()}`);
+    P(`TAREHE: ${V(i.date)}`);
+    P(`SIKU: ${dayNameSw(i.date)}`);
+    blank();
+
+    P("TAARIFA ZA MUDA WA TUKIO");
+    blank();
+    P(`Kupokea wito: ${fmtTime(t.timeReceived)}`);
+    P(`Kuondoka kituoni: ${fmtTime(t.timeDeparted)}`);
+    P(`Kufika eneo la tukio: ${fmtTime(t.timeArrived)}`);
+    P(`Kuanza kazi: ${fmtTime(t.timeOpStart)}`);
+    P(`Kumaliza kazi: ${fmtTime(t.timeOpEnd)}`);
+    P(`Kuondoka eneo la tukio: ${fmtTime(t.timeDepartedScene)}`);
+    P(`Kufika kituoni: ${fmtTime(t.timeReturned)}`);
+    blank();
+
+    P("ANUANI YA ENEO LA TUKIO");
+    blank();
+    P(`Kata: ${V(l.ward)}`);
+    P(`Mtaa: ${V(l.street)}`);
+    P(`Wilaya: ${V(l.district)}`);
+    P(`Mkoa: ${V(l.region)}`);
+    blank();
+
+    P("UMBALI WA ENEO LA TUKIO");
+    blank();
+    P(`Umbali wa kwenda na kurudi kituoni ni Km ${V(r.distanceKm)}, kwa kutumia gari ${V(v0.type)} ${V(v0.regNo)}.`);
+    blank();
+
+    P("AINA YA TUKIO");
+    blank();
+    P(V(i.incidentDescription || l.description));
+    blank();
+
+    P("HATUA ZILIZOCHUKULIWA NA JESHI LA ZIMAMOTO NA UOKOAJI");
+    blank();
+    P(V(r.actionsTaken && r.actionsTaken.text));
+    blank();
+
+    P(cz.title ? cz.title.toUpperCase() : "CHANZO CHA AWALI CHA TUKIO");
+    blank();
+    P(V((cz.options || []).join(", ") || cz.detail));
+    blank();
+
+    P("GHARAMA ZILIZOTUMIKA NA JESHI LA ZIMAMOTO NA UOKOAJI");
+    blank();
+    if ((r.fuel || []).length) {
+      r.fuel.forEach((fl) => P(`Mafuta: ${V(fl.fuelType)} lita ${V(fl.litres)}, yaliyotumika kwenye gari ${V(v0.type)} ${V(fl.regNo || v0.regNo)}.`));
+    } else {
+      P("Mafuta: -");
+    }
+    blank();
+
+    P("MAJERUHI NA VIFO");
+    blank();
+    P(`Majeruhi: ${(r.casualties || []).length ? r.casualties.length : "Hakuna."}`);
+    P(`Vifo: ${f.occurred && (f.deceased || []).length ? f.deceased.length : "Hakuna."}`);
+    blank();
+
+    P("MALI ZILIZOOKOLEWA");
+    blank();
+    P(V(r.propertySaved));
+    blank();
+
+    P("HASARA ILIYOPATIKANA");
+    blank();
+    P(V(d.description || [d.propertyDamaged, d.vehicleDamage, d.equipmentDamage, d.otherLosses].filter(Boolean).join("; ")));
+    blank();
+
+    P("TAASISI NYINGINE ZILIZOSHIRIKI");
+    blank();
+    const teamChecks = (r.otherTeams && r.otherTeams.checks) || [];
+    if (teamChecks.length && !(teamChecks.length === 1 && teamChecks[0] === "None")) {
+      P(teamChecks.join(", "));
+    } else {
+      P("Hakuna kikosi kingine kilichoshiriki.");
+    }
+    blank();
+
+    P("CHANGAMOTO");
+    blank();
+    const chOpts = (ch.options || []).filter((o) => o !== "None");
+    if (chOpts.length || ch.text) {
+      if (chOpts.length) P(chOpts.join(", "));
+      if (ch.text) P(V(ch.text));
+    } else {
+      P("Hakuna.");
+    }
+    blank();
+
+    P("MAONI");
+    blank();
+    P(V(r.comments) !== "-" ? V(r.comments) : DEFAULT_MAONI);
+    blank();
+
+    P("Naomba kuwasilisha, Afande.");
+
+    return lines.join("\n");
+  }
+
+  function buildSummaryText(r) {
+    const i = r.incident || {}, l = r.location || {};
+    const worstCondition = (r.casualties || []).reduce((worst, c) => {
+      const order = ["Unknown", "Stable", "Serious", "Critical", "Unconscious"];
+      if (!c.condition) return worst;
+      return order.indexOf(c.condition) > order.indexOf(worst) ? c.condition : worst;
+    }, "");
+    const actions = (r.actionsTaken && r.actionsTaken.text) || "";
+    const lines = [
+      "INCIDENT & RESCUE REPORT",
+      "",
+      `Report ID: ${V(r.reportNumber || r.incidentId)}`,
+      `Date: ${V(i.date)}`,
+      `Time: ${V(i.timeReceived)}`,
+      `Location: ${placeLabel(l)}, ${V(l.district)}, ${V(l.region)}`,
+      `Incident Type: ${incidentTypeLabel(i)}`,
+      `Severity: ${V(worstCondition)}`,
+      `Persons Involved: ${(r.casualties || []).length + (r.witnesses || []).length}`,
+      `Casualties: ${(r.casualties || []).length}`,
+      `Rescue Actions: ${V(actions).slice(0, 160)}`,
+      `Resources Used: ${(r.fuel || []).map((f) => `${V(f.fuelType)} ${V(f.litres)}L`).join(", ") || "-"}`,
+      `Current Status: ${V(r.status)}`,
+      `Additional Notes: ${V(r.challenges && r.challenges.text)}`,
+      "",
+      "Created by: Herman Sade",
+      "App: Incident & Rescue Reporting",
+    ];
+    return lines.join("\n");
+  }
+  function buildNarrativeHtml(r, photos) {
+    const text = buildNarrativeText(r);
+    let html = `<div class="narrative-body">${escapeHtml(text)}</div>`;
+    if (photos && photos.length) {
+      html += `<h3>Picha za Tukio (Attachments)</h3><div class="photo-grid">`;
+      photos.forEach((p, idx) => {
+        const url = URL.createObjectURL(p.blob);
+        html += `<div><img src="${url}"><div style="font-size:10px;color:#555;">Picha ${idx + 1}${p.caption ? ": " + escapeHtml(p.caption) : ""}</div></div>`;
+      });
+      html += `</div>`;
+    }
+    return html;
+  }
+  function generateReportPdfBlob(r) {
+    const header = `OFFLINE INCIDENT & RESCUE REPORT - ${r.reportNumber || r.incidentId}`;
+    const body = buildNarrativeText(r);
+    return window.PdfLite.generateBlob({ headerText: header, bodyText: body, footerLeftPrefix: "Created by Herman Sade" });
+  }
+  function downloadReportPdf(r) {
+    const blob = generateReportPdfBlob(r);
+    downloadBlob(blob, `${r.reportNumber || r.incidentId}.pdf`);
+    return blob;
+  }
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      throw new Error("no-clipboard-api");
+    } catch (e) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      let ok = false;
+      try {
+        ok = document.execCommand("copy");
+      } catch (e2) {
+        ok = false;
+      }
+      ta.remove();
+      return ok;
+    }
+  }
+  function canNativeShare() {
+    return typeof navigator.share === "function";
+  }
+  function canNativeShareFiles(files) {
+    return typeof navigator.canShare === "function" && navigator.canShare({ files });
+  }
+  async function shareText(title, text) {
+    if (canNativeShare()) {
+      try {
+        await navigator.share({ title, text });
+        return { ok: true, method: "native" };
+      } catch (e) {
+        if (e && e.name === "AbortError") return { ok: false, method: "native", cancelled: true };
+      }
+    }
+    const copied = await copyText(text);
+    return { ok: copied, method: "copy-fallback" };
+  }
+  async function sharePdfFile(r) {
+    const blob = generateReportPdfBlob(r);
+    const filename = `${r.reportNumber || r.incidentId}.pdf`;
+    const file = new File([blob], filename, { type: "application/pdf" });
+    if (canNativeShare() && canNativeShareFiles([file])) {
+      try {
+        await navigator.share({ title: "Incident & Rescue Report", text: `Ripoti: ${r.reportNumber || r.incidentId}`, files: [file] });
+        return { ok: true, method: "native-file" };
+      } catch (e) {
+        if (e && e.name === "AbortError") return { ok: false, method: "native-file", cancelled: true };
+      }
+    }
+    downloadBlob(blob, filename);
+    return { ok: true, method: "download-fallback" };
+  }
+  function whatsappShare(text) {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  }
+  function mailtoShare(subject, text) {
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+  }
+  window.RescueExport = {
+    downloadJSON, downloadHTML, downloadTextFile, downloadReportsCSV,
+    buildNarrativeText, buildSummaryText, buildNarrativeHtml,
+    generateReportPdfBlob, downloadReportPdf,
+    copyText, shareText, sharePdfFile, whatsappShare, mailtoShare,
+    canNativeShare, canNativeShareFiles,
+  };
+})();
+
+</script>
+<script>
+/* cloud-sync.js — Akaunti, Backup ya wingu, na Chat kwa Rescue Report */
+(function (global) {
+  "use strict";
+
+  var FIREBASE_VERSION = "10.12.2";
+  var firebaseConfig = {
+    apiKey: "AIzaSyBWg5KZZVhpaEeg-nVEylIYRDIxmaiK7TQ",
+    authDomain: "fire-media-f73ac.firebaseapp.com",
+    projectId: "fire-media-f73ac",
+    storageBucket: "fire-media-f73ac.firebasestorage.app",
+    messagingSenderId: "1027823144494",
+    appId: "1:1027823144494:web:b21a24fc4b6f3ec5d259bf",
+    measurementId: "G-L3C9EQ3VCZ"
+  };
+  var SDK_FILES = ["firebase-app-compat.js", "firebase-auth-compat.js", "firebase-firestore-compat.js"];
+
+  var LS_USER = "rescueCloudUser";
+  var LS_LOCAL = "rescueCloudLocal:";
+  var LS_LAST = "rescueCloudLast:";
+  var CHUNK = 250000;
+  var SECRET_KEYS = ["appPin"];
+  var VOLATILE = /^(exportedAt|exportDate|exported_at|generatedAt|timestamp)$/;
+
+  var auth = null, db = null, readyPromise = null;
+  var statusCbs = [], status = "idle", statusErr = null;
+  var timer = null, chain = Promise.resolve();
+
+  /* ---------------- helpers ---------------- */
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src; s.async = true;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error("sdk-load-failed")); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function init() {
+    if (readyPromise) return readyPromise;
+    readyPromise = (async function () {
+      if (!global.firebase || !global.firebase.firestore) {
+        for (var i = 0; i < SDK_FILES.length; i++) {
+          await loadScript("https://www.gstatic.com/firebasejs/" + FIREBASE_VERSION + "/" + SDK_FILES[i]);
+        }
+      }
+      var fb = global.firebase;
+      if (!fb.apps.length) fb.initializeApp(firebaseConfig);
+      auth = fb.auth();
+      db = fb.firestore();
+      try { db.settings({ experimentalAutoDetectLongPolling: true, merge: true }); } catch (e) { }
+      auth.onAuthStateChanged(function (u) {
+        if (u) remember(u);
+        else localStorage.removeItem(LS_USER);
+      });
+      return true;
+    })().catch(function (e) { readyPromise = null; throw e; });
+    return readyPromise;
+  }
+
+  function remember(u) {
+    try { localStorage.setItem(LS_USER, JSON.stringify({ uid: u.uid, email: u.email, displayName: u.displayName })); } catch (e) { }
+  }
+  function getUser() {
+    try { return JSON.parse(localStorage.getItem(LS_USER) || "null"); } catch (e) { return null; }
+  }
+
+  function hash(str) {
+    var h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+    for (var i = 0; i < str.length; i++) {
+      var ch = str.charCodeAt(i);
+      h1 = Math.imul(h1 ^ ch, 2654435761);
+      h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36) + "." + str.length.toString(36);
+  }
+
+  function safe(s) {
+    s = String(s).replace(/[^A-Za-z0-9_.-]/g, "_");
+    return s.length > 150 ? s.slice(0, 150) : s;
+  }
+
+  function split(s) {
+    var out = [], i = 0;
+    while (i < s.length) {
+      var end = Math.min(i + CHUNK, s.length);
+      if (end < s.length) {
+        var c = s.charCodeAt(end - 1);
+        if (c >= 0xd800 && c <= 0xdbff) end--;
+      }
+      out.push(s.slice(i, end));
+      i = end;
+    }
+    return out.length ? out : [""];
+  }
+
+  function stripSecrets(data) {
+    var copy = Object.assign({}, data);
+    var s = copy.settings;
+    if (Array.isArray(s)) {
+      copy.settings = s.filter(function (x) { return !(x && SECRET_KEYS.indexOf(x.key || x.name) >= 0); });
+    } else if (s && typeof s === "object") {
+      s = Object.assign({}, s);
+      SECRET_KEYS.forEach(function (k) { delete s[k]; });
+      copy.settings = s;
+    }
+    return copy;
+  }
+
+  function stableScalars(scalars) {
+    var o = {};
+    Object.keys(scalars).sort().forEach(function (k) { if (!VOLATILE.test(k)) o[k] = scalars[k]; });
+    return o;
+  }
+
+  function readLocal(uid) {
+    try { return JSON.parse(localStorage.getItem(LS_LOCAL + uid) || "{}"); } catch (e) { return {}; }
+  }
+  function writeLocal(uid, items) {
+    var m = {};
+    Object.keys(items).forEach(function (b) { m[b] = items[b].h; });
+    try { localStorage.setItem(LS_LOCAL + uid, JSON.stringify(m)); } catch (e) { }
+  }
+
+  function userDoc(uid) { return db.collection("users").doc(uid); }
+  function itemsCol(uid) { return userDoc(uid).collection("items"); }
+  function manifestRef(uid) { return userDoc(uid).collection("meta").doc("manifest"); }
+
+  function requireDb() {
+    if (!global.RescueDB || typeof global.RescueDB.exportFullBackup !== "function") {
+      throw new Error("rescuedb-missing");
+    }
+  }
+
+  /* ---------------- status ---------------- */
+  function setStatus(s, err) {
+    status = s; statusErr = err || null;
+    statusCbs.forEach(function (cb) { try { cb(s, err); } catch (e) { } });
+  }
+  function onStatus(cb) { statusCbs.push(cb); try { cb(status, statusErr); } catch (e) { } }
+  function getStatus() { return status; }
+
+  /* ---------------- auth ---------------- */
+  async function signUp(email, password, displayName) {
+    await init();
+    var cred = await auth.createUserWithEmailAndPassword(email, password);
+    var user = cred.user;
+    var finalName = displayName || email.split("@")[0];
+    if (displayName) await user.updateProfile({ displayName: finalName });
+    
+    await userDoc(user.uid).set({
+      uid: user.uid,
+      email: user.email || "",
+      displayName: finalName,
+      displayNameLower: finalName.toLowerCase(),
+      createdAt: global.firebase.firestore.FieldValue.serverTimestamp(),
+      lastSeen: global.firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    
+    remember(user);
+    return user;
+  }
+  
+  async function signIn(email, password) {
+    await init();
+    var cred = await auth.signInWithEmailAndPassword(email, password);
+    var user = cred.user;
+    
+    var finalName = user.displayName || email.split("@")[0];
+    await userDoc(user.uid).set({
+      uid: user.uid,
+      email: user.email || "",
+      displayName: finalName,
+      displayNameLower: finalName.toLowerCase(),
+      lastSeen: global.firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    
+    remember(user);
+    return user;
+  }
+  
+  async function signOut() {
+    await init();
+    clearTimeout(timer);
+    await auth.signOut();
+    localStorage.removeItem(LS_USER);
+    setStatus("signedout");
+  }
+  
+  async function resetPassword(email) {
+    await init();
+    await auth.sendPasswordResetEmail(email);
+  }
+  
+  async function currentUser() {
+    await init();
+    return new Promise(function (resolve) {
+      var off = auth.onAuthStateChanged(function (u) { off(); resolve(u); });
+    });
+  }
+
+  function errorMessage(e) {
+    var code = (e && e.code) || (e && e.message) || "";
+    var map = {
+      "auth/invalid-email": "Barua pepe si sahihi.",
+      "auth/missing-email": "Weka barua pepe.",
+      "auth/missing-password": "Weka password.",
+      "auth/weak-password": "Password iwe na angalau herufi 6.",
+      "auth/email-already-in-use": "Barua pepe hii tayari imesajiliwa. Tumia Ingia.",
+      "auth/user-not-found": "Hakuna akaunti yenye barua pepe hii. Tumia Jisajili.",
+      "auth/wrong-password": "Password si sahihi.",
+      "auth/invalid-credential": "Barua pepe au password si sahihi.",
+      "auth/invalid-login-credentials": "Barua pepe au password si sahihi.",
+      "auth/too-many-requests": "Majaribio mengi sana. Subiri kidogo kisha jaribu tena.",
+      "auth/network-request-failed": "Hakuna mtandao. Washa intaneti kisha jaribu tena.",
+      "auth/operation-not-allowed": "Email/Password haijawashwa kwenye Firebase (Authentication → Sign-in method).",
+      "auth/user-disabled": "Akaunti hii imezimwa.",
+      "permission-denied": "Firestore imekataa ruhusa. Weka Firestore Rules zinazoruhusu mmiliki wa akaunti.",
+      "unavailable": "Seva haipatikani kwa sasa. Jaribu tena ukiwa na intaneti.",
+      "sdk-load-failed": "Imeshindikana kupakia Firebase. Hakikisha una intaneti.",
+      "rescuedb-missing": "Hifadhi ya app (RescueDB) haipatikani. Hakikisha core.js imepakiwa."
+    };
+    for (var k in map) { if (String(code).indexOf(k) >= 0) return map[k]; }
+    return "Hitilafu imetokea. Jaribu tena.";
+  }
+
+  /* ---------------- backup ---------------- */
+  async function collect() {
+    requireDb();
+    var raw = await global.RescueDB.exportFullBackup();
+    var data = stripSecrets(raw || {});
+    var items = {}, scalars = {};
+    Object.keys(data).forEach(function (k) {
+      var v = data[k];
+      if (Array.isArray(v)) {
+        v.forEach(function (it) {
+          var s = JSON.stringify(it);
+          var h = hash(s);
+          var rawId = null;
+          if (it && typeof it === "object") {
+            rawId = it.id != null ? it.id : it.incidentId != null ? it.incidentId :
+              it.photoId != null ? it.photoId : it.key != null ? it.key : it.name != null ? it.name : null;
+          }
+          var base = safe(k) + "__" + safe(rawId == null ? "i" + h : rawId);
+          if (items[base]) base = base + "~" + safe(h);
+          if (items[base]) return;
+          items[base] = { k: k, s: s, h: h };
+        });
+      } else {
+        scalars[k] = v;
+      }
+    });
+    return { items: items, scalars: scalars };
+  }
+
+  async function commit(ops) {
+    var batch = db.batch(), count = 0, size = 0;
+    for (var i = 0; i < ops.length; i++) {
+      var op = ops[i];
+      if (count >= 400 || (count > 0 && size + op.size > 3000000)) {
+        await batch.commit();
+        batch = db.batch(); count = 0; size = 0;
+      }
+      if (op.type === "set") batch.set(op.ref, op.data); else batch.delete(op.ref);
+      count++; size += op.size;
+    }
+    if (count) await batch.commit();
+  }
+
+  async function backup() {
+    requireDb();
+    var u = auth.currentUser;
+    if (!u) throw new Error("not-signed-in");
+    var c = await collect();
+    var mref = manifestRef(u.uid);
+    var msnap = await mref.get();
+    var M = msnap.exists ? (msnap.data() || {}) : {};
+    var R = M.items || {};
+    var L = readLocal(u.uid);
+    var ops = [], newR = Object.assign({}, R), up = 0, del = 0;
+
+    Object.keys(c.items).forEach(function (b) {
+      var it = c.items[b], r = R[b];
+      if (r && r.h === it.h) return;
+      var parts = split(it.s);
+      parts.forEach(function (p, i) {
+        ops.push({ type: "set", ref: itemsCol(u.uid).doc(b + "__" + i), data: { b: b, i: i, d: p }, size: p.length });
+      });
+      if (r && r.n > parts.length) {
+        for (var j = parts.length; j < r.n; j++) ops.push({ type: "del", ref: itemsCol(u.uid).doc(b + "__" + j), size: 0 });
+      }
+      newR[b] = { k: it.k, h: it.h, n: parts.length };
+      up++;
+    });
+
+    Object.keys(R).forEach(function (b) {
+      if (c.items[b] || !L[b]) return;
+      for (var j = 0; j < (R[b].n || 1); j++) ops.push({ type: "del", ref: itemsCol(u.uid).doc(b + "__" + j), size: 0 });
+      delete newR[b];
+      del++;
+    });
+
+    var keepCloudScalars = msnap.exists && localStorage.getItem(LS_LOCAL + u.uid) === null;
+    var scalarsStr = keepCloudScalars ? (M.scalars || "{}") : JSON.stringify(c.scalars);
+    var sh = keepCloudScalars ? (M.sh || "") : hash(JSON.stringify(stableScalars(c.scalars)));
+    if (up || del || M.sh !== sh || !msnap.exists) {
+      await commit(ops);
+      await mref.set({
+        items: newR,
+        scalars: scalarsStr,
+        sh: sh,
+        count: Object.keys(newR).length,
+        updatedAt: global.firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    writeLocal(u.uid, c.items);
+    try { localStorage.setItem(LS_LAST + u.uid, String(Date.now())); } catch (e) { }
+    return { uploaded: up, deleted: del, total: Object.keys(c.items).length };
+  }
+
+  function enqueue(fn) {
+    var p = chain.then(fn);
+    chain = p.catch(function () { });
+    return p;
+  }
+
+  function backupNow() {
+    return enqueue(async function () {
+      await init();
+      var u = await currentUser();
+      if (!u) throw new Error("not-signed-in");
+      setStatus("syncing");
+      try {
+        var r = await backup();
+        setStatus("ok");
+        return r;
+      } catch (e) {
+        setStatus("error", e);
+        throw e;
+      }
+    });
+  }
+
+  function scheduleBackup(delay) {
+    if (!getUser()) return;
+    clearTimeout(timer);
+    setStatus("pending");
+    timer = setTimeout(function () {
+      if (!navigator.onLine) { setStatus("offline"); return; }
+      backupNow().catch(function (e) { console.warn("Cloud backup:", e); });
+    }, delay == null ? 20000 : delay);
+  }
+
+  /* ---------------- restore ---------------- */
+  async function cloudInfo() {
+    await init();
+    var u = await currentUser();
+    if (!u) return null;
+    var snap = await manifestRef(u.uid).get();
+    if (!snap.exists) return { exists: false, count: 0, reports: 0, updatedAt: null };
+    var M = snap.data() || {}, items = M.items || {}, reports = 0;
+    Object.keys(items).forEach(function (b) { if (items[b].k === "reports") reports++; });
+    var t = M.updatedAt && M.updatedAt.toDate ? M.updatedAt.toDate() : null;
+    return { exists: true, count: Object.keys(items).length, reports: reports, updatedAt: t };
+  }
+
+  function restore(mode) {
+    return enqueue(async function () {
+      await init();
+      requireDb();
+      var u = await currentUser();
+      if (!u) throw new Error("not-signed-in");
+      var msnap = await manifestRef(u.uid).get();
+      if (!msnap.exists) return { restored: false, count: 0, bad: 0 };
+      var M = msnap.data() || {}, mItems = M.items || {};
+      var snap = await itemsCol(u.uid).get();
+      var parts = {};
+      snap.forEach(function (d) { var x = d.data(); (parts[x.b] = parts[x.b] || [])[x.i] = x.d; });
+      var data = {};
+      try { data = JSON.parse(M.scalars || "{}"); } catch (e) { data = {}; }
+      var bad = 0, ok = 0;
+      Object.keys(mItems).forEach(function (b) {
+        var m = mItems[b], arr = parts[b], good = !!arr && arr.length >= m.n;
+        for (var i = 0; good && i < m.n; i++) { if (arr[i] == null) good = false; }
+        if (!good) { bad++; return; }
+        try {
+          (data[m.k] = data[m.k] || []).push(JSON.parse(arr.slice(0, m.n).join("")));
+          ok++;
+        } catch (e) { bad++; }
+      });
+      await global.RescueDB.importFullBackup(data, mode || "keep");
+      var c = await collect();
+      writeLocal(u.uid, c.items);
+      return { restored: true, count: ok, bad: bad };
+    });
+  }
+
+  function lastSync() {
+    var u = getUser();
+    var t = u ? Number(localStorage.getItem(LS_LAST + u.uid) || 0) : 0;
+    return t ? new Date(t) : null;
+  }
+
+  /* ================= CHAT & SEARCH ================= */
+  
+  function chatId(a, b) { return [a, b].sort().join("_"); }
+
+  async function searchUsers(query) {
+    await init();
+    if (!query || query.trim().length < 2) return [];
+    var q = query.trim().toLowerCase();
+    var me = auth.currentUser;
+    var results = {};
+    
+    try {
+      var snapEmail = await db.collection("users").where("email", "==", q).limit(10).get();
+      snapEmail.forEach(function (doc) {
+        if (doc.id !== me.uid) results[doc.id] = doc.data();
+      });
+    } catch (e) { }
+
+    try {
+      var snapName = await db.collection("users")
+        .where("displayNameLower", ">=", q)
+        .where("displayNameLower", "<=", q + "\uf8ff")
+        .limit(20).get();
+      snapName.forEach(function (doc) {
+        if (doc.id !== me.uid) results[doc.id] = doc.data();
+      });
+    } catch (e) { }
+
+    return Object.keys(results).map(function (uid) {
+      return {
+        uid: uid,
+        email: results[uid].email || "Mtumiaji",
+        displayName: results[uid].displayName || results[uid].email || "Mtumiaji",
+        online: results[uid].lastSeen && (Date.now() - results[uid].lastSeen.toMillis() < 5 * 60 * 1000)
+      };
+    });
+  }
+
+  async function getUserProfile(uid) {
+    await init();
+    var doc = await userDoc(uid).get();
+    if (!doc.exists) return { displayName: "Mtumiaji", email: "", online: false };
+    var d = doc.data();
+    return {
+      uid: doc.id,
+      email: d.email || "",
+      displayName: d.displayName || d.email || "Mtumiaji",
+      online: d.lastSeen && (Date.now() - d.lastSeen.toMillis() < 5 * 60 * 1000)
+    };
+  }
+
+  async function sendMessage(toUid, payload) {
+    await init();
+    var me = auth.currentUser;
+    if (!me) throw new Error("Hujaingia");
+    var cid = chatId(me.uid, toUid);
+    
+    var myProfile = await getUserProfile(me.uid);
+    var toProfile = await getUserProfile(toUid);
+    
+    // Kinga kali: Hakikisha jina lipo, kama halipo tumia Email, kama email haipo tumia "Mtumiaji"
+    var myName = (myProfile && myProfile.displayName) ? myProfile.displayName : (me.email || "Mtumiaji");
+    var toName = (toProfile && toProfile.displayName) ? toProfile.displayName : "Mtumiaji";
+    
+    var msg = {
+      from: me.uid,
+      to: toUid,
+      type: payload.type || "text",
+      text: payload.text || "",
+      share: payload.share || null,
+      at: global.firebase.firestore.FieldValue.serverTimestamp(),
+      readBy: [me.uid]
+    };
+    
+    await db.collection("chats").doc(cid).collection("messages").add(msg);
+    
+    var lastPreview = payload.type === "share" ? "📎 " + (payload.share && payload.share.title || "Taarifa") : (payload.text || "");
+    
+    // Update mpokeaji (unread +1) - Tumia myName
+    await userDoc(toUid).collection("chats").doc(cid).set({
+      peer: me.uid,
+      peerName: myName, 
+      lastMessage: lastPreview,
+      lastAt: global.firebase.firestore.FieldValue.serverTimestamp(),
+      unread: global.firebase.firestore.FieldValue.increment(1)
+    }, { merge: true });
+
+    // Update mtumaji (unread 0) - Tumia toName
+    await userDoc(me.uid).collection("chats").doc(cid).set({
+      peer: toUid,
+      peerName: toName,
+      lastMessage: lastPreview,
+      lastAt: global.firebase.firestore.FieldValue.serverTimestamp(),
+      unread: 0
+    }, { merge: true });
+  }
+
+  async function getMessages(peerUid, limit) {
+    await init();
+    var me = auth.currentUser;
+    var cid = chatId(me.uid, peerUid);
+    var snap = await db.collection("chats").doc(cid).collection("messages")
+      .orderBy("at", "desc").limit(limit || 50).get();
+    var list = [];
+    snap.forEach(function (doc) {
+      var d = doc.data();
+      list.push({
+        id: doc.id,
+        from: d.from,
+        to: d.to,
+        type: d.type,
+        text: d.text,
+        share: d.share,
+        at: d.at ? d.at.toMillis() : Date.now()
+      });
+    });
+    return list.reverse();
+  }
+
+  function watchMessages(peerUid, cb) {
+    init().then(function() {
+      var me = auth.currentUser;
+      var cid = chatId(me.uid, peerUid);
+      return db.collection("chats").doc(cid).collection("messages")
+        .orderBy("at", "asc").limit(100)
+        .onSnapshot(function (snap) {
+          snap.docChanges().forEach(function (ch) {
+            if (ch.type === "added") {
+              var d = ch.doc.data();
+              cb({
+                id: ch.doc.id,
+                from: d.from,
+                to: d.to,
+                type: d.type,
+                text: d.text,
+                share: d.share,
+                at: d.at ? d.at.toMillis() : Date.now()
+              });
+            }
+          });
+        });
+    });
+  }
+
+  async function markChatRead(peerUid) {
+    await init();
+    var me = auth.currentUser;
+    var cid = chatId(me.uid, peerUid);
+    try {
+      await userDoc(me.uid).collection("chats").doc(cid).set({ unread: 0 }, { merge: true });
+    } catch (e) { }
+  }
+
+  async function getRecentChats(limit) {
+    await init();
+    var me = auth.currentUser;
+    if (!me) return { list: [], total: 0 };
+    var snap = await userDoc(me.uid).collection("chats")
+      .orderBy("lastAt", "desc").limit(limit || 20).get();
+    var list = [];
+    var total = 0;
+    snap.forEach(function (doc) {
+      var d = doc.data();
+      total += (d.unread || 0);
+      list.push({
+        uid: d.peer,
+        name: d.peerName || "Mtumiaji",
+        lastMessage: d.lastMessage || "",
+        time: d.lastAt ? d.lastAt.toMillis() : null,
+        unread: d.unread || 0
+      });
+    });
+    return { list: list, total: total };
+  }
+
+  async function getTotalUnread() {
+    await init();
+    var me = auth.currentUser;
+    if (!me) return 0;
+    var snap = await userDoc(me.uid).collection("chats").get();
+    var total = 0;
+    snap.forEach(function (doc) {
+      total += (doc.data().unread || 0);
+    });
+    return total;
+  }
+
+  async function syncChats() {
+    return true;
+  }
+
+  global.CloudSync = {
+    init: init, signUp: signUp, signIn: signIn, signOut: signOut, resetPassword: resetPassword,
+    currentUser: currentUser, getUser: getUser, errorMessage: errorMessage,
+    backupNow: backupNow, scheduleBackup: scheduleBackup, restore: restore, cloudInfo: cloudInfo,
+    onStatus: onStatus, getStatus: getStatus, lastSync: lastSync,
+    // Chat
+    searchUsers: searchUsers,
+    getUserProfile: getUserProfile,
+    sendMessage: sendMessage,
+    getMessages: getMessages,
+    watchMessages: watchMessages,
+    markChatRead: markChatRead,
+    getRecentChats: getRecentChats,
+    getTotalUnread: getTotalUnread,
+    syncChats: syncChats,
+    _t: { hash: hash, split: split, collect: collect, backup: backup, setAuth: function (a, d) { auth = a; db = d; } }
+  };
+})(window);
+
+</script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var peerUid = new URLSearchParams(location.search).get("uid");
+  var peerUser = null, me = null, lastDay = "", seen = {}, pending = [];
+  var tab = "chats", filter = "all", chatsCache = [], replyTo = null, fileKind = "", rec = null, curChatKey = "";
+  var LIMIT = 700 * 1024; // kikomo cha ukubwa wa media (database ya ujumbe)
+
+  /* ===== LOCAL STORE ===== */
+  var KEY = "rr_chat_v2";
+  var S = (function () {
+    var d = {}; try { d = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { }
+    d.pins = d.pins || {}; d.arch = d.arch || {}; d.mute = d.mute || {}; d.locked = d.locked || {}; d.blocked = d.blocked || {};
+    d.drafts = d.drafts || {}; d.trash = d.trash || []; d.meta = d.meta || {}; d.log = d.log || []; d.groups = d.groups || [];
+    d.stories = d.stories || []; d.reports = d.reports || []; d.e2e = d.e2e || {}; d.names = d.names || {};
+    d.profile = d.profile || { about: "Nipo kwenye Rescue Report", photo: "" };
+    d.settings = Object.assign({ lang: "sw", theme: "", readRcpt: true, lastSeen: true, notif: false, pin: "", salt: "" }, d.settings || {});
+    return d;
+  })();
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast("Hifadhi imejaa — futa data kwenye Storage"); } }
+  function cs(fn) { var a = [].slice.call(arguments, 1); if (window.CloudSync && typeof CloudSync[fn] === "function") { try { return CloudSync[fn].apply(CloudSync, a); } catch (e) { } } }
+
+  /* ===== LUGHA ===== */
+  var L = {
+    sw: { chats: "Chats", contacts: "Contacts", calls: "Calls", status: "Status", settings: "Settings", title: "Mazungumzo", type: "Andika ujumbe", online: "mtandaoni", typing: "anaandika…", you: "Wewe" },
+    en: { chats: "Chats", contacts: "Contacts", calls: "Calls", status: "Status", settings: "Settings", title: "Messages", type: "Type a message", online: "online", typing: "typing…", you: "You" }
+  };
+  function T(k) { return (L[S.settings.lang] || L.sw)[k] || L.sw[k] || k; }
+  function applyLang() {
+    document.documentElement.lang = S.settings.lang;
+    document.querySelectorAll("[data-i]").forEach(function (e) { e.textContent = T(e.getAttribute("data-i")); });
+    $("msg-input").placeholder = T("type");
+  }
+
+  /* ===== THEME ===== */
+  (async function () {
+    var th = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    try { var s = await RescueDB.getAllSettings(); if (s && s.theme) th = s.theme === "light" ? "light" : "dark"; } catch (e) { }
+    if (S.settings.theme) th = S.settings.theme;
+    document.documentElement.setAttribute("data-theme", th);
+  })();
+
+  /* ===== UTIL ===== */
+  var tt;
+  function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("show"); clearTimeout(tt); tt = setTimeout(function () { el.classList.remove("show"); }, 2600); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function hm(ts) { return new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); }
+  function dayLabel(ts) {
+    var d = new Date(ts), n = new Date(), y = new Date(Date.now() - 864e5);
+    if (d.toDateString() === n.toDateString()) return S.settings.lang === "en" ? "Today" : "Leo";
+    if (d.toDateString() === y.toDateString()) return S.settings.lang === "en" ? "Yesterday" : "Jana";
+    return d.toLocaleDateString([], { day: "numeric", month: "long", year: "numeric" });
+  }
+  function ago(ts) {
+    var d = new Date(ts), df = (Date.now() - d) / 1000;
+    if (df < 60) return "sasa"; if (df < 3600) return Math.floor(df / 60) + "m";
+    if (df < 86400) return hm(ts); return d.toLocaleDateString([], { day: "2-digit", month: "short" });
+  }
+  function go(uid) { location.href = "chart.html?uid=" + encodeURIComponent(uid); }
+  function myUid() { return me && (me.uid || me.id); }
+  function avatar(name, photo) { return photo ? '<img src="' + esc(photo) + '" alt="">' : esc((name || "?").charAt(0).toUpperCase()); }
+  function openSheet(html, mid) { var b = document.createElement("div"); b.className = "bd" + (mid ? " mid" : ""); b.innerHTML = '<div class="sheet"' + (mid ? ' style="border-radius:18px;margin:16px"' : '') + '>' + html + '</div>'; b.addEventListener("click", function (e) { if (e.target === b) b.remove(); }); document.body.appendChild(b); return b; }
+  function menuSheet(title, items) {
+    var b = openSheet((title ? '<h3>' + esc(title) + '</h3>' : '') + items.map(function (it, i) { return '<button class="si' + (it.danger ? ' danger' : '') + '" data-i="' + i + '"><div class="ic">' + it.ic + '</div><div class="tt"><div class="a">' + esc(it.t) + '</div>' + (it.s ? '<div class="b">' + esc(it.s) + '</div>' : '') + '</div></button>'; }).join(""));
+    b.querySelectorAll(".si").forEach(function (x) { x.onclick = function () { b.remove(); items[+x.getAttribute("data-i")].fn(); }; });
+    return b;
+  }
+  async function sha(t) { var h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t)); return Array.from(new Uint8Array(h)).map(function (x) { return x.toString(16).padStart(2, "0"); }).join(""); }
+  function askPin(title, cb) {
+    var b = openSheet('<h3>' + esc(title) + '</h3><input class="f pin" id="pn" type="password" inputmode="numeric" maxlength="6" placeholder="••••"><div class="row2"><button id="pc">Ghairi</button><button class="p" id="po">Sawa</button></div>', true);
+    var i = b.querySelector("#pn"); i.focus();
+    function ok() { var v = i.value.trim(); if (v.length < 4) return toast("PIN iwe tarakimu 4–6"); b.remove(); cb(v); }
+    b.querySelector("#pc").onclick = function () { b.remove(); }; b.querySelector("#po").onclick = ok;
+    i.addEventListener("keydown", function (e) { if (e.key === "Enter") ok(); });
+  }
+  async function checkPin(pin) { return S.settings.pin && (await sha(S.settings.salt + pin)) === S.settings.pin; }
+  function needPin(cb, title) {
+    if (!S.settings.pin) { toast("Weka PIN kwanza: Settings › Security"); return; }
+    askPin(title || "Weka PIN", async function (p) { if (await checkPin(p)) cb(); else toast("PIN si sahihi"); });
+  }
+  function metaOf(k) { return S.meta[k] || (S.meta[k] = {}); }
+
+  /* ===== E2E (AES-GCM, passphrase ya pamoja) ===== */
+  async function e2eKey(uid) {
+    var pass = S.e2e[uid]; if (!pass) return null;
+    var base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt: new TextEncoder().encode("rr-chat:" + [myUid(), uid].sort().join("|")), iterations: 60000, hash: "SHA-256" }, base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+  function b64(u) { var s = ""; u.forEach(function (c) { s += String.fromCharCode(c); }); return btoa(s); }
+  function unb64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+  async function encText(uid, t) {
+    var k = await e2eKey(uid); if (!k) return t;
+    var iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, k, new TextEncoder().encode(t)));
+    var o = new Uint8Array(12 + ct.length); o.set(iv); o.set(ct, 12); return "🔒e1:" + b64(o);
+  }
+  async function decText(uid, t) {
+    if (String(t).indexOf("🔒e1:") !== 0) return t;
+    var k = await e2eKey(uid); if (!k) return "🔒 Ujumbe uliosimbwa (weka passphrase kwenye menyu ya chat)";
+    try { var o = unb64(t.slice(5)); return new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: o.slice(0, 12) }, k, o.slice(12))); }
+    catch (e) { return "🔒 Imeshindwa kufungua (passphrase tofauti)"; }
+  }
+
+  /* ===== TAARIFA HALISI: ripoti za tukio (muundo wa script.js) ===== */
+  var STEPS = ["incident", "location", "timeline", "vehicles", "casualties", "fatality", "witnesses", "actions", "cause", "damage", "fuel", "otherTeams", "challenges", "photos", "crew", "review"];
+  var STEP_LABELS = { incident: "Taarifa za Tukio", location: "Eneo la Tukio", timeline: "Muda wa Operesheni", vehicles: "Vyombo/Vitu Vilivyohusika", casualties: "Majeruhi", fatality: "Vifo", witnesses: "Mashahidi", actions: "Hatua Zilizochukuliwa", cause: "Chanzo cha Tukio", damage: "Hasara", fuel: "Mafuta / Rasilimali", otherTeams: "Vikosi Vingine", challenges: "Changamoto", photos: "Picha / Ushahidi", crew: "Wafanyakazi (Crew)", review: "Kamilisha / Hakiki" };
+  var ACTION_LIST = [["sceneAssessment", "Scene assessment"], ["firstAid", "First aid"], ["rescue", "Rescue"], ["evacuation", "Evacuation"], ["transportation", "Transportation"], ["fireSuppression", "Fire suppression"], ["sceneSafety", "Scene safety"], ["handoverHospital", "Handover to hospital"], ["handoverPolice", "Handover to police"], ["other", "Other"]];
+  var D_VEH = [["type", "Aina ya Chombo"], ["regNo", "Namba ya Usajili"], ["makeModel", "Make/Model"], ["color", "Rangi"], ["owner", "Owner"], ["notes", "Maelezo Mengine"]];
+  var D_CAS = [["name", "Full Name"], ["age", "Age"], ["sex", "Sex"], ["phone", "Phone"], ["role", "Role"], ["injury", "Injury Description"], ["condition", "Condition"], ["firstAid", "First Aid Given"], ["hospital", "Hospital/Facility Taken To"], ["transport", "Transport Used"], ["timeTransported", "Time Transported"], ["notes", "Additional Notes"]];
+  var D_DEC = [["name", "Name"], ["age", "Age"], ["sex", "Sex"], ["status", "Identification/Status if Known"], ["notes", "Notes"]];
+  var D_WIT = [["name", "Full Name"], ["position", "Position/Occupation"], ["org", "Company/Organization"], ["phone", "Phone"], ["statement", "Statement/Notes"]];
+  var D_FUEL = [["regNo", "Vehicle Registration"], ["fuelType", "Fuel Type"], ["litres", "Fuel Consumed (Litres)"], ["otherResources", "Other Resources Used"]];
+  var D_TEAM = [["name", "Team Name"], ["role", "Role"], ["notes", "Notes"]];
+  var D_MEM = [["name", "Name"], ["role", "Rank/Role"], ["staffNo", "Service/Staff Number"]];
+  function gp(o, p) { return p.split(".").reduce(function (a, k) { return a == null ? undefined : a[k]; }, o); }
+  function fv(v) { if (v == null || v === "") return ""; if (Array.isArray(v)) return v.filter(function (x) { return x != null && x !== ""; }).join(", "); if (typeof v === "boolean") return v ? "Ndiyo" : "Hapana"; if (typeof v === "object") return ""; return String(v); }
+  function noNone(a) { return Array.isArray(a) ? a.filter(function (x) { return x !== "None"; }) : a; }
+  function rowsOf(o, defs) { var out = []; defs.forEach(function (d) { var v = fv(gp(o || {}, d[0])); if (v) out.push([d[1], v]); }); return out; }
+  function blocksOf(arr, name, defs) { return (arr || []).map(function (x, i) { return { title: name + " #" + (i + 1), rows: rowsOf(x, defs) }; }); }
+  function reportSections(r) {
+    var t = Object.assign({}, r.timeline || {}); if (!t.timeOpStart && t.timeOpStarted) t.timeOpStart = t.timeOpStarted;
+    var gps = (r.location || {}).gps || {}, act = r.actionsTaken || {}, chk = ACTION_LIST.filter(function (a) { return act.checklist && act.checklist[a[0]]; }).map(function (a) { return a[1]; });
+    var ot = r.otherTeams || {}, ch = r.challenges || {}, cz = r.cause || {}, fa = r.fatality || {}, ph = (r.photoIds || []).length, cr = r.crew || {};
+    var sec = {
+      incident: { rows: rowsOf(r, [["reportNumber", "Report/Office Reference Number"], ["incident.date", "Tarehe ya Tukio"], ["incident.timeReceived", "Muda wa Kupokea Taarifa"], ["incident.type", "Aina ya Tukio"], ["incident.otherType", "Elezea Aina ya Tukio"], ["incident.sourceOfInfo", "Chanzo cha Taarifa"], ["incident.reporterName", "Jina la Mtoa Taarifa"], ["incident.reporterPhone", "Namba ya Simu ya Mtoa Taarifa"]]) },
+      location: { rows: rowsOf(r, [["location.region", "Mkoa"], ["location.district", "Wilaya"], ["location.ward", "Kata"], ["location.street", "Mtaa"], ["location.road", "Barabara"], ["location.landmark", "Eneo Maarufu/Landmark"], ["location.description", "Maelezo ya Eneo"]]).concat(gps.lat && gps.lng ? [["GPS", gps.lat + ", " + gps.lng]] : []) },
+      timeline: { rows: rowsOf({ timeline: t }, [["timeline.timeReceived", "Time Received"], ["timeline.timeDeparted", "Time Departed Station"], ["timeline.timeArrived", "Time Arrived Scene"], ["timeline.timeOpStart", "Time Operation Started"], ["timeline.timeOpEnd", "Time Operation Completed"], ["timeline.timeDepartedScene", "Time Departed Scene"], ["timeline.timeReturned", "Time Returned Station"]]) },
+      vehicles: { blocks: blocksOf(r.vehiclesInvolved, "Chombo", D_VEH) },
+      casualties: { rows: (r.casualties || []).length ? [["Idadi ya Majeruhi", String(r.casualties.length)]] : [], blocks: blocksOf(r.casualties, "Majeruhi", D_CAS) },
+      fatality: { rows: fa.occurred || (fa.deceased || []).length ? [["Kulikuwa na vifo", fa.occurred ? "Ndiyo" : "Hapana"]] : [], blocks: blocksOf(fa.deceased, "Marehemu", D_DEC) },
+      witnesses: { blocks: blocksOf(r.witnesses, "Shahidi", D_WIT) },
+      actions: { rows: (act.text ? [["Describe Actions Taken by the Crew", act.text]] : []).concat(chk.length ? [["Checklist", chk.join(", ")]] : []) },
+      cause: { rows: (fv(cz.options) ? [["Chanzo", fv(cz.options)]] : []).concat(cz.detail ? [["Detailed Cause/Observations", cz.detail]] : []) },
+      damage: { rows: rowsOf(r, [["damage.propertyDamaged", "Property Damaged"], ["damage.vehicleDamage", "Vehicle Damage"], ["damage.equipmentDamage", "Equipment Damage"], ["damage.estimatedLoss", "Estimated Loss (TZS)"], ["damage.otherLosses", "Other Losses"], ["damage.description", "Description"]]) },
+      fuel: { blocks: blocksOf(r.fuel, "Entry", D_FUEL) },
+      otherTeams: { rows: fv(noNone(ot.checks)) ? [["Vikosi", fv(noNone(ot.checks))]] : [], blocks: blocksOf(ot.entries, "Team", D_TEAM) },
+      challenges: { rows: (fv(noNone(ch.options)) ? [["Changamoto", fv(noNone(ch.options))]] : []).concat(ch.text ? [["Challenges Encountered", ch.text]] : []) },
+      photos: { rows: ph ? [["Idadi ya picha", ph + " (picha hazitumwi kwenye chat)"]] : [] },
+      crew: { rows: rowsOf(r, [["crew.station", "Station"], ["crew.shiftLeader", "Shift Leader"], ["crew.driver", "Driver"]]), blocks: blocksOf(cr.members, "Member", D_MEM) },
+      review: { rows: rowsOf(r, [["status", "Hali ya ripoti"], ["createdAt", "Imeundwa"], ["updatedAt", "Imebadilishwa"]]).map(function (x) { if (/^\d{4}-\d\d-\d\dT/.test(x[1])) { var d = new Date(x[1]); if (!isNaN(d)) x[1] = d.toLocaleString(); } return x; }) }
+    };
+    return STEPS.map(function (k) { var s = sec[k] || {}; return { k: k, label: STEP_LABELS[k], rows: s.rows || [], blocks: (s.blocks || []).filter(function (b) { return b.rows.length; }) }; })
+      .filter(function (s) { return s.rows.length || s.blocks.length; });
+  }
+  function sectionsHtml(secs) {
+    return secs.map(function (s) {
+      var h = '<div class="sec" style="margin:14px 0 4px">' + esc(s.label) + '</div>' + s.rows.map(function (f) { return '<div class="dr"><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></div>'; }).join("");
+      s.blocks.forEach(function (b) { h += '<div class="sec" style="margin:8px 0 2px;color:var(--muted)">' + esc(b.title) + '</div>' + b.rows.map(function (f) { return '<div class="dr"><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></div>'; }).join(""); });
+      return h;
+    }).join("");
+  }
+  function typeOf(r) { var i = r.incident || {}; return ((i.type === "Ajali nyingine" || i.type === "Tukio jingine") && i.otherType) ? i.otherType : (i.type || i.otherType || ""); }
+  function titleOf(r) {
+    if (r && r.incident) { var l = r.location || {}; return [typeOf(r) || "Ripoti", [l.ward, l.district].filter(Boolean).join(" ")].filter(Boolean).join(" "); }
+    return r.title || r.name || r.type || r.category || r.kind || ("Taarifa #" + (r.id || "?"));
+  }
+  function subOf(r) {
+    if (r && r.incident) { var l = r.location || {}; return [r.incident.date, [l.street, l.ward, l.district].filter(Boolean).join(", "), r.status].filter(Boolean).join(" · "); }
+    return r.location || r.place || r.address || r.eneo || r.date || r.createdAt || "";
+  }
+  function cleanReport(r) {
+    return JSON.parse(JSON.stringify(r, function (k, v) {
+      if (k === "narrativeOverride") return undefined;
+      if (typeof v === "string") { if (/^data:/.test(v)) return undefined; if (v.length > 20000) return v.slice(0, 20000); }
+      return v;
+    }));
+  }
+  function cardFields(r) {
+    var l = r.location || {}, out = [["Tarehe", (r.incident || {}).date], ["Aina", typeOf(r)], ["Eneo", [l.ward, l.district].filter(Boolean).join(", ")], ["Majeruhi", (r.casualties || []).length ? String(r.casualties.length) : ""], ["Hali", r.status]];
+    return out.filter(function (x) { return x[1]; }).map(function (x) { return { l: x[0], v: String(x[1]) }; });
+  }
+  function shareReport(r, mode) {
+    var text = ""; try { text = mode === "summary" ? RescueExport.buildSummaryText(r) : RescueExport.buildNarrativeText(r); } catch (e) { }
+    var share = { kind: mode === "summary" ? "Muhtasari wa Ripoti" : "Ripoti ya Tukio", rv: 2, mode: mode, title: titleOf(r), summary: subOf(r), fields: cardFields(r), reportId: String(r.incidentId || ""), text: text };
+    if (mode !== "summary") { share.report = cleanReport(r); if (JSON.stringify(share).length > 800000) delete share.report; }
+    dispatch({ type: "share", share: share });
+  }
+  async function getSources() {
+    var rep = [];
+    try { rep = await RescueDB.getAllReports(); } catch (e) { }
+    rep.sort(function (a, b) { return String(b.updatedAt || b.createdAt || "").localeCompare(String(a.updatedAt || a.createdAt || "")); });
+    return { reports: rep || [] };
+  }
+  async function openShare() {
+    var src = await getSources(), mode = "full", kind = "rep", invList = (await invAll()).filter(function (c) { return !c.tr && (Object.keys(c.a || {}).length || (c.f || []).length); }).sort(function (a, b) { return (b.up || 0) - (a.up || 0); });
+    var b = openSheet('<h3>Shiriki taarifa</h3><div class="tabs" id="sh-src"><button data-s="rep">Ripoti za Tukio (' + src.reports.length + ')</button><button data-s="inv">Uchunguzi (' + invList.length + ')</button></div><div class="tabs" id="sh-mode"><button data-m="full">Kamili</button><button data-m="summary">Muhtasari Tu</button></div><input class="f" id="sh-q" placeholder="Tafuta…"><div id="sh-list"></div>');
+    function draw() {
+      var q = b.querySelector("#sh-q").value.trim().toLowerCase(), base = kind === "rep" ? src.reports : invList;
+      var arr = base.filter(function (r) { return !q || JSON.stringify(kind === "inv" ? { a: r.a, aq: r.aq } : r).toLowerCase().indexOf(q) > -1; }).slice(0, 80);
+      b.querySelectorAll("#sh-mode button").forEach(function (x) { x.classList.toggle("on", x.getAttribute("data-m") === mode); });
+      b.querySelectorAll("#sh-src button").forEach(function (x) { x.classList.toggle("on", x.getAttribute("data-s") === kind); });
+      var Lb = b.querySelector("#sh-list");
+      if (!arr.length) { Lb.innerHTML = '<p class="note">' + (base.length ? "Hakuna kinacholingana." : (kind === "rep" ? "Hakuna ripoti kwenye kifaa hiki bado. Jaza ripoti kwenye app kwanza." : "Hakuna kesi ya uchunguzi kwenye kifaa hiki bado. Jaza kwenye Investigation kwanza.")) + '</p>'; return; }
+      Lb.innerHTML = arr.map(function (r, i) { return '<button class="si" data-i="' + i + '"><div class="ic">' + (kind === "rep" ? "📄" : "🔍") + '</div><div class="tt"><div class="a">' + esc(kind === "rep" ? titleOf(r) : invTitle(r)) + '</div><div class="b">' + esc((kind === "rep" ? subOf(r) : invSub(r)) || "Gusa kutuma") + '</div></div></button>'; }).join("");
+      Lb.querySelectorAll(".si").forEach(function (x) { x.onclick = function () { var r = arr[+x.getAttribute("data-i")]; b.remove(); if (kind === "rep") shareReport(r, mode); else shareInv(r, mode); }; });
+    }
+    b.querySelectorAll("#sh-mode button").forEach(function (x) { x.onclick = function () { mode = x.getAttribute("data-m"); draw(); }; });
+    b.querySelectorAll("#sh-src button").forEach(function (x) { x.onclick = function () { kind = x.getAttribute("data-s"); draw(); }; });
+    b.querySelector("#sh-q").addEventListener("input", draw); draw();
+  }
+  /* ===== UCHUNGUZI WA MOTO (data ya incident-search.html, hifadhi: fiiai_db/c) ===== */
+  var INV = {"ST":["Taarifa za msingi","Eneo na jengo","Muda na taarifa","Asili ya moto","Mfumo wa umeme","Gesi, kemikali, mlipuko","Mashahidi","Ulinzi na kikosi","Madhara","Ushahidi","Nadharia","Hitimisho"],"STX":{"road":{"1":"Magari na barabara","3":"Chanzo cha ajali","5":"Hatari nyingine"},"exp":{"3":"Asili ya mlipuko","5":"Mlipuko, gesi na kemikali"},"wild":{"1":"Eneo la tukio"},"veh":{"1":"Chombo kilichoungua"},"com":{"1":"Eneo na matumizi"}},"QS":[["story",0,"Maelezo ya tukio","x",null],["ref",0,"Namba ya uchunguzi","t",null],["type",0,"Aina ya tukio","s",["fire:Moto","exp:Mlipuko","road:Ajali ya barabarani","oth:Nyingine"]],["date",0,"Tarehe","d",null],["time",0,"Muda wa tukio","tm",null],["loc",0,"Eneo","t",null],["owner",0,"Mmiliki/mkazi","t",null],["inv",0,"Mchunguzi","t",null],["idate",0,"Tarehe ya uchunguzi","d",null],["itime",0,"Muda wa uchunguzi","t",null],["struct",1,"Jengo/eneo","x",null],["veh",1,"Magari/vyombo vilivyohusika","x",null],["road",1,"Hali ya barabara na mazingira","x",null],["occ",1,"Matumizi ya eneo na watu","x",null],["wild",1,"Eneo la porini","x",null],["reporter",2,"Taarifa","x",null],["started",2,"Moto ulianza (kadirio)","tm",null],["seen",2,"Ulionekana","tm",null],["arr",2,"Kikosi kilifika","tm",null],["night",2,"Tukio la usiku","x",null],["delay",2,"Kuchelewa kufika","x",null],["area",3,"Area of Origin","x",null],["pat",3,"Fire patterns","x",null],["ign",3,"Chanzo cha joto","x",null],["firstmat",3,"Kilichowaka kwanza","t",null],["spread",3,"Kuenea","x",null],["multi",3,"Asili nyingi","s",["y:Ndiyo","n:Hapana","u:Haijulikani"]],["rcause",3,"Sababu ya ajali","x",null],["vfuel",3,"Mfumo wa gari","x",null],["e1",4,"Mfumo wa umeme","x",null],["e3",4,"Hitilafu kabla","s",["y:Ndiyo","n:Hapana","u:Haijulikani"]],["g1",5,"Gesi/mafuta/kemikali","x",null],["x1",5,"Mlipuko","x",null],["accel",5,"Kichocheo","s",["y:Ndiyo","n:Hapana","u:Haijulikani"]],["expsrc",5,"Chanzo na dalili za mlipuko","x",null],["w1",6,"Shahidi","t",null],["w2",6,"Ushuhuda","x",null],["prot",7,"Mifumo ya ulinzi","s",["y:Ndiyo","n:Hapana","u:Haijulikani"]],["crew",7,"Kikosi","x",null],["cas",8,"Majeruhi/vifo","s",["y:Ndiyo","n:Hapana","u:Haijulikani"]],["cas2",8,"Hali ya majeruhi","x",null],["prop",8,"Mali na hasara","x",null],["ev",9,"Vielelezo","x",null],["evp",9,"Picha mahali pake","s",["y:Ndiyo","n:Hapana","u:Haijulikani"]],["lab",9,"Maabara","s",["y:Ndiyo","n:Hapana","u:Haijulikani"]],["h1",10,"Nadharia 1","x",null],["h1c",10,"Aina (1)","s",["acc:Accidental (ajali)","nat:Natural (asili)","inc:Incendiary (makusudi)"]],["h1s",10,"Ushahidi unaounga (1)","x",null],["h1a",10,"Ushahidi unaopinga (1)","x",null],["h1t",10,"Hali (1)","s",["sup:Inaungwa mkono","unk:Haijathibitika","ref:Imekanushwa"]],["h2",10,"Nadharia 2","x",null],["h2c",10,"Aina (2)","s",["acc:Accidental (ajali)","nat:Natural (asili)","inc:Incendiary (makusudi)"]],["h2s",10,"Ushahidi unaounga (2)","x",null],["h2a",10,"Ushahidi unaopinga (2)","x",null],["h2t",10,"Hali (2)","s",["sup:Inaungwa mkono","unk:Haijathibitika","ref:Imekanushwa"]],["concl",11,"Hitimisho","x",null],["rec",11,"Mapendekezo","x",null]]};
+  function invOpen() { return new Promise(function (res) { try { var q = indexedDB.open("fiiai_db", 1); q.onupgradeneeded = function () { if (!q.result.objectStoreNames.contains("c")) q.result.createObjectStore("c", { keyPath: "id" }); }; q.onsuccess = function () { res(q.result); }; q.onerror = function () { res(null); }; } catch (e) { res(null); } }); }
+  async function invAll() {
+    var db = await invOpen(); if (!db) return [];
+    return new Promise(function (res) { try { var r = db.transaction("c").objectStore("c").getAll(); r.onsuccess = function () { res(r.result || []); }; r.onerror = function () { res([]); }; } catch (e) { res([]); } }).then(function (x) { try { db.close(); } catch (e) { } return x; });
+  }
+  async function invPut(c) {
+    var db = await invOpen(); if (!db) throw new Error("no-db");
+    return new Promise(function (res, rej) { var t = db.transaction("c", "readwrite"); t.objectStore("c").put(c); t.oncomplete = function () { try { db.close(); } catch (e) { } res(); }; t.onerror = function () { rej(t.error); }; });
+  }
+  function invDsp(id, v) {
+    var q = INV.QS.filter(function (x) { return x[0] === id; })[0];
+    if (q && q[3] === "s" && q[4]) { var o = q[4].filter(function (x) { return x.split(":")[0] === v; })[0]; if (o) return o.slice(o.indexOf(":") + 1); }
+    return v == null ? "" : String(v);
+  }
+  function invTitle(c) { var a = c.a || {}; return a.ref ? a.ref + (a.loc ? " — " + a.loc : "") : (a.loc || (a.type ? invDsp("type", a.type) : "") || "Ripoti bila jina"); }
+  function invSub(c) { var a = c.a || {}; return [a.date, a.type ? invDsp("type", a.type) : "", c.st === "done" ? "Imekamilika" : "Drafti"].filter(Boolean).join(" · "); }
+  function invFilled(v) { return v != null && String(v).trim() !== ""; }
+  function invSections(c) {
+    var a = c.a || {}, aq = c.aq || {}, kind = a.type === "road" ? "road" : a.type === "exp" ? "exp" : "", known = {}, out = [];
+    INV.QS.forEach(function (q) { known[q[0]] = 1; });
+    INV.ST.forEach(function (name, i) {
+      var rows = [];
+      INV.QS.forEach(function (q) { if (q[1] === i && invFilled(a[q[0]])) rows.push([q[2], invDsp(q[0], a[q[0]])]); });
+      if (rows.length) out.push({ k: "s" + i, label: (INV.STX[kind] && INV.STX[kind][i]) || name, rows: rows, blocks: [] });
+    });
+    var extra = Object.keys(a).filter(function (id) { return !known[id] && invFilled(a[id]); }).map(function (id) { return [aq[id] || id, String(a[id])]; });
+    if (extra.length) out.push({ k: "extra", label: "Maswali ya ziada (AI)", rows: extra, blocks: [] });
+    var pics = (c.f || []).filter(function (p) { return p && p.c && String(p.c).trim(); }).map(function (p, i) { return ["Picha " + (i + 1), p.c]; });
+    if ((c.f || []).length) out.push({ k: "pics", label: "Picha / Ushahidi", rows: [["Idadi ya picha", String((c.f || []).length)]].concat(pics), blocks: [] });
+    return out;
+  }
+  function invText(c, brief) {
+    var a = c.a || {};
+    if (brief) {
+      var L = ["UCHUNGUZI WA MOTO — MUHTASARI", ""], keys = [["ref", "Namba"], ["type", "Aina ya tukio"], ["date", "Tarehe"], ["time", "Muda"], ["loc", "Eneo"], ["owner", "Mmiliki/mkazi"], ["inv", "Mchunguzi"]];
+      keys.forEach(function (k) { if (invFilled(a[k[0]])) L.push(k[1] + ": " + invDsp(k[0], a[k[0]])); });
+      if (invFilled(a.story)) L.push("", "Maelezo: " + String(a.story).slice(0, 400));
+      L.push("", "Hali: " + (c.st === "done" ? "Imekamilika" : "Drafti"), "Picha: " + (c.f || []).length);
+      return L.join("\n");
+    }
+    return "UCHUNGUZI WA MOTO — " + invTitle(c) + "\n\n" + invSections(c).map(function (s) { return s.label.toUpperCase() + "\n" + s.rows.map(function (f) { return f[0] + ": " + f[1]; }).join("\n"); }).join("\n\n");
+  }
+  function invCardFields(c) {
+    var a = c.a || {}, out = [["Tarehe", a.date], ["Aina", a.type ? invDsp("type", a.type) : ""], ["Eneo", a.loc], ["Mchunguzi", a.inv], ["Picha", (c.f || []).length ? String(c.f.length) : ""]];
+    return out.filter(function (x) { return x[1]; }).map(function (x) { return { l: x[0], v: String(x[1]) }; });
+  }
+  function invPack(c, withPics) {
+    var o = JSON.parse(JSON.stringify({ id: c.id, a: c.a || {}, aq: c.aq || {}, auto: c.auto || {}, n: c.n || 0, st: c.st || "draft", cr: c.cr || Date.now(), up: c.up || Date.now() }));
+    o.f = []; var omit = 0, size = JSON.stringify(o).length;
+    (c.f || []).forEach(function (p) {
+      var len = ((p && p.d) || "").length + ((p && p.c) || "").length + 40;
+      if (withPics && p && p.d && size + len < 700000) { o.f.push({ d: p.d, c: p.c || "" }); size += len; } else omit++;
+    });
+    return { c: o, omitted: omit };
+  }
+  function shareInv(c, mode) {
+    var full = mode !== "summary", pk = invPack(c, full);
+    var share = { kind: full ? "Uchunguzi wa Moto" : "Muhtasari wa Uchunguzi", rv: 2, src: "fiiai", mode: mode, title: invTitle(c), summary: invSub(c), fields: invCardFields(c), reportId: String(c.id), text: invText(c, !full) };
+    if (full) { share.case = pk.c; share.picsOmitted = pk.omitted; }
+    dispatch({ type: "share", share: share });
+  }
+  function invPicsHtml(f, omitted) {
+    var h = (f || []).length ? '<div class="sec" style="margin:14px 0 4px">Picha</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">' + f.map(function (p) { return '<figure style="margin:0"><img src="' + esc(p.d) + '" alt="" style="width:100%;border-radius:10px;display:block">' + (p.c ? '<figcaption style="font-size:12px;color:var(--muted)">' + esc(p.c) + '</figcaption>' : '') + '</figure>'; }).join("") + '</div>' : "";
+    if (omitted > 0) h += '<p class="note" style="padding:10px 0">Picha ' + omitted + ' hazikutumwa (zilizidi ukubwa unaoruhusiwa).</p>';
+    return h;
+  }
+  async function invImport(c) {
+    var o = JSON.parse(JSON.stringify(c));
+    o.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+    o.st = "draft"; o.tr = 0; o.arch = 0; o.sample = 0; o.chat = []; o.sg = ""; o.cr = o.up = Date.now();
+    o.receivedFrom = (peerUser && (peerUser.displayName || peerUser.email)) || "Chat";
+    await invPut(o);
+  }
+
+  function fieldPair(f) { return Array.isArray(f) ? f : [f.l, f.v]; }
+  function openDetail(p) {
+    var rows = (p.fields || []).map(fieldPair).map(function (f) { return '<div class="dr"><b>' + esc(f[0]) + '</b><span>' + esc(f[1]) + '</span></div>'; }).join("") || '<p class="note">Hakuna maelezo zaidi.</p>';
+    var b = openSheet('<h3>' + esc(p.title || "Taarifa") + '</h3>' + rows + '<div class="row2"><button id="dc">Nakili</button><button class="p" id="dx">Funga</button></div>');
+    b.querySelector("#dx").onclick = function () { b.remove(); };
+    b.querySelector("#dc").onclick = function () { copyText((p.title || "") + "\n" + (p.fields || []).map(fieldPair).map(function (f) { return f[0] + ": " + f[1]; }).join("\n")); };
+  }
+  function openShareDetail(p) {
+    if (!p.report && !p.case && !p.text) return openDetail(p);
+    var isInv = !!p.case, secs = p.report ? reportSections(p.report) : (isInv ? invSections(p.case) : []), text = p.text || "";
+    if (p.report) { try { text = RescueExport.buildNarrativeText(p.report); } catch (e) { } }
+    if (isInv) { try { text = invText(p.case); } catch (e) { } }
+    var view = secs.length ? "sec" : "txt", canSave = !!(p.report || p.case);
+    var b = openSheet('<h3>' + esc(p.title || "Ripoti") + '</h3>' + (secs.length ? '<div class="tabs" id="rd-tabs"><button data-v="sec">Sehemu</button><button data-v="txt">Maandishi</button></div>' : '') + '<div id="rd-body"></div><div class="row2"><button id="rd-copy">Nakili</button>' + (canSave ? '<button id="rd-save">Hifadhi kwangu</button>' : '') + '<button class="p" id="rd-x">Funga</button></div>');
+    function draw() {
+      b.querySelectorAll("#rd-tabs button").forEach(function (x) { x.classList.toggle("on", x.getAttribute("data-v") === view); });
+      b.querySelector("#rd-body").innerHTML = view === "sec" ? sectionsHtml(secs) + (isInv ? invPicsHtml(p.case.f, p.picsOmitted) : "") : '<div style="white-space:pre-wrap;font-size:14.5px;line-height:1.5">' + esc(text) + '</div>';
+    }
+    b.querySelectorAll("#rd-tabs button").forEach(function (x) { x.onclick = function () { view = x.getAttribute("data-v"); draw(); }; });
+    b.querySelector("#rd-x").onclick = function () { b.remove(); };
+    b.querySelector("#rd-copy").onclick = function () { copyText(text || sectionsText(secs)); };
+    var sv = b.querySelector("#rd-save");
+    if (sv) sv.onclick = async function () {
+      try {
+        if (isInv) { await invImport(p.case); toast("Imehifadhiwa kwenye Investigation yako (Drafti)"); }
+        else {
+          var r = JSON.parse(JSON.stringify(p.report)); r.incidentId = "INC-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 8);
+          r.status = "DRAFT"; r.receivedFrom = (peerUser && (peerUser.displayName || peerUser.email)) || "Chat"; r.updatedAt = new Date().toISOString();
+          await RescueDB.putReport(r); try { await RescueDB.logAction(r.incidentId, "Received via chat"); } catch (e) { }
+          toast("Imehifadhiwa kwenye ripoti zako (Drafti)");
+        }
+        sv.disabled = true;
+      } catch (e) { toast("Imeshindikana kuhifadhi"); }
+    };
+    draw();
+  }
+  function sectionsText(secs) { return secs.map(function (s) { return s.label.toUpperCase() + "\n" + s.rows.map(function (f) { return f[0] + ": " + f[1]; }).join("\n") + s.blocks.map(function (b) { return "\n" + b.title + "\n" + b.rows.map(function (f) { return f[0] + ": " + f[1]; }).join("\n"); }).join(""); }).join("\n\n"); }
+  function copyText(t) { try { navigator.clipboard.writeText(t).then(function () { toast("Imenakiliwa"); }); } catch (e) { toast("Haikunakiliwa"); } }
+
+  /* ===== LOG ya ujumbe (SMS Inbox / Sent / Search) ===== */
+  function previewOf(m) {
+    if (m.type === "share") return "📋 " + ((m.share || {}).title || "Taarifa");
+    if (m.type === "voice") return "🎤 Ujumbe wa sauti"; if (m.type === "image") return "📷 Picha"; if (m.type === "video") return "🎥 Video";
+    if (m.type === "doc") return "📄 " + (m.name || "Hati"); if (m.type === "location") return "📍 Mahali";
+    return String(m.text || "");
+  }
+  function logMsg(m, uid, name) {
+    var id = uid + ":" + (m.id || m.at), dir = m.from === myUid() ? "out" : "in";
+    if (S.log.some(function (x) { return x.k === id; })) return;
+    var txt = previewOf(m); if (String(txt).indexOf("🔒e1:") === 0) txt = "🔒 Ujumbe uliosimbwa";
+    S.log.push({ k: id, uid: uid, name: name || S.names[uid] || "", dir: dir, text: txt, at: m.at || Date.now() });
+    if (S.log.length > 1500) S.log = S.log.slice(-1200); save();
+  }
+
+  /* ===== LIST / TABS ===== */
+  function nameOf(c) { return c.name || c.displayName || c.email || "Mtumiaji"; }
+  function itemHtml(c, right, kebab) {
+    var nm = nameOf(c), un = c.unread > 0; S.names[c.uid] = nm;
+    var pin = S.pins[c.uid] ? "📌 " : "", mu = S.mute[c.uid] ? " 🔕" : "", lk = S.locked[c.uid] ? "🔒 " : "";
+    var last = c.lastMessage != null ? (S.locked[c.uid] ? "Chat imefungwa" : (c.lastMessage || "Anza mazungumzo…")) : (c.email || "");
+    if (String(last).indexOf("🔒e1:") === 0) last = "🔒 Ujumbe uliosimbwa";
+    var dr = S.drafts[c.uid] ? '<span style="color:var(--err)">Rasimu: </span>' + esc(S.drafts[c.uid]) : esc(last);
+    return '<div class="chat-item" data-uid="' + esc(c.uid) + '"><div class="av">' + avatar(nm) + '</div>'
+      + '<div class="cm"><div class="n">' + lk + pin + esc(nm) + mu + '</div><div class="m">' + dr + '</div></div>'
+      + '<div><div class="ct' + (un ? ' u' : '') + '">' + (right || (c.time ? ago(c.time) : "")) + '</div>' + (un ? '<span class="badge">' + c.unread + '</span>' : '') + '</div>'
+      + (kebab ? '<button class="kebab" data-k="' + esc(c.uid) + '" aria-label="Zaidi">⋮</button>' : '') + '</div>';
+  }
+  function bind(box) {
+    box.querySelectorAll(".chat-item").forEach(function (el) { el.addEventListener("click", function (e) { if (e.target.closest(".kebab")) return; go(el.getAttribute("data-uid")); }); });
+    box.querySelectorAll(".kebab").forEach(function (el) { el.addEventListener("click", function (e) { e.stopPropagation(); chatMenu(el.getAttribute("data-k")); }); });
+  }
+  function chatInfo(uid) { return chatsCache.filter(function (c) { return c.uid === uid; })[0] || { uid: uid, name: S.names[uid] || "Mtumiaji" }; }
+
+  function chatMenu(uid) {
+    var c = chatInfo(uid), nm = nameOf(c);
+    menuSheet(nm, [
+      { ic: "📌", t: S.pins[uid] ? "Ondoa pin" : "Bandika (Pin)", fn: function () { S.pins[uid] = !S.pins[uid]; if (!S.pins[uid]) delete S.pins[uid]; save(); renderTab(); } },
+      { ic: "🗄️", t: S.arch[uid] ? "Rudisha kutoka Archive" : "Hifadhi (Archive)", fn: function () { S.arch[uid] = !S.arch[uid]; if (!S.arch[uid]) delete S.arch[uid]; save(); renderTab(); } },
+      { ic: "🔕", t: S.mute[uid] ? "Washa arifa" : "Zima arifa", fn: function () { S.mute[uid] = !S.mute[uid]; if (!S.mute[uid]) delete S.mute[uid]; save(); renderTab(); } },
+      { ic: "🔒", t: S.locked[uid] ? "Fungua Chat Lock" : "Funga chat (PIN)", fn: function () { needPin(function () { S.locked[uid] = !S.locked[uid]; if (!S.locked[uid]) delete S.locked[uid]; save(); renderTab(); toast(S.locked[uid] ? "Chat imefungwa" : "Chat Lock imeondolewa"); }); } },
+      { ic: "🚫", t: S.blocked[uid] ? "Mruhusu" : "Mzuie", fn: function () { toggleBlock(uid); }, danger: true },
+      { ic: "⚠️", t: "Ripoti mtumiaji", fn: function () { reportUser(uid); }, danger: true }
+    ]);
+  }
+  function toggleBlock(uid) {
+    if (S.blocked[uid]) { delete S.blocked[uid]; toast("Ameruhusiwa"); } else { S.blocked[uid] = 1; toast("Amezuiwa"); cs("blockUser", uid); }
+    save(); if (peerUid) applyBlock(); else renderTab();
+  }
+  function reportUser(uid) {
+    var b = openSheet('<h3>Ripoti mtumiaji</h3><select class="f" id="rr"><option>Spam / matangazo</option><option>Unyanyasaji</option><option>Taarifa za uongo</option><option>Mengineyo</option></select><textarea class="f" id="rd" rows="3" placeholder="Maelezo (hiari)"></textarea><div class="row2"><button id="rc">Ghairi</button><button class="p" id="ro">Tuma ripoti</button></div>', true);
+    b.querySelector("#rc").onclick = function () { b.remove(); };
+    b.querySelector("#ro").onclick = function () {
+      var r = { uid: uid, reason: b.querySelector("#rr").value, detail: b.querySelector("#rd").value.trim(), at: Date.now() };
+      S.reports.push(r); save(); cs("reportUser", uid, r.reason, r.detail); b.remove(); toast("Ripoti imetumwa. Asante.");
+    };
+  }
+
+  async function loadChats() {
+    try { var r = await CloudSync.getRecentChats(50); chatsCache = (r && r.list) || []; chatsCache.forEach(function (c) { S.names[c.uid] = nameOf(c); }); save(); }
+    catch (e) { toast("Hitilafu: " + e.message); }
+    updateBadge();
+  }
+  function updateBadge() {
+    var n = chatsCache.reduce(function (a, c) { return a + (c.unread > 0 && !S.arch[c.uid] ? 1 : 0); }, 0), el = $("nb-chats");
+    el.hidden = !n; el.textContent = n;
+  }
+
+  var FILTERS = [["all", "Zote"], ["unread", "Hazijasomwa"], ["pinned", "Pinned"], ["groups", "Vikundi"], ["inbox", "SMS Inbox"], ["sent", "Zilizotumwa"], ["drafts", "Rasimu"], ["arch", "Archive"], ["trash", "Tupio"]];
+
+  function renderChatsTab() {
+    var unread = chatsCache.filter(function (c) { return c.unread > 0; }).length, pinned = Object.keys(S.pins).length;
+    var h = '<div class="search-bar"><input type="text" id="search-input" placeholder="Tafuta mtumiaji au ujumbe…"><button id="search-go" type="button">Watu</button><button id="msg-go" type="button">Ujumbe</button></div>'
+      + '<div class="dash">'
+      + tile("unread", unread, "Hazijasomwa") + tile("pinned", pinned, "Pinned") + tile("groups", S.groups.length, "Vikundi")
+      + tile("drafts", Object.keys(S.drafts).length, "Rasimu") + tile("sent", S.log.filter(function (x) { return x.dir === "out"; }).length, "Zilizotumwa") + tile("trash", S.trash.length, "Tupio")
+      + '</div><div class="chips">' + FILTERS.map(function (f) { return '<button class="chip' + (filter === f[0] ? " on" : "") + '" data-f="' + f[0] + '">' + f[1] + '</button>'; }).join("") + '</div>'
+      + '<div id="chats-list"></div><div class="sec" id="search-sec" hidden>Matokeo ya utafutaji</div><div id="search-list"></div>';
+    $("tab-body").innerHTML = h;
+    $("tab-body").querySelectorAll(".tile").forEach(function (t) { t.onclick = function () { filter = t.getAttribute("data-f"); renderTab(); }; });
+    $("tab-body").querySelectorAll(".chip").forEach(function (t) { t.onclick = function () { filter = t.getAttribute("data-f"); renderTab(); }; });
+    $("search-go").onclick = doSearch; $("msg-go").onclick = searchMessages;
+    $("search-input").addEventListener("keydown", function (e) { if (e.key === "Enter") doSearch(); });
+    drawFilter();
+  }
+  function tile(f, n, l) { return '<button class="tile" data-f="' + f + '"><b>' + n + '</b><span>' + l + '</span></button>'; }
+  function rowHtml(x, ic) { return '<div class="chat-item" data-uid="' + esc(x.uid) + '"><div class="av">' + ic + '</div><div class="cm"><div class="n">' + esc(x.name || S.names[x.uid] || "Mtumiaji") + '</div><div class="m">' + esc(x.text) + '</div></div><div class="ct">' + ago(x.at) + '</div></div>'; }
+  function drawFilter() {
+    var box = $("chats-list"), list = chatsCache.slice(), h = "";
+    if (filter === "all") list = list.filter(function (c) { return !S.arch[c.uid]; });
+    if (filter === "unread") list = list.filter(function (c) { return c.unread > 0; });
+    if (filter === "pinned") list = list.filter(function (c) { return S.pins[c.uid]; });
+    if (filter === "arch") list = list.filter(function (c) { return S.arch[c.uid]; });
+    list.sort(function (a, b) { return (S.pins[b.uid] ? 1 : 0) - (S.pins[a.uid] ? 1 : 0) || (b.time || 0) - (a.time || 0); });
+    if (filter === "groups") {
+      h = S.groups.map(function (g, i) { return '<div class="chat-item" data-g="' + i + '"><div class="av">👥</div><div class="cm"><div class="n">' + esc(g.name) + '</div><div class="m">' + g.members.length + ' wanachama' + (g.bc ? " · Broadcast" : "") + '</div></div></div>'; }).join("") || '<p class="note">Hakuna vikundi. Bonyeza ✏️ kuunda kikundi au Broadcast.</p>';
+      box.innerHTML = h; box.querySelectorAll("[data-g]").forEach(function (e) { e.onclick = function () { openGroup(+e.getAttribute("data-g")); }; }); return;
+    }
+    if (filter === "inbox" || filter === "sent") {
+      var arr = S.log.filter(function (x) { return x.dir === (filter === "inbox" ? "in" : "out"); }).sort(function (a, b) { return b.at - a.at; }).slice(0, 80);
+      box.innerHTML = arr.length ? arr.map(function (x) { return rowHtml(x, filter === "inbox" ? "📥" : "📤"); }).join("") : '<p class="note">' + (filter === "inbox" ? "Hakuna ujumbe uliopokelewa bado." : "Hakuna ujumbe uliotumwa bado.") + '<br>Orodha hujazwa unapofungua mazungumzo.</p>';
+      bind(box); return;
+    }
+    if (filter === "drafts") {
+      var ds = Object.keys(S.drafts);
+      box.innerHTML = ds.length ? ds.map(function (u) { return rowHtml({ uid: u, text: S.drafts[u], at: Date.now() }, "📝"); }).join("") : '<p class="note">Hakuna rasimu.</p>'; bind(box); return;
+    }
+    if (filter === "trash") {
+      box.innerHTML = S.trash.length ? '<div class="sec">Ujumbe uliofutwa (gusa kurejesha)</div>' + S.trash.map(function (t, i) { return '<div class="chat-item" data-t="' + i + '"><div class="av">🗑️</div><div class="cm"><div class="n">' + esc(S.names[t.uid] || "Mtumiaji") + '</div><div class="m">' + esc(previewOf(t.m)) + '</div></div><div class="ct">' + ago(t.at) + '</div></div>'; }).join("") + '<div class="row2" style="margin:12px"><button id="tr-clear">Safisha tupio</button></div>' : '<p class="note">Tupio ni tupu.</p>';
+      box.querySelectorAll("[data-t]").forEach(function (e) { e.onclick = function () { var t = S.trash[+e.getAttribute("data-t")]; menuSheet("Ujumbe uliofutwa", [{ ic: "♻️", t: "Rejesha", fn: function () { var mk = metaOf(t.k); delete mk.del; S.trash = S.trash.filter(function (x) { return x !== t; }); save(); renderTab(); toast("Umerejeshwa"); } }, { ic: "❌", t: "Futa kabisa", danger: true, fn: function () { S.trash = S.trash.filter(function (x) { return x !== t; }); save(); renderTab(); } }]); }; });
+      var tc = $("tr-clear"); if (tc) tc.onclick = function () { S.trash = []; save(); renderTab(); };
+      return;
+    }
+    if (!list.length) { box.innerHTML = '<p class="note">' + (filter === "all" ? "Hakuna mazungumzo bado.<br>Tafuta mtumiaji juu au bonyeza ✏️ kuanza." : "Hakuna matokeo.") + '</p>'; return; }
+    box.innerHTML = list.map(function (c) { return itemHtml(c, null, true); }).join(""); bind(box);
+  }
+
+  async function doSearch() {
+    var q = $("search-input").value.trim();
+    if (q.length < 2) return toast("Andika angalau herufi 2");
+    $("search-sec").hidden = false; $("search-sec").textContent = "Matokeo ya utafutaji"; $("search-list").innerHTML = '<p class="note">Inatafuta…</p>';
+    try {
+      var u = await CloudSync.searchUsers(q);
+      if (!u || !u.length) { $("search-list").innerHTML = '<p class="note">Hakuna mtumiaji aliyepatikana.</p>'; return; }
+      $("search-list").innerHTML = u.map(function (x) { return itemHtml({ uid: x.uid, name: x.displayName || x.email, email: x.email }, "Anza ›"); }).join("");
+      bind($("search-list"));
+    } catch (e) { toast("Hitilafu: " + e.message); }
+  }
+  function searchMessages() {
+    var q = $("search-input").value.trim().toLowerCase();
+    if (q.length < 2) return toast("Andika angalau herufi 2");
+    var r = S.log.filter(function (x) { return String(x.text).toLowerCase().indexOf(q) > -1; }).sort(function (a, b) { return b.at - a.at; }).slice(0, 50);
+    $("search-sec").hidden = false; $("search-sec").textContent = "Ujumbe uliopatikana (" + r.length + ")";
+    $("search-list").innerHTML = r.length ? r.map(function (x) { return rowHtml(x, x.dir === "in" ? "📥" : "📤"); }).join("") : '<p class="note">Hakuna ujumbe uliopatikana kwenye mazungumzo uliyofungua.</p>';
+    bind($("search-list"));
+  }
+
+  function blockedSheet() {
+    var ids = Object.keys(S.blocked);
+    if (!ids.length) return toast("Hakuna uliyemzuia");
+    var b = openSheet('<h3>Waliozuiwa</h3>' + ids.map(function (u) { return '<div class="chat-item"><div class="av">🚫</div><div class="cm"><div class="n">' + esc(S.names[u] || "Mtumiaji") + '</div></div><button class="kebab" data-ub="' + esc(u) + '" style="font-size:13px;width:auto;color:var(--send);font-weight:700">Ruhusu</button></div>'; }).join(""));
+    b.querySelectorAll("[data-ub]").forEach(function (x) { x.onclick = function () { b.remove(); toggleBlock(x.getAttribute("data-ub")); }; });
+  }
+
+  /* ===== STATUS / STORIES ===== */
+  function renderStatus() {
+    var now = Date.now(), mine = S.stories.filter(function (s) { return now - s.at < 864e5; });
+    if (mine.length !== S.stories.length) { S.stories = mine; save(); }
+    var nm = (me && (me.displayName || me.email)) || T("you");
+    var h = '<div class="sec">Status yangu</div><div class="chat-item" id="st-add"><div class="av">' + avatar(nm, S.profile.photo) + '</div><div class="cm"><div class="n">Ongeza status</div><div class="m">' + (mine.length ? mine.length + " status (zinaisha baada ya saa 24)" : "Gusa kuweka maandishi au picha") + '</div></div><div class="ct" style="font-size:22px">➕</div></div>';
+    if (mine.length) h += mine.slice().reverse().map(function (s, i) { return '<div class="chat-item" data-s="' + (mine.length - 1 - i) + '"><div class="av" style="background:' + (s.bg || "#075e54") + '">' + (s.img ? '<img src="' + esc(s.img) + '">' : "✍️") + '</div><div class="cm"><div class="n">' + esc(s.text || "Picha") + '</div><div class="m">' + ago(s.at) + '</div></div></div>'; }).join("");
+    h += '<div class="sec">Status za wengine</div><div id="st-others"><p class="note">Inapakia…</p></div>';
+    $("tab-body").innerHTML = h;
+    $("st-add").onclick = function () { menuSheet("Status mpya", [{ ic: "✍️", t: "Maandishi", fn: addTextStory }, { ic: "🖼️", t: "Picha", fn: function () { pickFile("image", function (d) { addStory({ img: d.data, text: "" }); }); } }]); };
+    $("tab-body").querySelectorAll("[data-s]").forEach(function (e) { e.onclick = function () { viewStory(S.stories[+e.getAttribute("data-s")]); }; });
+    Promise.resolve(cs("getStatuses")).then(function (r) {
+      var l = (r && (r.list || r)) || []; var o = $("st-others"); if (!o) return;
+      o.innerHTML = Array.isArray(l) && l.length ? l.map(function (s) { return '<div class="chat-item"><div class="av">' + avatar(s.name || s.displayName) + '</div><div class="cm"><div class="n">' + esc(s.name || s.displayName || "Mtumiaji") + '</div><div class="m">' + esc(s.text || "Status") + '</div></div></div>'; }).join("") : '<p class="note">Hakuna status za wengine (kushiriki status kati ya watumiaji kunahitaji seva — zako zinabaki kwenye kifaa hiki).</p>';
+    }).catch(function () { var o = $("st-others"); if (o) o.innerHTML = '<p class="note">Hakuna status za wengine kwa sasa.</p>'; });
+  }
+  function addStory(s) { s.at = Date.now(); S.stories.push(s); save(); cs("postStatus", s); toast("Status imewekwa"); renderTab(); }
+  function addTextStory() {
+    var cols = ["#075e54", "#6a1b9a", "#c62828", "#1565c0", "#ef6c00"];
+    var b = openSheet('<h3>Status ya maandishi</h3><textarea class="f" id="stt" rows="4" maxlength="200" placeholder="Andika status yako…"></textarea><div class="row2"><button id="sc">Ghairi</button><button class="p" id="so">Weka</button></div>', true);
+    b.querySelector("#sc").onclick = function () { b.remove(); };
+    b.querySelector("#so").onclick = function () { var t = b.querySelector("#stt").value.trim(); if (!t) return; b.remove(); addStory({ text: t, bg: cols[Math.floor(Math.random() * cols.length)] }); };
+  }
+  function viewStory(s) {
+    if (!s) return;
+    var b = openSheet('<div style="min-height:50vh;display:grid;place-items:center;text-align:center;border-radius:14px;color:#fff;padding:16px;background:' + (s.bg || "#075e54") + '">' + (s.img ? '<img src="' + esc(s.img) + '" style="max-width:100%;max-height:60vh;border-radius:10px">' : '<div style="font-size:24px;font-weight:600">' + esc(s.text) + '</div>') + '</div><div class="row2"><button id="sd">Futa</button><button class="p" id="sx">Funga</button></div>', true);
+    b.querySelector("#sx").onclick = function () { b.remove(); };
+    b.querySelector("#sd").onclick = function () { S.stories = S.stories.filter(function (x) { return x !== s; }); save(); b.remove(); renderTab(); };
+  }
+
+  /* ===== SETTINGS ===== */
+  function renderSettings() {
+    var nm = (me && (me.displayName || me.email)) || "Mimi";
+    var items = [
+      ["👤", "Akaunti (Account)", (me && me.email) || "", accountSheet], ["🔐", "Faragha (Privacy)", "Read receipts, last seen", privacySheet],
+      ["🛡️", "Usalama (Security)", S.settings.pin ? "App Lock: imewashwa" : "App Lock: imezimwa", securitySheet], ["🔔", "Arifa (Notifications)", S.settings.notif ? "Zimewashwa" : "Zimezimwa", notifSheet],
+      ["🎨", "Mandhari (Theme)", "Light / Dark", themeSheet], ["🌐", "Lugha (Language)", S.settings.lang === "en" ? "English" : "Kiswahili", langSheet],
+      ["💾", "Chat Backup", "Hifadhi / rejesha mazungumzo", backupSheet], ["☁️", "Cloud Sync", "Sawazisha na seva", syncSheet],
+      ["📦", "Data & Storage", storageInfo(), storageSheet], ["🚫", "Waliozuiwa", Object.keys(S.blocked).length + " watumiaji", blockedSheet]
+    ];
+    $("tab-body").innerHTML = '<div class="chat-item" id="pf-open"><div class="av">' + avatar(nm, S.profile.photo) + '</div><div class="cm"><div class="n">' + esc(nm) + '</div><div class="m">' + esc(S.profile.about) + '</div></div><div class="ct">›</div></div>'
+      + items.map(function (x, i) { return '<div class="chat-item" data-st="' + i + '"><div class="av" style="background:var(--send);font-size:20px">' + x[0] + '</div><div class="cm"><div class="n">' + x[1] + '</div><div class="m">' + esc(x[2]) + '</div></div></div>'; }).join("")
+      + '<div class="chat-item" id="lo"><div class="av" style="background:var(--err)">⎋</div><div class="cm"><div class="n" style="color:var(--err)">Toka (Logout)</div></div></div>';
+    $("pf-open").onclick = profileSheet;
+    $("tab-body").querySelectorAll("[data-st]").forEach(function (e) { e.onclick = function () { items[+e.getAttribute("data-st")][3](); }; });
+    $("lo").onclick = async function () { try { await (cs("signOut") || cs("logout")); } catch (e) { } location.href = "login.html?next=chart.html"; };
+  }
+  function storageInfo() { try { return Math.round(JSON.stringify(S).length / 1024) + " KB zimetumika"; } catch (e) { return ""; } }
+  function profileSheet() {
+    var nm = (me && (me.displayName || me.email)) || "";
+    var b = openSheet('<h3>Wasifu (Profile)</h3><div class="pf"><div class="av" id="pp">' + avatar(nm, S.profile.photo) + '</div><button class="chip" id="pph">Badili picha</button></div><input class="f" id="pn1" placeholder="Jina" value="' + esc((me && me.displayName) || "") + '"><input class="f" id="pa" placeholder="Kuhusu mimi" value="' + esc(S.profile.about) + '"><div class="row2"><button id="pc2">Ghairi</button><button class="p" id="ps">Hifadhi</button></div>');
+    b.querySelector("#pph").onclick = function () { pickFile("image", function (d) { S.profile.photo = d.data; b.querySelector("#pp").innerHTML = '<img src="' + esc(d.data) + '">'; }, 256); };
+    b.querySelector("#pc2").onclick = function () { b.remove(); };
+    b.querySelector("#ps").onclick = function () { S.profile.about = b.querySelector("#pa").value.trim(); var n = b.querySelector("#pn1").value.trim(); if (n && me) me.displayName = n; save(); cs("updateProfile", { displayName: n, about: S.profile.about, photo: S.profile.photo }); b.remove(); toast("Wasifu umehifadhiwa"); renderTab(); };
+  }
+  function accountSheet() {
+    var b = openSheet('<h3>Akaunti</h3><div class="dr"><b>Email</b><span>' + esc((me && me.email) || "-") + '</span></div><div class="dr"><b>Jina</b><span>' + esc((me && me.displayName) || "-") + '</span></div><div class="dr"><b>ID</b><span>' + esc(myUid() || "-") + '</span></div><div class="row2"><button id="ax">Funga</button><button class="p" id="ar">Badili nenosiri</button></div>');
+    b.querySelector("#ax").onclick = function () { b.remove(); };
+    b.querySelector("#ar").onclick = function () { var r = cs("resetPassword", me && me.email); if (r) { toast("Barua ya kubadili nenosiri imetumwa"); } else toast("Tumia ukurasa wa Login › Umesahau nenosiri"); };
+  }
+  function toggleRow(id, label, on) { return '<label class="sw"><span>' + label + '</span><input type="checkbox" id="' + id + '"' + (on ? " checked" : "") + '></label>'; }
+  function privacySheet() {
+    var b = openSheet('<h3>Faragha</h3>' + toggleRow("p1", "Read receipts (✓✓ ya bluu)", S.settings.readRcpt) + toggleRow("p2", "Onyesha last seen / mtandaoni", S.settings.lastSeen) + '<p class="note" style="text-align:left;padding:10px 4px">Mipangilio hii inahifadhiwa na kutumwa kwenye seva ikiwa inaunga mkono.</p>');
+    b.querySelector("#p1").onchange = function (e) { S.settings.readRcpt = e.target.checked; save(); cs("setPrivacy", { readRcpt: S.settings.readRcpt, lastSeen: S.settings.lastSeen }); };
+    b.querySelector("#p2").onchange = function (e) { S.settings.lastSeen = e.target.checked; save(); cs("setPrivacy", { readRcpt: S.settings.readRcpt, lastSeen: S.settings.lastSeen }); };
+  }
+  function securitySheet() {
+    var has = !!S.settings.pin;
+    var items = [{ ic: "🔢", t: has ? "Badili PIN ya App Lock" : "Weka PIN ya App Lock", s: "App itaomba PIN ikifunguliwa", fn: function () { askPin("PIN mpya (tarakimu 4–6)", function (p) { askPin("Rudia PIN", async function (p2) { if (p !== p2) return toast("PIN hazifanani"); S.settings.salt = Math.random().toString(36).slice(2); S.settings.pin = await sha(S.settings.salt + p); save(); toast("App Lock imewashwa"); renderTab(); }); }); } }];
+    if (has) items.push({ ic: "🔓", t: "Zima App Lock", fn: function () { needPin(function () { S.settings.pin = ""; save(); toast("App Lock imezimwa"); renderTab(); }); }, danger: true });
+    items.push({ ic: "👆", t: "Alama ya kidole", s: "Inahitaji app ya Android/iOS; kwenye web tumia PIN.", fn: function () { toast("Fingerprint haipatikani kwenye toleo la web"); } });
+    items.push({ ic: "🔐", t: "End-to-End Encryption", s: "Washa ndani ya chat: menyu ⋮ › Usimbaji (passphrase)", fn: function () { } });
+    menuSheet("Usalama", items);
+  }
+  function notifSheet() {
+    var b = openSheet('<h3>Arifa</h3>' + toggleRow("n1", "Arifa za ujumbe mpya", S.settings.notif) + '<p class="note" style="text-align:left;padding:10px 4px">Arifa zinaonekana app ikiwa wazi nyuma ya dirisha. Kupokea arifa app imefungwa kunahitaji Push (FCM).</p>');
+    b.querySelector("#n1").onchange = async function (e) {
+      if (e.target.checked && "Notification" in window) { var p = await Notification.requestPermission(); if (p !== "granted") { e.target.checked = false; toast("Ruhusa ya arifa imekataliwa"); return; } }
+      S.settings.notif = e.target.checked; save();
+    };
+  }
+  function themeSheet() {
+    menuSheet("Mandhari", [{ ic: "☀️", t: "Light", fn: function () { setTheme("light"); } }, { ic: "🌙", t: "Dark", fn: function () { setTheme("dark"); } }]);
+  }
+  function setTheme(t) { S.settings.theme = t; save(); document.documentElement.setAttribute("data-theme", t); try { RescueDB.setSetting && RescueDB.setSetting("theme", t); } catch (e) { } }
+  function langSheet() {
+    menuSheet("Lugha / Language", [{ ic: "🇹🇿", t: "Kiswahili", fn: function () { S.settings.lang = "sw"; save(); applyLang(); renderTab(); } }, { ic: "🇬🇧", t: "English", fn: function () { S.settings.lang = "en"; save(); applyLang(); renderTab(); } }]);
+  }
+  function backupSheet() {
+    menuSheet("Chat Backup", [
+      { ic: "⬇️", t: "Hifadhi faili (JSON)", s: "Pakua nakala ya data ya chat kwenye simu", fn: function () { var d = JSON.parse(JSON.stringify(S)); d.settings.pin = ""; d.settings.salt = ""; var a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(d)], { type: "application/json" })); a.download = "rescue-chat-backup-" + new Date().toISOString().slice(0, 10) + ".json"; a.click(); toast("Backup imepakuliwa"); } },
+      { ic: "⬆️", t: "Rejesha kutoka faili", fn: function () { pickFile("backup", function (d) { try { var o = JSON.parse(atob(d.data.split(",")[1])); var keep = S.settings; Object.assign(S, o); S.settings = Object.assign({}, o.settings || {}, { pin: keep.pin, salt: keep.salt }); save(); toast("Imerejeshwa"); renderTab(); } catch (e) { toast("Faili si sahihi"); } }); } },
+      { ic: "☁️", t: "Backup kwenye cloud", fn: function () { var r = cs("backupChats", S); toast(r ? "Backup ya cloud imeanza" : "Cloud backup bado haijaunganishwa kwenye seva"); } }
+    ]);
+  }
+  function syncSheet() {
+    menuSheet("Cloud Synchronization", [{ ic: "🔄", t: "Sawazisha sasa", s: "Pakia upya mazungumzo kutoka seva", fn: async function () { toast("Inasawazisha…"); await (cs("syncNow") || Promise.resolve()); await loadChats(); renderTab(); toast("Imekamilika"); } }]);
+  }
+  function storageSheet() {
+    var b = openSheet('<h3>Data & Storage</h3><div class="dr"><b>Matumizi</b><span>' + storageInfo() + '</span></div><div class="dr"><b>Ujumbe kwenye log</b><span>' + S.log.length + '</span></div><div class="dr"><b>Status</b><span>' + S.stories.length + '</span></div><div class="dr"><b>Tupio</b><span>' + S.trash.length + '</span></div><div class="row2"><button id="s1">Futa log</button><button id="s2">Safisha tupio</button></div><div class="row2"><button id="s3">Futa status</button><button class="p" id="s4">Funga</button></div>');
+    b.querySelector("#s1").onclick = function () { S.log = []; save(); b.remove(); toast("Log imefutwa"); renderTab(); };
+    b.querySelector("#s2").onclick = function () { S.trash = []; save(); b.remove(); toast("Tupio limesafishwa"); renderTab(); };
+    b.querySelector("#s3").onclick = function () { S.stories = []; save(); b.remove(); toast("Status zimefutwa"); renderTab(); };
+    b.querySelector("#s4").onclick = function () { b.remove(); };
+  }
+
+  /* ===== GROUP / BROADCAST ===== */
+  function newMenu() {
+    menuSheet("Mpya", [
+      { ic: "💬", t: "Chat mpya", s: "Tafuta mtumiaji", fn: function () { tab = "chats"; filter = "all"; setTab(); setTimeout(function () { var i = $("search-input"); i && i.focus(); }, 50); } },
+      { ic: "👥", t: "Kikundi kipya", s: "Tuma ujumbe kwa wanachama wote", fn: function () { groupForm(false); } },
+      { ic: "📢", t: "Broadcast mpya", s: "Tuma ujumbe mmoja kwa wengi", fn: function () { groupForm(true); } }
+    ]);
+  }
+  function groupForm(bc) {
+    var cands = chatsCache.filter(function (c) { return !S.blocked[c.uid]; });
+    if (!cands.length) return toast("Anza chat na watu kwanza");
+    var b = openSheet('<h3>' + (bc ? "Broadcast" : "Kikundi") + ' kipya</h3><input class="f" id="gn" placeholder="Jina"><div>' + cands.map(function (c) { return '<label class="chk"><input type="checkbox" value="' + esc(c.uid) + '"><span>' + esc(nameOf(c)) + '</span></label>'; }).join("") + '</div><div class="row2"><button id="gc">Ghairi</button><button class="p" id="go2">Unda</button></div>');
+    b.querySelector("#gc").onclick = function () { b.remove(); };
+    b.querySelector("#go2").onclick = function () {
+      var n = b.querySelector("#gn").value.trim(), m = Array.from(b.querySelectorAll("input[type=checkbox]:checked")).map(function (x) { return x.value; });
+      if (!n || m.length < 1) return toast("Weka jina na chagua angalau mtu 1");
+      S.groups.push({ id: Date.now(), name: n, members: m, bc: bc, log: [] }); save(); b.remove(); filter = "groups"; tab = "chats"; setTab(); toast("Imeundwa");
+    };
+  }
+  function openGroup(i) {
+    var g = S.groups[i]; if (!g) return;
+    var b = openSheet('<h3>' + (g.bc ? "📢 " : "👥 ") + esc(g.name) + '</h3><p class="note" style="padding:4px;text-align:left">Wanachama: ' + esc(g.members.map(function (u) { return S.names[u] || "Mtumiaji"; }).join(", ")) + '<br>Ujumbe hutumwa kwa kila mwanachama kama ujumbe binafsi.</p><div style="max-height:30vh;overflow:auto">' + (g.log.slice(-30).map(function (x) { return '<div class="dr"><b>' + hm(x.at) + '</b><span>' + esc(x.text) + '</span></div>'; }).join("") || '<p class="note">Hakuna ujumbe bado.</p>') + '</div><textarea class="f" id="gt" rows="2" placeholder="Andika ujumbe…"></textarea><div class="row2"><button id="gd">Futa kikundi</button><button class="p" id="gs">Tuma</button></div>');
+    b.querySelector("#gd").onclick = function () { S.groups.splice(i, 1); save(); b.remove(); renderTab(); };
+    b.querySelector("#gs").onclick = async function () {
+      var t = b.querySelector("#gt").value.trim(); if (!t) return; var txt = (g.bc ? "" : "[" + g.name + "] ") + t, ok = 0;
+      for (var k = 0; k < g.members.length; k++) { try { await CloudSync.sendMessage(g.members[k], { type: "text", text: await encText(g.members[k], txt) }); ok++; } catch (e) { } }
+      g.log.push({ at: Date.now(), text: t }); save(); b.remove(); toast("Imetumwa kwa " + ok + "/" + g.members.length);
+    };
+  }
+
+  /* ===== FILES / MEDIA ===== */
+  function readData(file) { return new Promise(function (res, rej) { var r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = rej; r.readAsDataURL(file); }); }
+  function compressImage(file, maxW) {
+    return readData(file).then(function (url) { return new Promise(function (res) { var im = new Image(); im.onload = function () { var s = Math.min(1, (maxW || 1024) / im.width), c = document.createElement("canvas"); c.width = im.width * s; c.height = im.height * s; c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", .7)); }; im.onerror = function () { res(url); }; im.src = url; }); });
+  }
+  function pickFile(kind, cb, maxW) {
+    var inp = $("file-in"); inp.value = "";
+    inp.accept = kind === "image" ? "image/*" : kind === "video" ? "video/*" : kind === "backup" ? "application/json,.json" : "*/*";
+    inp.onchange = async function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      try {
+        var data = kind === "image" ? await compressImage(f, maxW) : await readData(f);
+        if (data.length > LIMIT * 1.37 && kind !== "backup") return toast("Faili ni kubwa mno (kikomo ~700KB)");
+        cb({ data: data, name: f.name, size: f.size, mime: f.type });
+      } catch (e) { toast("Imeshindwa kusoma faili"); }
+    };
+    inp.click();
+  }
+  function attachMenu() {
+    menuSheet("Ambatisha", [
+      { ic: "🖼️", t: "Picha", fn: function () { pickFile("image", function (d) { dispatch({ type: "image", data: d.data, name: d.name }); }); } },
+      { ic: "🎥", t: "Video", s: "Kikomo ~700KB", fn: function () { pickFile("video", function (d) { dispatch({ type: "video", data: d.data, name: d.name }); }); } },
+      { ic: "📄", t: "Hati (Document)", s: "Kikomo ~700KB", fn: function () { pickFile("doc", function (d) { dispatch({ type: "doc", data: d.data, name: d.name, size: d.size }); }); } },
+      { ic: "📍", t: "Mahali (Location)", fn: shareLocation },
+      { ic: "📋", t: "Taarifa / Ripoti za app", fn: openShare }
+    ]);
+  }
+  function shareLocation() {
+    if (!navigator.geolocation) return toast("Kifaa hakina GPS");
+    toast("Inatafuta mahali…");
+    navigator.geolocation.getCurrentPosition(function (p) { dispatch({ type: "location", lat: +p.coords.latitude.toFixed(6), lng: +p.coords.longitude.toFixed(6) }); }, function () { toast("Ruhusa ya mahali imekataliwa"); }, { enableHighAccuracy: true, timeout: 12000 });
+  }
+  async function toggleRecord() {
+    if (rec) { rec.stop(); return; }
+    if (!navigator.mediaDevices || !window.MediaRecorder) return toast("Kurekodi sauti hakuungwi mkono");
+    try {
+      var st = await navigator.mediaDevices.getUserMedia({ audio: true }), mr = new MediaRecorder(st), ch = [], t0 = Date.now();
+      mr.ondataavailable = function (e) { ch.push(e.data); };
+      mr.onstop = async function () {
+        st.getTracks().forEach(function (t) { t.stop(); }); clearTimeout(rec && rec.timer); rec = null; setSendIcon();
+        var blob = new Blob(ch, { type: mr.mimeType || "audio/webm" });
+        if (Date.now() - t0 < 700 || rec === "cancel") return;
+        var d = await readData(blob); if (d.length > LIMIT * 1.37) return toast("Sauti ni ndefu mno (kikomo ~dakika 1)");
+        dispatch({ type: "voice", data: d, dur: Math.round((Date.now() - t0) / 1000) });
+      };
+      mr.start(); rec = { stop: function () { mr.stop(); }, timer: setTimeout(function () { mr.stop(); }, 60000) }; setSendIcon();
+      toast("Inarekodi… gusa ■ kutuma");
+    } catch (e) { toast("Ruhusa ya maikrofoni imekataliwa"); }
+  }
+  function setSendIcon() {
+    var b = $("send-btn"), has = $("msg-input").value.trim().length > 0;
+    b.classList.toggle("rec", !!rec); b.textContent = rec ? "■" : has ? "➤" : "🎤";
+  }
+
+  /* ===== CHAT ===== */
+  function mkey(m) { return peerUid + ":" + (m.id || m.at); }
+  function keyOf(m) { return m.type === "share" ? "s:" + ((m.share || {}).title || "") : m.type === "text" ? "t:" + (m.text || "") : m.type + ":" + (m.at || ""); }
+  function tickHtml(m, status) {
+    if (m.from !== myUid()) return "";
+    if (status === "pending") return " 🕓"; if (status === "fail") return " ⚠";
+    if (m.read || m.readAt) return ' <span class="tk rd">✓✓</span>';
+    if (m.delivered || m.deliveredAt) return ' <span class="tk">✓✓</span>';
+    return ' <span class="tk">✓</span>';
+  }
+  function cardHtml(p) {
+    var rows = (p.fields || []).slice(0, 4).map(fieldPair).map(function (f) { return '<div class="r"><b>' + esc(f[0]) + ':</b><span>' + esc(f[1]) + '</span></div>'; }).join("");
+    return '<div class="card"><div class="k">📋 ' + esc(p.kind || "Taarifa") + '</div><div class="t">' + esc(p.title || "Taarifa") + '</div>'
+      + (p.summary ? '<div class="r"><span>' + esc(p.summary) + '</span></div>' : '') + rows
+      + ((p.report || p.text) ? '<span class="more">Fungua ripoti kamili ›</span>' : ((p.fields || []).length > 4 ? '<span class="more">Angalia taarifa kamili ›</span>' : ((p.fields || []).length ? '<span class="more">Fungua ›</span>' : ''))) + '</div>';
+  }
+  function bodyHtml(m) {
+    switch (m.type) {
+      case "share": return cardHtml(m.share || {});
+      case "image": return '<img class="pic" src="' + esc(m.data) + '" alt="picha">';
+      case "video": return '<video controls preload="metadata" src="' + esc(m.data) + '"></video>';
+      case "voice": return '🎤 <audio controls preload="none" src="' + esc(m.data) + '"></audio>';
+      case "doc": return '<a class="doc" href="' + esc(m.data) + '" download="' + esc(m.name || "hati") + '"><i>📄</i><span>' + esc(m.name || "Hati") + (m.size ? '<br><small>' + Math.round(m.size / 1024) + ' KB · gusa kupakua</small>' : '') + '</span></a>';
+      case "location": return '<a class="loc" target="_blank" rel="noopener" href="https://maps.google.com/?q=' + m.lat + ',' + m.lng + '"><b>📍 Mahali</b><br>' + m.lat + ', ' + m.lng + '<br><small>Gusa kufungua ramani</small></a>';
+      default: return '<span class="tx">' + esc(m.text || "") + '</span>';
+    }
+  }
+  function render(div, m, status) {
+    var isMe = m.from === myUid(), mk = S.meta[mkey(m)] || {};
+    div.className = "bubble " + (isMe ? "me" : "them") + (status === "pending" ? " pending" : status === "fail" ? " fail" : "");
+    var txt = mk.edit != null ? Object.assign({}, m, { text: mk.edit }) : m;
+    var rep = m.replyTo ? '<div class="rep" data-rk="' + esc(m.replyTo.at || "") + '"><b>' + esc(m.replyTo.who || "") + '</b>' + esc(m.replyTo.text || "") + '</div>' : "";
+    var fw = m.fwd ? '<div class="fwd">↪ Imesambazwa</div>' : "";
+    var rx = mk.react && Object.keys(mk.react).length ? '<div><span class="rx" data-rx="1">' + Object.keys(mk.react).map(function (k) { return mk.react[k]; }).join("") + '</span></div>' : "";
+    div.innerHTML = '<span class="dd" title="Chaguzi">▾</span>' + fw + rep + bodyHtml(txt) + '<span class="meta">' + (mk.edit != null ? '<span class="edited">imehaririwa</span>' : '') + hm(m.at || Date.now()) + tickHtml(m, status) + '</span>' + rx;
+    div.__m = m;
+    var mo = div.querySelector(".more"); if (mo) mo.onclick = function () { openShareDetail(m.share || {}); };
+    div.querySelector(".dd").onclick = function (e) { e.stopPropagation(); msgMenu(div, m); };
+    var rr = div.querySelector(".rep"); if (rr) rr.onclick = function () { var t = rr.getAttribute("data-rk"); Array.from($("messages").children).forEach(function (c) { if (c.__m && String(c.__m.at) === t) { c.scrollIntoView({ block: "center" }); c.classList.add("hl"); setTimeout(function () { c.classList.remove("hl"); }, 1500); } }); };
+    var t0; div.addEventListener("touchstart", function () { t0 = setTimeout(function () { msgMenu(div, m); }, 550); }, { passive: true });
+    ["touchend", "touchmove", "touchcancel"].forEach(function (ev) { div.addEventListener(ev, function () { clearTimeout(t0); }, { passive: true }); });
+    div.addEventListener("contextmenu", function (e) { e.preventDefault(); msgMenu(div, m); });
+    if (m.type === "text" && String(m.text).indexOf("🔒e1:") === 0 && mk.edit == null) { decText(peerUid, m.text).then(function (d) { var s = div.querySelector(".tx"); if (s) s.textContent = d; div.__plain = d; }); }
+  }
+  function plainOf(div, m) { var mk = S.meta[mkey(m)] || {}; if (mk.edit != null) return mk.edit; if (div && div.__plain) return div.__plain; return m.type === "text" ? (m.text || "") : previewOf(m); }
+
+  function msgMenu(div, m) {
+    var isMe = m.from === myUid(), k = mkey(m), mk = metaOf(k);
+    var b = openSheet('<div class="emo">' + ["👍", "❤️", "😂", "😮", "😢", "🙏"].map(function (e) { return '<button data-e="' + e + '">' + e + '</button>'; }).join("") + '</div><div id="mm"></div>');
+    b.querySelectorAll(".emo button").forEach(function (x) {
+      x.onclick = function () { var e = x.getAttribute("data-e"); mk.react = mk.react || {}; if (mk.react[myUid()] === e) delete mk.react[myUid()]; else mk.react[myUid()] = e; save(); cs("reactMessage", peerUid, m.id, e); b.remove(); render(div, m, ""); };
+    });
+    var items = [
+      { ic: "↩️", t: "Jibu", fn: function () { setReply(div, m); } },
+      { ic: "📋", t: "Nakili", fn: function () { copyText(plainOf(div, m)); } },
+      { ic: "↪️", t: "Sambaza (Forward)", fn: function () { forwardMsg(m); } }
+    ];
+    if (isMe && m.type === "text") items.push({ ic: "✏️", t: "Hariri", fn: function () { editMsg(div, m); } });
+    if (m.id) items.push({ ic: "ℹ️", t: "Maelezo ya ujumbe", fn: function () { var st = m.read || m.readAt ? "Imesomwa" : m.delivered || m.deliveredAt ? "Imefika" : isMe ? "Imetumwa" : "Imepokelewa"; openSheet('<h3>Maelezo</h3><div class="dr"><b>Muda</b><span>' + new Date(m.at).toLocaleString() + '</span></div><div class="dr"><b>Hali</b><span>' + st + '</span></div>'); } });
+    items.push({ ic: "🗑️", t: "Futa", danger: true, fn: function () { deleteMsg(div, m); } });
+    var mm = b.querySelector("#mm"); mm.innerHTML = items.map(function (it, i) { return '<button class="si' + (it.danger ? ' danger' : '') + '" data-i="' + i + '"><div class="ic">' + it.ic + '</div><div class="tt"><div class="a">' + it.t + '</div></div></button>'; }).join("");
+    mm.querySelectorAll(".si").forEach(function (x) { x.onclick = function () { b.remove(); items[+x.getAttribute("data-i")].fn(); }; });
+  }
+  function setReply(div, m) {
+    replyTo = { at: m.at, who: m.from === myUid() ? T("you") : ((peerUser && (peerUser.displayName || peerUser.email)) || ""), text: plainOf(div, m).slice(0, 80) };
+    $("rb-t").textContent = replyTo.who + ": " + replyTo.text; $("replybar").hidden = false; $("msg-input").focus();
+  }
+  function clearReply() { replyTo = null; $("replybar").hidden = true; }
+  function editMsg(div, m) {
+    var b = openSheet('<h3>Hariri ujumbe</h3><textarea class="f" id="et" rows="3">' + esc(plainOf(div, m)) + '</textarea><p class="note" style="padding:0 0 8px;text-align:left">Mabadiliko yanaonekana kwako; mpokeaji ataona ikiwa seva inaunga mkono kuhariri.</p><div class="row2"><button id="ec">Ghairi</button><button class="p" id="eo">Hifadhi</button></div>', true);
+    b.querySelector("#ec").onclick = function () { b.remove(); };
+    b.querySelector("#eo").onclick = async function () { var t = b.querySelector("#et").value.trim(); if (!t) return; metaOf(mkey(m)).edit = t; save(); cs("editMessage", peerUid, m.id, await encText(peerUid, t)); b.remove(); render(div, m, ""); };
+  }
+  function deleteMsg(div, m) {
+    var b = openSheet('<h3>Futa ujumbe?</h3><p class="note" style="padding:6px 0">Utahamishiwa Tupio na unaweza kurejeshwa.</p><div class="row2"><button id="dc1">Ghairi</button><button class="p" id="do1" style="background:var(--err)">Futa</button></div>', true);
+    b.querySelector("#dc1").onclick = function () { b.remove(); };
+    b.querySelector("#do1").onclick = function () { var k = mkey(m); metaOf(k).del = 1; S.trash.push({ k: k, uid: peerUid, m: m, at: Date.now() }); save(); cs("deleteMessage", peerUid, m.id); b.remove(); div.remove(); toast("Imehamishiwa Tupio"); };
+  }
+  function forwardMsg(m) {
+    var cands = chatsCache.filter(function (c) { return !S.blocked[c.uid]; });
+    var b = openSheet('<h3>Sambaza kwa…</h3>' + (cands.map(function (c) { return '<button class="si" data-u="' + esc(c.uid) + '"><div class="ic">' + avatar(nameOf(c)) + '</div><div class="tt"><div class="a">' + esc(nameOf(c)) + '</div></div></button>'; }).join("") || '<p class="note">Hakuna mazungumzo.</p>'));
+    b.querySelectorAll(".si").forEach(function (x) { x.onclick = async function () { var u = x.getAttribute("data-u"); b.remove(); var p = Object.assign({}, m, { fwd: true }); delete p.id; delete p.from; delete p.at; delete p.replyTo; delete p.read; delete p.delivered; if (p.type === "text") p.text = await encText(u, await decText(peerUid, p.text)); try { await CloudSync.sendMessage(u, p); toast("Imesambazwa"); } catch (e) { toast("Imeshindikana: " + e.message); } }; });
+  }
+
+  function appendMessage(m, scroll) {
+    var box = $("messages"), n = box.querySelector(".note"); if (n) n.remove();
+    var meUid = myUid();
+    if (m.id) { if (seen[m.id]) return; seen[m.id] = 1; }
+    if (S.meta[mkey(m)] && S.meta[mkey(m)].del) return;
+    if (m.from !== meUid && S.blocked[peerUid]) return;
+    if (m.from === meUid) {
+      for (var i = 0; i < pending.length; i++) if (pending[i].key === keyOf(m)) { render(pending[i].el, m, ""); pending.splice(i, 1); logMsg(m, peerUid); return; }
+    }
+    logMsg(m, peerUid);
+    var dl = dayLabel(m.at || Date.now());
+    if (dl !== lastDay) { lastDay = dl; var d = document.createElement("div"); d.className = "day"; d.textContent = dl; box.appendChild(d); }
+    var div = document.createElement("div"); render(div, m, ""); box.appendChild(div);
+    if (scroll) box.scrollTop = box.scrollHeight;
+  }
+  async function dispatch(payload) {
+    if (S.blocked[peerUid]) return toast("Umemzuia mtumiaji huyu");
+    var meUid = myUid(), m = Object.assign({ from: meUid, at: Date.now() }, payload), wire = Object.assign({}, payload);
+    if (replyTo && (payload.type === "text" || !payload.type)) { m.replyTo = replyTo; wire.replyTo = replyTo; }
+    if (wire.type === "text") wire.text = await encText(peerUid, wire.text);
+    if (m.replyTo) clearReply();
+    appendMessage(Object.assign({}, m, { id: null }), false);
+    var box = $("messages"), el = box.lastChild; render(el, m, "pending");
+    var p = { el: el, key: keyOf(m) }; pending.push(p); box.scrollTop = box.scrollHeight;
+    try { await CloudSync.sendMessage(peerUid, wire); setTimeout(function () { var k = pending.indexOf(p); if (k > -1) { pending.splice(k, 1); render(el, m, ""); logMsg(m, peerUid); } }, 2500); }
+    catch (e) { var k = pending.indexOf(p); if (k > -1) pending.splice(k, 1); render(el, m, "fail"); toast("Imeshindikana kutuma: " + e.message); }
+  }
+  function sendText() {
+    var i = $("msg-input"), t = i.value.trim(); if (!t) return;
+    i.value = ""; i.style.height = "auto"; i.focus(); delete S.drafts[peerUid]; save(); setSendIcon();
+    cs("setTyping", peerUid, false);
+    dispatch({ type: "text", text: t });
+  }
+  function applyBlock() { var bl = !!S.blocked[peerUid]; $("composer").hidden = bl; $("blockbar").hidden = !bl; }
+
+  function chatHeaderMenu() {
+    var nm = (peerUser && (peerUser.displayName || peerUser.email)) || "";
+    menuSheet(nm, [
+      { ic: "🔎", t: "Tafuta kwenye chat", fn: function () { var b = openSheet('<h3>Tafuta kwenye chat</h3><input class="f" id="cs1" placeholder="Neno…"><div class="row2"><button id="cs2">Ondoa kichujio</button><button class="p" id="cs3">Tafuta</button></div>', true); var i = b.querySelector("#cs1"); i.focus(); function run(q) { q = q.toLowerCase(); Array.from($("messages").children).forEach(function (c) { if (!c.__m) return; c.style.display = !q || (plainOf(c, c.__m) + "").toLowerCase().indexOf(q) > -1 ? "" : "none"; }); } b.querySelector("#cs3").onclick = function () { run(i.value.trim()); b.remove(); }; b.querySelector("#cs2").onclick = function () { run(""); b.remove(); }; } },
+      { ic: "🔐", t: S.e2e[peerUid] ? "Usimbaji: umewashwa (badili)" : "Usimbaji (E2E passphrase)", s: "Wewe na mpokeaji mnahitaji passphrase moja", fn: function () { var b = openSheet('<h3>Usimbaji wa mwisho-hadi-mwisho</h3><input class="f" id="ep" type="password" placeholder="Passphrase ya siri (ya pamoja)" value="' + esc(S.e2e[peerUid] || "") + '"><p class="note" style="padding:0 0 8px;text-align:left">Ujumbe wa maandishi utasimbwa kwa AES-256 kabla ya kutumwa. Mpe mwenzako passphrase kwa njia salama (si kwenye chat hii).</p><div class="row2"><button id="e0">Zima</button><button class="p" id="e1">Washa</button></div>', true); b.querySelector("#e0").onclick = function () { delete S.e2e[peerUid]; save(); b.remove(); toast("Usimbaji umezimwa"); }; b.querySelector("#e1").onclick = function () { var v = b.querySelector("#ep").value; if (v.length < 6) return toast("Passphrase angalau herufi 6"); S.e2e[peerUid] = v; save(); b.remove(); toast("Usimbaji umewashwa 🔒"); }; } },
+      { ic: "📌", t: S.pins[peerUid] ? "Ondoa pin" : "Bandika chat", fn: function () { S.pins[peerUid] = !S.pins[peerUid]; if (!S.pins[peerUid]) delete S.pins[peerUid]; save(); toast("Imefanyika"); } },
+      { ic: "🗄️", t: "Hifadhi (Archive)", fn: function () { S.arch[peerUid] = 1; save(); location.href = "chart.html"; } },
+      { ic: "🔕", t: S.mute[peerUid] ? "Washa arifa" : "Zima arifa", fn: function () { S.mute[peerUid] = !S.mute[peerUid]; if (!S.mute[peerUid]) delete S.mute[peerUid]; save(); toast("Imefanyika"); } },
+      { ic: "🔒", t: S.locked[peerUid] ? "Ondoa Chat Lock" : "Funga chat kwa PIN", fn: function () { needPin(function () { S.locked[peerUid] = !S.locked[peerUid]; if (!S.locked[peerUid]) delete S.locked[peerUid]; save(); toast(S.locked[peerUid] ? "Chat imefungwa" : "Chat Lock imeondolewa"); }); } },
+      { ic: "🚫", t: "Mzuie", danger: true, fn: function () { toggleBlock(peerUid); } },
+      { ic: "⚠️", t: "Ripoti mtumiaji", danger: true, fn: function () { reportUser(peerUid); } }
+    ]);
+  }
+
+  async function openChat() {
+    $("list-view").hidden = true; $("chat-view").hidden = false; $("main-area").style.overflow = "hidden";
+    $("search-btn").hidden = true; $("new-btn").hidden = true; $("chat-menu").hidden = false; $("back").hidden = false; $("bnav").hidden = true;
+    try { peerUser = await CloudSync.getUser(peerUid); } catch (e) { }
+    if (!peerUser) { toast("Mtumiaji hakupatikana"); location.href = "chart.html"; return; }
+    var nm = peerUser.displayName || peerUser.email || "Mtumiaji"; S.names[peerUid] = nm; save();
+    $("top-title").textContent = nm;
+    $("top-sub").textContent = peerUser.online && S.settings.lastSeen ? T("online") : (S.settings.lastSeen && peerUser.lastSeen ? "ilionekana " + ago(peerUser.lastSeen) : "");
+    var av = $("top-av"); av.hidden = false; av.innerHTML = avatar(nm, peerUser.photo || peerUser.photoURL);
+    document.title = nm + " — Rescue Report";
+    applyBlock();
+    var box = $("messages");
+    try {
+      var msgs = await CloudSync.getMessages(peerUid, 100);
+      if (!msgs || !msgs.length) box.innerHTML = '<p class="note">Anza mazungumzo kwa kutuma ujumbe.' + (S.e2e[peerUid] ? '<br>🔒 Usimbaji umewashwa' : '') + '</p>';
+      else { msgs.forEach(function (m) { appendMessage(m, false); }); box.scrollTop = box.scrollHeight; }
+    } catch (e) { box.innerHTML = '<p class="note">Hitilafu kupakia ujumbe.</p>'; }
+    if (S.settings.readRcpt) { try { await CloudSync.markChatRead(peerUid); } catch (e) { } }
+    CloudSync.watchMessages(peerUid, function (m) {
+      appendMessage(m, true);
+      if (S.settings.readRcpt) CloudSync.markChatRead(peerUid).catch(function () { });
+      if (m.from !== myUid() && !S.mute[peerUid] && !S.blocked[peerUid] && S.settings.notif && document.hidden && window.Notification && Notification.permission === "granted") { try { new Notification(nm, { body: S.settings.pin ? "Ujumbe mpya" : previewOf(m).slice(0, 100) }); } catch (e) { } }
+    });
+    // Typing indicator (inafanya kazi ikiwa CloudSync ina watchTyping/setTyping)
+    var tto; cs("watchTyping", peerUid, function (on) { var s = $("top-sub"); if (on) { s.textContent = T("typing"); clearTimeout(tto); tto = setTimeout(function () { s.textContent = peerUser.online ? T("online") : ""; }, 4000); } else s.textContent = peerUser.online ? T("online") : ""; });
+    var inp = $("msg-input"), lastTy = 0;
+    inp.value = S.drafts[peerUid] || ""; setSendIcon();
+    inp.addEventListener("input", function () {
+      inp.style.height = "auto"; inp.style.height = Math.min(120, inp.scrollHeight) + "px";
+      var v = inp.value; if (v.trim()) S.drafts[peerUid] = v; else delete S.drafts[peerUid]; save(); setSendIcon();
+      if (Date.now() - lastTy > 2500 && v.trim()) { lastTy = Date.now(); cs("setTyping", peerUid, true); }
+    });
+    inp.addEventListener("keydown", function (e) { if (e.key === "Enter" && !e.shiftKey && !/Mobi|Android/i.test(navigator.userAgent)) { e.preventDefault(); sendText(); } });
+    $("send-btn").addEventListener("click", function () { if (rec) return rec.stop(); if (inp.value.trim()) sendText(); else toggleRecord(); });
+    $("share-btn").addEventListener("click", attachMenu);
+    $("rb-x").addEventListener("click", clearReply);
+    $("chat-menu").addEventListener("click", chatHeaderMenu);
+    $("unblock-btn").addEventListener("click", function () { toggleBlock(peerUid); });
+  }
+
+  /* ===== NAV ===== */
+  var TITLES = { chats: "title", status: "status", settings: "settings" };
+  function renderTab() {
+    if (peerUid) return;
+    if (tab === "chats") renderChatsTab(); else if (tab === "status") renderStatus(); else renderSettings();
+    updateBadge();
+  }
+  function setTab() {
+    document.querySelectorAll("#bnav button").forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-tab") === tab); });
+    $("top-title").textContent = T(TITLES[tab]);
+    $("search-btn").hidden = tab !== "chats"; $("new-btn").hidden = tab === "settings";
+    renderTab();
+  }
+  document.querySelectorAll("#bnav button").forEach(function (b) { b.addEventListener("click", function () { tab = b.getAttribute("data-tab"); setTab(); }); });
+  $("back").addEventListener("click", function () { location.href = "chart.html"; });
+  $("search-btn").addEventListener("click", function () { var i = $("search-input"); if (i) { i.focus(); i.scrollIntoView(); } });
+  $("new-btn").addEventListener("click", newMenu);
+  window.addEventListener("beforeunload", function () { cs("setTyping", peerUid, false); });
+
+  /* ===== APP LOCK + START ===== */
+  function lockScreen() {
+    return new Promise(function (resolve) {
+      var d = document.createElement("div"); d.id = "lock";
+      d.innerHTML = '<div style="font-size:48px">🔒</div><h2 style="margin:0">Rescue Chat</h2><div>Weka PIN kufungua</div><input id="lp" type="password" inputmode="numeric" maxlength="6" autocomplete="off"><button id="lb" type="button">Fungua</button>';
+      document.body.appendChild(d);
+      async function tryIt() { if (await checkPin($("lp").value.trim())) { d.remove(); resolve(); } else { toast("PIN si sahihi"); $("lp").value = ""; } }
+      $("lb").onclick = tryIt; $("lp").addEventListener("keydown", function (e) { if (e.key === "Enter") tryIt(); }); $("lp").focus();
+    });
+  }
+  async function start() {
+    applyLang();
+    if (!window.CloudSync || !window.RescueDB) { toast("Faili za app hazikupatikana"); return; }
+    if (S.settings.pin) await lockScreen();
+    try { me = await CloudSync.currentUser(); if (!me) { location.href = "login.html?next=chart.html"; return; } }
+    catch (e) { location.href = "login.html?next=chart.html"; return; }
+    await loadChats();
+    if (peerUid) {
+      if (S.locked[peerUid]) { askPin("Chat imefungwa — weka PIN", async function (p) { if (await checkPin(p)) openChat(); else { toast("PIN si sahihi"); location.href = "chart.html"; } }); }
+      else openChat();
+    } else { $("back").hidden = true; setTab(); }
+  }
+  start();
+})();
+</script>
+</body>
+</html>
+x p
