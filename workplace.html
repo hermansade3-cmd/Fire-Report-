@@ -76,6 +76,38 @@ input:focus,select:focus{border-color:var(--ac)}
 #pn{left:14px;right:auto;width:380px;bottom:84px;max-height:calc(100vh - 190px);border-radius:20px}
 #nav{left:50%;right:auto;transform:translateX(-50%);width:min(700px,96vw);bottom:12px;border-radius:22px}
 #co{bottom:14px}}
+#nav{overflow-x:auto;scrollbar-width:none}#nav button{flex:1 0 58px}#m3{position:absolute;inset:0;display:none}#map.h{visibility:hidden}input[type=range]{padding:0}
+
+/* ===== Muonekano wa kisasa ===== */
+:root{--bg:#070b16;--card:rgba(13,20,38,.78);--bd:rgba(148,163,184,.16);--in:rgba(148,163,184,.10);--ac:#38e1ff;--ac2:#6366f1;--sh:0 10px 40px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.06);--r:20px}
+:root.light{--bg:#eef2f9;--card:rgba(255,255,255,.80);--bd:rgba(15,23,42,.10);--in:rgba(15,23,42,.05);--ac:#0ea5c6;--ac2:#4f46e5;--sh:0 10px 36px rgba(30,41,90,.16),inset 0 1px 0 #fff}
+html,body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.005em}
+.fl{backdrop-filter:blur(22px) saturate(1.5);-webkit-backdrop-filter:blur(22px) saturate(1.5);box-shadow:var(--sh);border-color:var(--bd)}
+.b{border-radius:14px;transition:transform .15s,background .2s,border-color .2s,box-shadow .2s;font-weight:600;min-height:42px}
+.b:hover{background:var(--in);border-color:var(--ac)}.b:active{transform:scale(.96)}
+.b.p{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 6px 18px rgba(99,102,241,.45)}
+.b.on{background:linear-gradient(135deg,rgba(56,225,255,.16),rgba(99,102,241,.16));box-shadow:0 0 0 1px var(--ac) inset}
+.ib{transition:background .15s,transform .15s}.ib:active{transform:scale(.9)}
+#top{border-radius:22px;padding:5px 7px;transition:box-shadow .25s}#top:focus-within{box-shadow:0 0 0 2px var(--ac),var(--sh)}
+#av,.br{background:linear-gradient(135deg,var(--ac),var(--ac2));color:#fff;box-shadow:0 4px 14px rgba(99,102,241,.5)}
+#rc,#cp,#lc,#co{border-radius:18px}
+@media(max-width:899px){#nav{left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);border-radius:24px;padding:5px}
+#pn{bottom:calc(env(safe-area-inset-bottom,0px) + 78px);left:8px;right:8px;border-radius:26px;max-height:52vh;transition:max-height .3s cubic-bezier(.2,.8,.2,1),transform .2s}#pn.tall{max-height:78vh}
+.leaflet-bottom{bottom:calc(env(safe-area-inset-bottom,0px) + 78px)}}
+#nav button{border-radius:18px;font-weight:600;transition:background .2s,color .2s}#nav button.on{background:linear-gradient(135deg,rgba(56,225,255,.18),rgba(99,102,241,.2))}
+#nav button.on:before{left:34%;right:34%;background:linear-gradient(90deg,var(--ac),var(--ac2));box-shadow:0 0 10px var(--ac)}
+#nav button .ic{transition:transform .2s}#nav button.on .ic{transform:translateY(-2px) scale(1.1)}
+#pn{padding:4px 16px 18px;animation:up .32s cubic-bezier(.2,.8,.2,1)}#pn .h{touch-action:none;cursor:grab;padding:16px 0 8px}#pn .h b{font-size:18px;font-weight:700;letter-spacing:.01em}
+#pn .h:before{width:44px;height:5px;margin-left:-22px;top:5px;background:var(--mu);opacity:.45}
+.it{padding:11px 8px;border-radius:14px;border-top:0;margin:2px 0;transition:background .15s;cursor:pointer}.it:hover,.it:active{background:var(--in)}
+.card{border-radius:18px;padding:14px}.bd{border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.wxc{color:#fff;border:0;background:linear-gradient(135deg,#0ea5e9,#6366f1)}.wxc small{color:rgba(255,255,255,.85)}.wxc.cl{background:linear-gradient(135deg,#64748b,#334155)}.wxc.rn{background:linear-gradient(135deg,#2563eb,#1e293b)}.wxc.st{background:linear-gradient(135deg,#7c3aed,#0f172a)}
+.sk{height:64px;border-radius:16px;margin:8px 0;background:linear-gradient(90deg,var(--in) 25%,var(--bd) 50%,var(--in) 75%);background-size:200% 100%;animation:sh 1.2s infinite}@keyframes sh{to{background-position:-200% 0}}
+#toast{border-radius:16px;background:rgba(10,15,30,.9);backdrop-filter:blur(14px);border:1px solid var(--bd);box-shadow:var(--sh);animation:up .25s}
+.mk{transition:transform .2s}.mk:hover{transform:rotate(-45deg) scale(1.15)}
+.leaflet-popup-content-wrapper{border-radius:18px;box-shadow:var(--sh)}
+input,select{border-radius:14px}input[type=range]{accent-color:var(--ac)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(56,225,255,.6)}100%{box-shadow:0 0 0 18px rgba(56,225,255,0)}}.leaflet-interactive.me{animation:pulse 1.8s infinite}
 </style>
 </head>
 <body>
@@ -131,7 +163,7 @@ input:focus,select:focus{border-color:var(--ac)}
 <symbol id="i-sat" viewBox="0 0 24 24"><rect x="9" y="9" width="6" height="6" rx="1" transform="rotate(45 12 12)"/><path d="M5 5l3 3M16 16l3 3M3 12l3 0M18 12h3M12 3v3M12 18v3"/></symbol>
 </defs></svg>
 
-<div id="map"></div>
+<div id="map"></div><div id="m3"></div>
 <div id="off">Nje ya mtandao: ramani zilizohifadhiwa zinatumika</div>
 <div id="toast"></div>
 <div id="top" class="fl"><span class="br"><svg class="ic"><use href="#i-globe"/></svg></span><input id="q" placeholder="Tafuta nchi, mji, mtaa, jengo, uwanja wa ndege..." autocomplete="off"><div id="sug"></div><button id="av" onclick="show('set',1)" title="Akaunti"><svg class="ic"><use href="#i-user"/></svg></button></div>
@@ -159,9 +191,9 @@ let P={theme:'dark',base:'sat',tt:'',ov:{}};const savePrefs=()=>{put('kv',P,'pre
 const applyTheme=()=>{document.documentElement.classList.toggle('light',P.theme==='light')};
 
 /* ===== Ramani ===== */
-L.TileLayer.Cached=L.TileLayer.extend({createTile(c,done){const img=document.createElement('img');img.alt='';const u=this.getTileUrl(c);
+L.TileLayer.Cached=L.TileLayer.extend({async par(c){for(let k=1;k<=4;k++){const z=c.z-k;if(z<0)break;const p={x:c.x>>k,y:c.y>>k,z},b=await get('tiles',this.getTileUrl(p)).catch(()=>null);if(b){try{const bm=await createImageBitmap(b),sz=256>>k,cv=document.createElement('canvas');cv.width=cv.height=256;cv.getContext('2d').drawImage(bm,(c.x-(p.x<<k))*sz,(c.y-(p.y<<k))*sz,sz,sz,0,0,256,256);return cv.toDataURL('image/jpeg',.85)}catch{}}}return null},createTile(c,done){const img=document.createElement('img');img.alt='';const u=this.getTileUrl(c);
 const fin=()=>{img.onload=img.onerror=()=>done(null,img)},show=b=>{fin();img.src=URL.createObjectURL(b)};
-get('tiles',u).then(b=>b?show(b):fetch(u).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{put('tiles',b,u).catch(()=>{});show(b)})).catch(()=>{fin();img.src=u});return img}});
+get('tiles',u).then(b=>b?show(b):fetch(u).then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{put('tiles',b,u).catch(()=>{});show(b)})).catch(()=>this.par(c).then(d=>{fin();img.src=d||u})).catch(()=>{fin();img.src=u});return img}});
 const map=L.map('map',{zoomControl:false,center:[0,20],zoom:3,worldCopyJump:true});map.attributionControl.setPrefix(false);
 const esri=p=>`https://server.arcgisonline.com/ArcGIS/rest/services/${p}/MapServer/tile/{z}/{y}/{x}`;
 const T=(u,o)=>new L.TileLayer.Cached(u,Object.assign({maxZoom:19},o));
@@ -170,22 +202,24 @@ street:T('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; O
 terrain:T('https://tile.opentopomap.org/{z}/{x}/{y}.png',{maxNativeZoom:17,maxZoom:19,attribution:'&copy; OpenTopoMap'}),
 topo:T(esri('World_Topo_Map'),{maxNativeZoom:17,attribution:'Esri Topo'})};
 const BN={sat:['sat','Satellite'],street:['road','Street'],terrain:['mount','Terrain'],topo:['layers','Topo']};
+const KEYS={tomtom:''}; /* Weka TomTom key yako HAPA mara moja (si kwa watumiaji). Acha tupu kuficha Trafiki. */
 const OV={labels:['text','Majina na mipaka (Hybrid)',()=>T(esri('Reference/World_Boundaries_and_Places'))],
 roads:['road','Barabara',()=>T(esri('Reference/World_Transportation'))],
 rain:['rain','Mvua (RainViewer)',async()=>{const d=await j('https://api.rainviewer.com/public/weather-maps.json');return L.tileLayer(d.host+d.radar.past.slice(-1)[0].path+'/256/{z}/{x}/{y}/2/1_1.png',{opacity:.6,attribution:'RainViewer'})}],
-traffic:['traffic','Trafiki (key ya TomTom)',()=>{if(!P.tt)throw new Error('Weka TomTom key kwenye Settings');return L.tileLayer(`https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=${P.tt}`,{opacity:.8,attribution:'TomTom'})}]};
+cloud:['cloud','Mawingu (satellite)',async()=>{const d=await j('https://api.rainviewer.com/public/weather-maps.json');return L.tileLayer(d.host+d.satellite.infrared.slice(-1)[0].path+'/256/{z}/{x}/{y}/0/0_0.png',{opacity:.55,attribution:'RainViewer'})}],
+traffic:['traffic','Trafiki (TomTom)',()=>{if(!KEYS.tomtom)throw new Error('Trafiki haijawashwa');return L.tileLayer(`https://api.tomtom.com/traffic/map/4/tile/flow/relative/{z}/{x}/{y}.png?key=${KEYS.tomtom}`,{opacity:.8,attribution:'TomTom'})}]};
 const ovL={};
 function setNz(n){P.nz=n;[bases.sat,bases.topo].forEach(l=>{l.options.maxNativeZoom=n;l.redraw()});savePrefs();show('sat');toast('Picha halisi hadi zoom '+n+'; zaidi ya hapo hukuzwa')}
 function setBase(k){Object.values(bases).forEach(l=>map.removeLayer(l));bases[k].addTo(map).bringToBack();$('#map').classList.toggle('lt',k!=='sat');P.base=k;savePrefs();show.cur==='sat'&&show('sat')}
-async function toggleOv(k){try{if(ovL[k]){map.removeLayer(ovL[k]);delete ovL[k];P.ov[k]=0}else{ovL[k]=await OV[k][2]();ovL[k].addTo(map);P.ov[k]=1}savePrefs()}catch(e){toast('Imeshindwa: '+e.message)}show.cur==='sat'&&show('sat')}
-$('#rc').innerHTML=`<button class="ib" onclick="show('sat',1)" title="Tabaka">${I('layers')}</button><hr><button class="ib" onclick="map.zoomIn()">${I('plus')}</button><button class="ib" onclick="map.zoomOut()">${I('minus')}</button><hr><button class="ib" id="nb" onclick="togNames()" title="Majina">${I('tag')}</button><button class="ib" onclick="locate()" title="Eneo langu">${I('locate')}</button><button class="ib" onclick="fs()" title="Skrini nzima">${I('full')}</button>`;
+async function toggleOv(k){try{if(ovL[k]){map.removeLayer(ovL[k]);delete ovL[k];P.ov[k]=0}else{ovL[k]=await OV[k][2]();ovL[k].addTo(map);P.ov[k]=1}savePrefs()}catch(e){toast('Imeshindwa: '+e.message)}['sat','wx'].includes(show.cur)&&show(show.cur)}
+$('#rc').innerHTML=`<button class="ib" onclick="show('sat',1)" title="Tabaka">${I('layers')}</button><hr><button class="ib" onclick="zi()">${I('plus')}</button><button class="ib" onclick="zo()">${I('minus')}</button><hr><button class="ib" id="nb" onclick="togNames()" title="Majina">${I('tag')}</button><button class="ib" onclick="locate()" title="Eneo langu">${I('locate')}</button><button class="ib" onclick="fs()" title="Skrini nzima">${I('full')}</button>`;
 
 /* ===== GPS, dira, kushiriki ===== */
 let me,mc,watch,lastPos;
-function upd(p){lastPos=p;const c=p.coords,ll=[c.latitude,c.longitude];me?me.setLatLng(ll):me=L.circleMarker(ll,{radius:8,color:'#fff',weight:3,fillColor:'#2563eb',fillOpacity:1}).addTo(map);
+function upd(p){lastPos=p;const c=p.coords,ll=[c.latitude,c.longitude];me?me.setLatLng(ll):me=L.circleMarker(ll,{className:'me',radius:8,color:'#fff',weight:3,fillColor:'#2563eb',fillOpacity:1}).addTo(map);
 mc?mc.setLatLng(ll).setRadius(c.accuracy):mc=L.circle(ll,{radius:c.accuracy,weight:1}).addTo(map);
 $('#co').innerHTML=`${c.latitude.toFixed(6)}, ${c.longitude.toFixed(6)}<br>Usahihi &plusmn;${Math.round(c.accuracy)} m${c.altitude!=null?' &bull; Mwinuko '+Math.round(c.altitude)+' m':''}`}
-function locate(){if(!navigator.geolocation)return toast('GPS haipatikani');navigator.geolocation.getCurrentPosition(p=>{upd(p);map.flyTo([p.coords.latitude,p.coords.longitude],Math.max(map.getZoom(),16))},e=>toast('GPS: '+e.message),{enableHighAccuracy:true,timeout:15000})}
+function locate(){if(!navigator.geolocation)return toast('GPS haipatikani');navigator.geolocation.getCurrentPosition(p=>{upd(p);goTo(p.coords.latitude,p.coords.longitude,Math.max(map.getZoom(),16))},e=>toast('GPS: '+e.message),{enableHighAccuracy:true,timeout:15000})}
 function track(){if(watch!=null){navigator.geolocation.clearWatch(watch);watch=null;toast('Ufuatiliaji umezimwa')}else{watch=navigator.geolocation.watchPosition(upd,e=>toast('GPS: '+e.message),{enableHighAccuracy:true});toast('Ufuatiliaji umewashwa')}show('exp')}
 const fs=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen().catch(()=>toast('Skrini nzima haipatikani'));
 $('#cp').onclick=async()=>{try{if(DeviceOrientationEvent.requestPermission)await DeviceOrientationEvent.requestPermission()}catch{}
@@ -205,7 +239,7 @@ const TY={pin:['pin','Alama','#3b82f6'],fire:['flame','Kituo cha zimamoto','#ef4
 const mkIcon=t=>{const y=TY[t]||TY.pin;return L.divIcon({className:'',html:`<div class="mk" style="--c:${y[2]}">${I(y[0])}</div>`,iconSize:[30,30],iconAnchor:[15,36],popupAnchor:[0,-34]})};
 const mk=L.layerGroup().addTo(map),emL=L.layerGroup().addTo(map);let marks=[];
 const nid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-async function loadMarks(){marks=(await all('marks')).filter(m=>!m.del).sort((a,b)=>b.t-a.t);mk.clearLayers();marks.forEach(m=>L.marker([m.lat,m.lng],{icon:mkIcon(m.type)}).addTo(mk).bindPopup(`<b>${esc(m.name)}</b><br>${TY[m.type]?.[1]||''}<br>${m.lat.toFixed(5)}, ${m.lng.toFixed(5)}`))}
+async function loadMarks(){marks=(await all('marks')).filter(m=>!m.del).sort((a,b)=>b.t-a.t);mk.clearLayers();setTimeout(()=>m3on&&sync3());marks.forEach(m=>L.marker([m.lat,m.lng],{icon:mkIcon(m.type)}).addTo(mk).bindPopup(`<b>${esc(m.name)}</b><br>${TY[m.type]?.[1]||''}<br>${m.lat.toFixed(5)}, ${m.lng.toFixed(5)}`))}
 async function saveM(m){m.t=Date.now();await put('marks',m);await loadMarks();sched();['loc'].includes(show.cur)&&show('loc')}
 async function addMark(ll,type='pin',name){name=name||prompt('Jina la alama:',TY[type][1]);if(name===null)return;await saveM({id:nid(),lat:ll.lat,lng:ll.lng,type,name});toast('Imehifadhiwa')}
 const editM=async id=>{const m=marks.find(x=>x.id==id),n=prompt('Jina jipya:',m.name);if(n){m.name=n;await saveM(m)}};
@@ -328,15 +362,15 @@ try{await CloudSync.init();const u=await CloudSync.currentUser();if(u)onUser(u);
 catch(e){const c=CloudSync.getUser&&CloudSync.getUser();if(c)onUser(c,true);else setSt('Hali ya ndani (hakuna mtandao)')}}
 
 /* ===== Paneli na menyu ===== */
-const TABS=[['exp','globe','Explore'],['sat','sat','Satellite'],['nav','route','Navigation'],['loc','pin','Locations'],['mea','ruler','Measure'],['eme','siren','Emergency'],['set','sliders','Settings']];
-const TT={exp:'Explore',sat:'Satellite na tabaka',nav:'Navigation',loc:'My Locations',mea:'Measure',eme:'Emergency Map',set:'Settings'};
+const TABS=[['exp','globe','Explore'],['sat','sat','Satellite'],['nav','route','Navigation'],['loc','pin','Locations'],['mea','ruler','Measure'],['eme','siren','Emergency'],['thr','mount','3D'],['wx','cloud','Weather'],['set','sliders','Settings']];
+const TT={exp:'Explore',sat:'Satellite na tabaka',nav:'Navigation',loc:'My Locations',mea:'Measure',eme:'Emergency Map',thr:'Mwonekano wa 3D',wx:'Hali ya hewa',set:'Settings'};
 $('#nav').innerHTML=TABS.map(t=>`<button data-t="${t[0]}" onclick="show('${t[0]}',1)">${I(t[1])}${t[2]}</button>`).join('');
 const H={
 exp:()=>`<div class="card"><small>Gusa popote kwenye ramani kuona kuratibu, mwinuko na hali ya hewa.</small></div>
 <div class="row"><button class="b p" onclick="locate()">${I('locate')}Eneo langu</button><button class="b" onclick="track()">${I(watch!=null?'stop':'play')}${watch!=null?'Acha kufuatilia':'Fuatilia moja kwa moja'}</button></div>
 <div class="row"><button class="b" onclick="const c=map.getCenter();share(c.lat,c.lng)">${I('share')}Shiriki katikati</button><button class="b" onclick="addMark(map.getCenter())">${I('pin')}Weka alama katikati</button></div>`,
 sat:()=>`<div class="chips">${Object.keys(BN).map(k=>`<button class="b ${P.base===k?'on':''}" onclick="setBase('${k}')">${I(BN[k][0])}${BN[k][1]}</button>`).join('')}</div>
-<small>Overlay</small><div class="chips">${Object.keys(OV).map(k=>`<button class="b ${ovL[k]?'on':''}" onclick="toggleOv('${k}')">${I(OV[k][0])}${OV[k][1]}</button>`).join('')}</div>
+<small>Overlay</small><div class="chips">${Object.keys(OV).filter(k=>k!=='traffic'||KEYS.tomtom).map(k=>`<button class="b ${ovL[k]?'on':''}" onclick="toggleOv('${k}')">${I(OV[k][0])}${OV[k][1]}</button>`).join('')}</div>
 <small>Zoom ya juu ya picha halisi (Esri haina picha za kina kila mahali; ukiona "Map data not yet available" punguza)</small><div class="row">${[15,16,17,18].map(n=>`<button class="b ${(P.nz||17)===n?'on':''}" onclick="setNz(${n})">${n}</button>`).join('')}</div>
 <button class="b ${P.names?'on':''}" style="width:100%" onclick="togNames();show('sat')">${I('tag')}Majina: vituo, vijiji, kata, mitaa, barabara, maduka</button>
 <div class="legend">${Object.values(KD).filter((v,i,a)=>a.findIndex(x=>x[2]===v[2])===i).map(v=>`<span><i style="background:${v[1]}"></i>${v[2]}</span>`).join('')}</div>
@@ -348,20 +382,31 @@ loc:()=>`<div class="row"><button class="b p" onclick="startAdd('pin')">${I('plu
 ${marks.length?marks.map(m=>{const y=TY[m.type]||TY.pin;return `<div class="it"><span class="bd" style="--c:${y[2]}">${I(y[0])}</span><div><b>${esc(m.name)}</b><br><small>${m.lat.toFixed(5)}, ${m.lng.toFixed(5)}</small></div><button class="ib" onclick="goM('${m.id}')">${I('locate')}</button><button class="ib" onclick="editM('${m.id}')">${I('edit')}</button><button class="ib" onclick="shM('${m.id}')">${I('share')}</button><button class="ib" onclick="delM('${m.id}')">${I('trash')}</button></div>`}).join(''):'<small>Hakuna alama bado.</small>'}`,
 mea:()=>`<div class="row"><button class="b ${mType==='line'?'on':''}" onclick="mSet('line');show('mea')">${I('ruler')}Umbali</button><button class="b ${mType==='area'?'on':''}" onclick="mSet('area');show('mea')">${I('layers')}Eneo</button><button class="b" onclick="mp.pop();mDraw()">${I('undo')}</button><button class="b d" onclick="mSet(mType)">${I('trash')}</button></div>
 <small>Gusa ramani kuongeza pointi.</small><div id="mres" class="card"></div>`,
-eme:()=>`<div class="row"><button class="b p" onclick="loadEm()">${I('siren')}Pakia vituo vya eneo hili</button><button class="b" onclick="emL.clearLayers()">Ficha</button></div><small>Zimamoto, hospitali, hydrant, maji, mkusanyiko (OpenStreetMap). Weka alama zako:</small>
-<div class="chips">${Object.keys(TY).filter(k=>k!=='pin').map(k=>`<button class="b" onclick="startAdd('${k}')"><span class="bd" style="--c:${TY[k][2]};width:26px;height:26px">${I(TY[k][0])}</span>${TY[k][1]}</button>`).join('')}</div>`,
+eme:()=>emCat?`<div class="row"><button class="b" onclick="emCat=null;emL.clearLayers();show('eme')">Rudi</button><button class="b p" onclick="emLoad()">${I('siren')}Tafuta eneo hili</button><button class="b" onclick="startAdd(emCat)">${I('plus')}Weka alama</button></div>
+<div class="row">${['Karibu','Kati','Pana'].map((n,i)=>`<button class="b ${emSc===i?'on':''}" onclick="emSc=${i};show('eme')">${n}</button>`).join('')}</div><small>Karibu ~25km, Kati ~110km, Pana ~330km kutoka katikati ya ramani</small>
+<input id="emq" placeholder="Chuja kwa jina..." value="${esc(emQ)}" oninput="emQ=this.value;emRender()" style="margin:8px 0"><div id="eml"></div>`:`<div class="row"><button class="b" onclick="loadEm()">${I('siren')}Onyesha vyote vya eneo hili</button><button class="b" onclick="emL.clearLayers()">Ficha</button></div><small>Bonyeza aina kuona orodha yote, kisha chagua kwenda moja kwa moja:</small>
+<div class="chips">${Object.keys(TY).filter(k=>k!=='pin').map(k=>`<button class="b" onclick="openEm('${k}')"><span class="bd" style="--c:${TY[k][2]};width:26px;height:26px">${I(TY[k][0])}</span>${TY[k][1]}</button>`).join('')}</div>`,
+thr:()=>`<div class="row"><button class="b p" onclick="m3on?close3():open3().then(()=>show('thr'))">${m3on?'Rudi 2D':'Fungua 3D'}</button><button class="b" onclick="m3&&m3.easeTo({bearing:0})">Kaskazini</button></div>
+<small>Ramani</small><div class="chips">${[['sat','Satellite'],['street','Mitaa'],['topo','Topo']].map(([k,n])=>`<button class="b ${m3s.b===k?'on':''}" onclick="s3('b','${k}')">${n}</button>`).join('')}</div>
+<div class="chips">${[['t','Milima 3D'],['bd','Majengo 3D'],['bl','Majina'],['rot','Zunguka']].map(([k,n])=>`<button class="b ${m3s[k]?'on':''}" onclick="s3('${k}')">${n}</button>`).join('')}</div>
+<small>Kuinama: ${m3s.pt}&deg;</small><input type="range" min="0" max="80" value="${m3s.pt}" oninput="s3('pt',+this.value)">
+<small>Ukuzaji wa milima: ${m3s.ex}x</small><input type="range" min="1" max="4" step=".5" value="${m3s.ex}" oninput="s3('ex',+this.value)">
+<small>Vidole viwili: buruta juu/chini kuinamisha, zungusha kugeuza. Majengo huonekana zoom 15+.</small>`,
+wx:()=>`<div class="row"><button class="b" onclick="wxLoad(map.getCenter())">Katikati</button><button class="b" onclick="lastPos?wxLoad(L.latLng(lastPos.coords.latitude,lastPos.coords.longitude)):toast('Bonyeza Eneo langu (Explore) kwanza')">Eneo langu</button><button class="b" onclick="mode='wx';toast('Gusa ramani kuchagua eneo')">Gusa ramani</button></div>
+<div class="chips">${['rain','cloud'].map(k=>`<button class="b ${ovL[k]?'on':''}" onclick="toggleOv('${k}')">${I(OV[k][0])}${OV[k][1]}</button>`).join('')}</div><div id="wxb"><div class="sk"></div><div class="sk"></div></div>`,
 set:()=>`<div class="card" style="display:flex;gap:12px;align-items:center">${U?`<span class="bd" style="--c:#3b82f6;width:44px;height:44px;border-radius:50%;font-weight:800">${esc(U.name[0].toUpperCase())}</span><div style="flex:1;min-width:0"><b>${esc(U.name)}</b><br><small>${esc(U.email)}</small></div><button class="b" onclick="logout()">${I('out')}Toka</button>`:`<span class="bd" style="--c:#64748b;width:44px;height:44px;border-radius:50%">${I('user')}</span><div style="flex:1"><b>Hujaingia</b><br><small>Hali ya ndani tu</small></div><button class="b p" onclick="showLogin()">Ingia</button>`}</div>
 <div class="row" style="align-items:center"><small style="flex:1">${I('cloud')} ${esc(stTxt||'Wingu')}</small>${U?`<button class="b" onclick="pull()">${I('up')}Sawazisha</button>`:''}</div>
 <div class="row"><button class="b" onclick="P.theme=P.theme==='dark'?'light':'dark';applyTheme();savePrefs();show('set')">${I(P.theme==='dark'?'sun':'sun')}${P.theme==='dark'?'Mwanga (Light)':'Giza (Dark)'}</button></div>
-<small>TomTom key ya bure (Trafiki)</small><div class="row"><input id="tk" type="password" value="${esc(P.tt)}" placeholder="API key"><button class="b" style="flex:0" onclick="P.tt=$('#tk').value.trim();savePrefs();toast('Imehifadhiwa')">Hifadhi</button></div>
+<small>Tiles, majina, vituo vya dharura na hali ya hewa unavyotazama huhifadhiwa kiotomatiki kwenye simu na hufunguka bila mtandao.</small>
 <div class="row"><button class="b p" onclick="dl()">${I('down')}Hifadhi ramani ya eneo hili offline</button><button class="b d" onclick="clr('tiles').then(()=>toast('Cache imefutwa'))">${I('trash')}Futa cache</button></div>
 <div class="row"><button class="b" onclick="imp.click()">${I('up')}Ingiza GeoJSON/KML/GPX</button><button class="b" onclick="exp()">${I('down')}Hamisha GeoJSON</button></div>
 <small>Offline: ramani ulizotazama au kupakua tu ndizo zinapatikana. Alama na mipangilio huhifadhiwa kwenye IndexedDB.</small>`};
 function show(id,tog){const pn=$('#pn'),nb=document.querySelectorAll('#nav button');
 if(tog&&show.cur===id){pn.style.display='none';show.cur=null;nb.forEach(b=>b.classList.remove('on'));if(mode==='measure')mode=null;return}
-show.cur=id;pn.innerHTML=`<div class="h"><b>${TT[id]}</b><button class="ib" onclick="show('${id}',1)">${I('close')}</button></div>`+H[id]();pn.style.display='block';nb.forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='mea')mDraw()}
+show.cur=id;pn.innerHTML=`<div class="h"><b>${TT[id]}</b><button class="ib" onclick="show('${id}',1)">${I('close')}</button></div>`+H[id]();pn.style.display='block';nb.forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='mea')mDraw();if(id==='eme'&&emCat)emRender();if(id==='wx')wxLoad(wxP||map.getCenter())}
 
 map.on('click',async e=>{if(mode==='add'){mode=null;return addMark(e.latlng,addType)}
+if(mode==='wx'){mode=null;return wxLoad(e.latlng)}
 if(show.cur==='mea'){mp.push(e.latlng);return mDraw()}
 const ll=e.latlng,f=n=>n.toFixed(5);$('#co').innerHTML=`${f(ll.lat)}, ${f(ll.lng)}`;
 const p=L.popup().setLatLng(ll).setContent(`${f(ll.lat)}, ${f(ll.lng)}<br><small>Inapakia...</small>`).openOn(map);
@@ -370,11 +415,74 @@ p.setContent(`<b>${f(ll.lat)}, ${f(ll.lng)}</b><br>${rv?adrParts(rv.address||{})
 map.on('mousemove',e=>{if(!lastPos)$('#co').innerHTML=`${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`});
 map.on('moveend',()=>{put('kv',{c:map.getCenter(),z:map.getZoom()},'view').catch(()=>{});clearTimeout(mvT1);mvT1=setTimeout(loadNames,600);clearTimeout(mvT2);mvT2=setTimeout(rev,1500)});
 
+
+/* ===== Dharura: orodha + kwenda moja kwa moja ===== */
+let emShown=[],emCat=null,emQ='',emSc=1;const SCOPE=[.25,1,3];
+const EQ={fire:['nwr[amenity=fire_station]'],hosp:['nwr[amenity=hospital]'],hydrant:['node[emergency=fire_hydrant]'],water:['nwr[emergency=water_tank]','node[amenity=drinking_water]'],assembly:['node[emergency=assembly_point]']};
+const zi=()=>m3on?m3.zoomIn():map.zoomIn(),zo=()=>m3on?m3.zoomOut():map.zoomOut();
+function goTo(la,lo,z=17,pad){if(m3on)return m3.flyTo({center:[lo,la],zoom:z-1});let p=[la,lo];const pn=$('#pn');if(pad&&pn.style.display!=='none'&&innerWidth<900)p=map.unproject(map.project(p,z).add([0,pn.offsetHeight/2]),z);map.flyTo(p,z)}
+async function emFetch(cat){const c=map.getCenter(),h=SCOPE[emSc],bb=[c.lat-h,c.lng-h,c.lat+h,c.lng+h].map(v=>v.toFixed(3)).join(),q=`[out:json][timeout:40];(${EQ[cat].map(x=>x+`(${bb})`).join(';')};);out center 400;`;
+const d=await j('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)}),out=d.elements.map(e=>({id:e.type+e.id,n:e.tags?.name||TY[cat][1],la:e.lat??e.center?.lat,lo:e.lon??e.center?.lon,p:e.tags?.phone||''})).filter(e=>e.la!=null);
+const m=new Map(((await get('kv','em:'+cat).catch(()=>null))||[]).map(x=>[x.id,x]));out.forEach(x=>m.set(x.id,x));const r=[...m.values()];put('kv',r,'em:'+cat).catch(()=>{});return r}
+async function emLoad(){if(!EQ[emCat])return toast('Hizi ni alama zako mwenyewe: tumia "Weka alama"');toast('Inatafuta...');try{await emFetch(emCat);toast('Imepakiwa na kuhifadhiwa')}catch{toast(navigator.onLine?'Seva ina shughuli, jaribu tena':'Nje ya mtandao: data iliyohifadhiwa inatumika')}emRender()}
+async function openEm(k){emCat=k;emQ='';show('eme');if(EQ[k]&&navigator.onLine&&!(await get('kv','em:'+k).catch(()=>null)))emLoad()}
+async function emRender(){const el=$('#eml');if(!el)return;const y=TY[emCat],ref=lastPos?L.latLng(lastPos.coords.latitude,lastPos.coords.longitude):map.getCenter();
+let it=(((await get('kv','em:'+emCat).catch(()=>null))||[]).concat(marks.filter(m=>m.type===emCat).map(m=>({id:'m'+m.id,n:m.name,la:m.lat,lo:m.lng})))).map(e=>({...e,d:ref.distanceTo([e.la,e.lo])})).sort((a,b)=>a.d-b.d);
+const q=emQ.toLowerCase();if(q)it=it.filter(e=>e.n.toLowerCase().includes(q));emShown=it;emL.clearLayers();
+it.slice(0,300).forEach(e=>{const m=L.marker([e.la,e.lo],{icon:mkIcon(emCat)}).addTo(emL).bindPopup(`<b>${esc(e.n)}</b><br>${y[1]}${e.p?'<br>Simu: '+esc(e.p):''}`);if(emCat==='fire'||emCat==='hosp')m.bindTooltip(esc(e.n),{permanent:true,direction:'bottom',offset:[0,2],className:'tt'})});
+el.innerHTML=it.length?`<small>${it.length} zimepatikana, zilizo karibu kwanza</small>`+it.map((e,i)=>`<div class="it" onclick="emGo(${i})"><span class="bd" style="--c:${y[2]}">${I(y[0])}</span><div><b>${esc(e.n)}</b><br><small>${fmtL(e.d)}${e.p?' &bull; '+esc(e.p):''}</small></div>${I('locate')}</div>`).join(''):'<small>Hakuna bado. Bonyeza "Tafuta eneo hili" (inahitaji mtandao mara ya kwanza).</small>'}
+function emGo(i){const e=emShown[i];if(!e)return;goTo(e.la,e.lo,17,1);L.popup().setLatLng([e.la,e.lo]).setContent(`<b>${esc(e.n)}</b><br>${TY[emCat][1]}${e.p?'<br>Simu: '+esc(e.p):''}`).openOn(map)}
+
+/* ===== Hali ya hewa (Open-Meteo, bila key) ===== */
+let wxP=null,wxMk;
+const WC={0:'Anga safi',1:'Anga nyingi safi',2:'Mawingu kiasi',3:'Mawingu mazito',45:'Ukungu',48:'Ukungu wa barafu',51:'Manyunyu',53:'Manyunyu',55:'Manyunyu mengi',61:'Mvua nyepesi',63:'Mvua ya wastani',65:'Mvua kubwa',80:'Mvua za vipindi',81:'Mvua za vipindi',82:'Mvua kali sana',95:'Radi na mvua',96:'Radi na mvua ya mawe',99:'Radi na mvua ya mawe'};
+const wd=c=>WC[c]||(c>=71&&c<=77?'Theluji':'Hali ya hewa'),DIR=['Kaskazini','Kaskazini-mashariki','Mashariki','Kusini-mashariki','Kusini','Kusini-magharibi','Magharibi','Kaskazini-magharibi'];
+async function wxLoad(ll){wxP=ll;wxMk?wxMk.setLatLng(ll):wxMk=L.marker(ll,{icon:mkIcon('pin')}).addTo(map);const k='wx:'+ll.lat.toFixed(2)+','+ll.lng.toFixed(2),el=()=>$('#wxb');let d,old=false;
+try{d=await j(`https://api.open-meteo.com/v1/forecast?latitude=${ll.lat}&longitude=${ll.lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,pressure_msl,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=temperature_2m,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,uv_index_max&timezone=auto&forecast_days=7`);d.at=Date.now();put('kv',d,k).catch(()=>{})}catch{d=await get('kv',k).catch(()=>null);old=true}
+if(!el())return;if(!d)return el().innerHTML='<small>Hakuna mtandao wala data iliyohifadhiwa kwa eneo hili.</small>';
+const c=d.current,h=d.hourly,D=d.daily,i=Math.max(0,h.time.findIndex(t=>t>=c.time));
+el().innerHTML=`<div class="card wxc ${c.weather_code>=95?'st':c.weather_code>=51?'rn':c.weather_code>=2?'cl':''}"><b style="font-size:34px">${Math.round(c.temperature_2m)}&deg;C</b> <b>${wd(c.weather_code)}</b><br><small>Inahisi ${Math.round(c.apparent_temperature)}&deg;C &bull; Unyevu ${c.relative_humidity_2m}% &bull; Mawingu ${c.cloud_cover}%<br>Upepo ${Math.round(c.wind_speed_10m)} km/h kutoka ${DIR[Math.round(c.wind_direction_10m/45)%8]} (ghafla ${Math.round(c.wind_gusts_10m)}) &bull; Shinikizo ${Math.round(c.pressure_msl)} hPa &bull; Mvua ${c.precipitation} mm${old?'<br>Data ya zamani: '+new Date(d.at).toLocaleString():''}</small></div>
+<div style="display:flex;gap:8px;overflow-x:auto">${h.time.slice(i,i+24).map((t,n)=>`<div class="card" style="min-width:58px;text-align:center;margin:0"><small>${t.slice(11,16)}</small><br><b>${Math.round(h.temperature_2m[i+n])}&deg;</b><br><small>${h.precipitation_probability[i+n]??0}%</small></div>`).join('')}</div>
+${D.time.map((t,n)=>`<div class="it"><div><b>${new Date(t).toLocaleDateString('sw',{weekday:'short',day:'numeric',month:'short'})}</b><br><small>${wd(D.weather_code[n])} &bull; Mvua ${D.precipitation_probability_max[n]??0}% (${D.precipitation_sum[n]} mm)</small></div><b>${Math.round(D.temperature_2m_max[n])}&deg; / ${Math.round(D.temperature_2m_min[n])}&deg;</b></div>`).join('')}
+<small>UV leo ${D.uv_index_max[0]} &bull; Jua huchomoza ${D.sunrise[0].slice(11,16)}, huzama ${D.sunset[0].slice(11,16)}</small>`}
+
+/* ===== 3D (MapLibre: milima, majengo) ===== */
+let m3=null,m3on=false,m3s={b:'sat',t:1,bd:1,bl:1,rot:0,ex:1.5,pt:65},m3m=[];
+const MLU='https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl';
+const ld=(u,css)=>new Promise((ok,no)=>{const e=document.createElement(css?'link':'script');css?(e.rel='stylesheet',e.href=u):e.src=u;e.onload=ok;e.onerror=no;document.head.appendChild(e)});
+function st3(){const r=(u,z)=>({type:'raster',tiles:[u],tileSize:256,maxzoom:z||17}),v=b=>({visibility:b?'visible':'none'});
+return{version:8,sources:{sat:r(esri('World_Imagery')),street:r('https://tile.openstreetmap.org/{z}/{x}/{y}.png',19),topo:r(esri('World_Topo_Map')),lab:r(esri('Reference/World_Boundaries_and_Places')),dem:{type:'raster-dem',tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],encoding:'terrarium',tileSize:256,maxzoom:15},omt:{type:'vector',url:'https://tiles.openfreemap.org/planet'}},
+layers:[{id:'bg',type:'background',paint:{'background-color':'#0b1220'}},...['sat','street','topo'].map(k=>({id:k,type:'raster',source:k,layout:v(m3s.b===k)})),{id:'lab',type:'raster',source:'lab',layout:v(m3s.bl)},
+{id:'b3d',type:'fill-extrusion',source:'omt','source-layer':'building',minzoom:14,layout:v(m3s.bd),paint:{'fill-extrusion-color':'#e2e8f0','fill-extrusion-height':['coalesce',['get','render_height'],6],'fill-extrusion-base':['coalesce',['get','render_min_height'],0],'fill-extrusion-opacity':.85}}],
+terrain:m3s.t?{source:'dem',exaggeration:m3s.ex}:undefined}}
+async function open3(){try{if(!window.maplibregl){toast('Inapakia 3D...');await ld(MLU+'.css',1);await ld(MLU+'.js')}}catch{return toast('3D inahitaji mtandao mara ya kwanza')}
+const c=map.getCenter();$('#m3').style.display='block';$('#map').classList.add('h');m3on=true;
+if(!m3){m3=new maplibregl.Map({container:'m3',style:st3(),center:[c.lng,c.lat],zoom:map.getZoom()-1,pitch:m3s.pt,maxPitch:85,maxZoom:19,attributionControl:false});
+m3.on('click',e=>{if(mode==='add'){mode=null;addMark({lat:e.lngLat.lat,lng:e.lngLat.lng},addType)}else $('#co').innerHTML=e.lngLat.lat.toFixed(5)+', '+e.lngLat.lng.toFixed(5)})}
+else{m3.jumpTo({center:[c.lng,c.lat],zoom:map.getZoom()-1,pitch:m3s.pt});m3.resize()}sync3()}
+function close3(){if(!m3on)return;const c=m3.getCenter();m3on=false;m3s.rot=0;$('#m3').style.display='none';$('#map').classList.remove('h');map.setView([c.lat,c.lng],Math.round(m3.getZoom()+1));map.invalidateSize();show('thr')}
+function sync3(){if(!m3||!window.maplibregl)return;m3m.forEach(x=>x.remove());m3m=marks.map(m=>{const e=document.createElement('div');e.style.cssText='width:30px;height:36px';e.innerHTML=mkIcon(m.type).options.html;return new maplibregl.Marker({element:e,anchor:'bottom'}).setLngLat([m.lng,m.lat]).setPopup(new maplibregl.Popup().setText(m.name)).addTo(m3)})}
+function s3(k,v){m3s[k]=v===undefined?+!m3s[k]:v;if(m3&&m3.isStyleLoaded()){const vis=(id,b)=>m3.setLayoutProperty(id,'visibility',b?'visible':'none');
+if(k==='b')['sat','street','topo'].forEach(x=>vis(x,x===m3s.b));if(k==='bd')vis('b3d',m3s.bd);if(k==='bl')vis('lab',m3s.bl);
+if(k==='t'||k==='ex')m3.setTerrain(m3s.t?{source:'dem',exaggeration:m3s.ex}:null);if(k==='pt')m3.setPitch(m3s.pt);
+if(k==='rot'&&m3s.rot){const sp=()=>{if(m3on&&m3s.rot){m3.setBearing(m3.getBearing()+.15);requestAnimationFrame(sp)}};sp()}}
+if(k!=='pt'&&k!=='ex')show('thr')}
+
+
+/* ===== Mwingiliano: kuburuta paneli, haptics, kibodi ===== */
+(()=>{const pn=$('#pn');let y0=null,dy=0;const hap=n=>navigator.vibrate&&navigator.vibrate(n);
+pn.addEventListener('pointerdown',e=>{if(!e.target.closest('.h')||e.target.closest('button'))return;y0=e.clientY;dy=0;pn.style.transition='none';pn.setPointerCapture(e.pointerId)});
+pn.addEventListener('pointermove',e=>{if(y0==null)return;dy=e.clientY-y0;if(dy>0)pn.style.transform=`translateY(${dy}px)`});
+const end=()=>{if(y0==null)return;pn.style.transition='';pn.style.transform='';if(dy>110){hap(12);show(show.cur,1)}else if(dy<-40){pn.classList.add('tall');hap(8)}else if(dy>40)pn.classList.remove('tall');else if(Math.abs(dy)<6)pn.classList.toggle('tall');y0=null};
+pn.addEventListener('pointerup',end);pn.addEventListener('pointercancel',end);
+document.addEventListener('click',e=>{if(e.target.closest('button,.it'))hap(8)},true);
+addEventListener('keydown',e=>{if(e.key==='Escape'){if(m3on)return;if(show.cur)show(show.cur,1)}});
+const o=show;})();
 /* ===== Anza ===== */
 bases.sat.addTo(map);setTimeout(()=>map.invalidateSize(),300);let tileErr=0;
 bases.sat.on('tileerror',()=>{if(!tileErr){tileErr=1;toast('Tiles hazipakii: angalia mtandao',5000)}});
 const net=()=>$('#off').style.display=navigator.onLine?'none':'block';addEventListener('online',()=>{net();U&&push()});addEventListener('offline',net);net();
-(async()=>{let p=null;try{p=await get('kv','prefs');if(p)P=Object.assign(P,p)}catch{}if(!p)P.ov={labels:1};if(P.names===undefined)P.names=true;applyTheme();[bases.sat,bases.topo].forEach(l=>l.options.maxNativeZoom=P.nz||17);setBase(P.base);nbUpd();
+navigator.storage?.persist?.();(async()=>{let p=null;try{p=await get('kv','prefs');if(p)P=Object.assign(P,p)}catch{}if(!p)P.ov={labels:1};if(P.names===undefined)P.names=true;applyTheme();[bases.sat,bases.topo].forEach(l=>l.options.maxNativeZoom=P.nz||17);setBase(P.base);nbUpd();
 for(const k of Object.keys(P.ov||{}))if(P.ov[k]&&navigator.onLine)toggleOv(k);
 await loadMarks();try{const v=await get('kv','view');if(v)map.setView(v.c,v.z)}catch{}setTimeout(()=>{loadNames();rev()},500);acct()})();
 </script>
