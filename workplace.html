@@ -384,7 +384,7 @@ mea:()=>`<div class="row"><button class="b ${mType==='line'?'on':''}" onclick="m
 <small>Gusa ramani kuongeza pointi.</small><div id="mres" class="card"></div>`,
 eme:()=>emCat?`<div class="row"><button class="b" onclick="emCat=null;emL.clearLayers();show('eme')">Rudi</button><button class="b p" onclick="emLoad()">${I('siren')}Tafuta eneo hili</button><button class="b" onclick="startAdd(emCat)">${I('plus')}Weka alama</button></div>
 <div class="row">${['Karibu','Kati','Pana'].map((n,i)=>`<button class="b ${emSc===i?'on':''}" onclick="emSc=${i};show('eme')">${n}</button>`).join('')}</div><small>Karibu ~25km, Kati ~110km, Pana ~330km kutoka katikati ya ramani</small>
-<input id="emq" placeholder="Chuja kwa jina..." value="${esc(emQ)}" oninput="emQ=this.value;emRender()" style="margin:8px 0"><div id="eml"></div>`:`<div class="row"><button class="b" onclick="loadEm()">${I('siren')}Onyesha vyote vya eneo hili</button><button class="b" onclick="emL.clearLayers()">Ficha</button></div><small>Bonyeza aina kuona orodha yote, kisha chagua kwenda moja kwa moja:</small>
+<input id="emq" placeholder="Chuja kwa jina..." value="${esc(emQ)}" oninput="emQ=this.value;emRender()" style="margin:8px 0"><div id="eml"></div>`:`${emHero()}<div class="row"><button class="b" onclick="loadEm()">${I('siren')}Onyesha vyote vya eneo hili</button><button class="b" onclick="emL.clearLayers()">Ficha</button></div><small>Bonyeza aina kuona orodha yote, kisha chagua kwenda moja kwa moja:</small>
 <div class="chips">${Object.keys(TY).filter(k=>k!=='pin').map(k=>`<button class="b" onclick="openEm('${k}')"><span class="bd" style="--c:${TY[k][2]};width:26px;height:26px">${I(TY[k][0])}</span>${TY[k][1]}</button>`).join('')}</div>`,
 thr:()=>`<div class="row"><button class="b p" onclick="m3on?close3():open3().then(()=>show('thr'))">${m3on?'Rudi 2D':'Fungua 3D'}</button><button class="b" onclick="m3&&m3.easeTo({bearing:0})">Kaskazini</button></div>
 <small>Ramani</small><div class="chips">${[['sat','Satellite'],['street','Mitaa'],['topo','Topo']].map(([k,n])=>`<button class="b ${m3s.b===k?'on':''}" onclick="s3('b','${k}')">${n}</button>`).join('')}</div>
@@ -403,10 +403,11 @@ set:()=>`<div class="card" style="display:flex;gap:12px;align-items:center">${U?
 <small>Offline: ramani ulizotazama au kupakua tu ndizo zinapatikana. Alama na mipangilio huhifadhiwa kwenye IndexedDB.</small>`};
 function show(id,tog){const pn=$('#pn'),nb=document.querySelectorAll('#nav button');
 if(tog&&show.cur===id){pn.style.display='none';show.cur=null;nb.forEach(b=>b.classList.remove('on'));if(mode==='measure')mode=null;return}
-show.cur=id;pn.innerHTML=`<div class="h"><b>${TT[id]}</b><button class="ib" onclick="show('${id}',1)">${I('close')}</button></div>`+H[id]();pn.style.display='block';nb.forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='mea')mDraw();if(id==='eme'&&emCat)emRender();if(id==='wx')wxLoad(wxP||map.getCenter())}
+show.cur=id;pn.innerHTML=`<div class="h"><b>${TT[id]}</b><button class="ib" onclick="show('${id}',1)">${I('close')}</button></div>`+H[id]();pn.style.display='block';nb.forEach(b=>b.classList.toggle('on',b.dataset.t===id));if(id==='mea')mDraw();if(id==='eme')emCat?emRender():incRender();if(id==='wx')wxLoad(wxP||map.getCenter());}
 
 map.on('click',async e=>{if(mode==='add'){mode=null;return addMark(e.latlng,addType)}
 if(mode==='wx'){mode=null;return wxLoad(e.latlng)}
+if(mode==='inc'){mode=null;return incSet(e.latlng)}
 if(show.cur==='mea'){mp.push(e.latlng);return mDraw()}
 const ll=e.latlng,f=n=>n.toFixed(5);$('#co').innerHTML=`${f(ll.lat)}, ${f(ll.lng)}`;
 const p=L.popup().setLatLng(ll).setContent(`${f(ll.lat)}, ${f(ll.lng)}<br><small>Inapakia...</small>`).openOn(map);
@@ -478,6 +479,41 @@ pn.addEventListener('pointerup',end);pn.addEventListener('pointercancel',end);
 document.addEventListener('click',e=>{if(e.target.closest('button,.it'))hap(8)},true);
 addEventListener('keydown',e=>{if(e.key==='Escape'){if(m3on)return;if(show.cur)show(show.cur,1)}});
 const o=show;})();
+
+const jt=(u,o)=>j(u,Object.assign({signal:AbortSignal.timeout(12000)},o));
+
+/* ===== Dharura ya hali ya juu: SOS, Amri ya Tukio, ramani ya moshi, kutuma gari ===== */
+let inc=null,incW=null,incSt=[],sirT=null,au,sosTm;const incL=L.layerGroup().addTo(map);
+const eta=m=>Math.max(1,Math.round(m*1.35/1000/45*60)),al=()=>{const b=document.querySelector('#nav [data-t=eme]');b&&b.classList.toggle('al',!!inc)};
+const dest=(ll,b,m)=>{const R=6371e3,d=m/R,t=b*Math.PI/180,la=ll.lat*Math.PI/180,lo=ll.lng*Math.PI/180,l2=Math.asin(Math.sin(la)*Math.cos(d)+Math.cos(la)*Math.sin(d)*Math.cos(t)),o2=lo+Math.atan2(Math.sin(t)*Math.sin(d)*Math.cos(la),Math.cos(d)-Math.sin(la)*Math.sin(l2));return[l2*180/Math.PI,o2*180/Math.PI]};
+const emHero=()=>`<button class="sos" onpointerdown="sosDown()" onpointerup="sosUp()" onpointerleave="sosUp()" oncontextmenu="return false">SOS<small>Shikilia sekunde 2 kutuma eneo lako</small></button>
+<div class="row"><a class="b" href="tel:112">${I('siren')}112</a><a class="b" href="tel:114">${I('flame')}114 Zimamoto</a><button class="b ${sirT?'on':''}" onclick="siren();show('eme')">${I('alert')}Siren</button></div><small>Thibitisha namba za dharura za eneo lako.</small>
+<div class="row"><button class="b p" onclick="emCat=null;mode='inc';toast('Gusa ramani kuweka tukio')">${I('flame')}Weka tukio</button><button class="b" onclick="incSet(map.getCenter())">Katikati</button>${inc?'<button class="b d" onclick="incClear()">Ondoa</button>':''}</div><div id="incc"></div>`;
+const sosDown=()=>{const b=document.querySelector('.sos');b&&b.classList.add('hold');sosTm=setTimeout(sos,2000)},sosUp=()=>{clearTimeout(sosTm);const b=document.querySelector('.sos');b&&b.classList.remove('hold')};
+function sos(){navigator.vibrate&&navigator.vibrate([200,100,200,100,400]);if(!navigator.geolocation)return toast('GPS haipatikani');toast('Inatafuta eneo lako...');
+navigator.geolocation.getCurrentPosition(p=>{upd(p);const la=p.coords.latitude,lo=p.coords.longitude;incSet(L.latLng(la,lo));const t=`NAHITAJI MSAADA! Eneo: ${la.toFixed(6)}, ${lo.toFixed(6)} (usahihi ${Math.round(p.coords.accuracy)} m) https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=18/${la}/${lo}`;
+navigator.share?navigator.share({title:'SOS',text:t}).catch(()=>{}):navigator.clipboard.writeText(t).then(()=>toast('Ujumbe wa SOS umenakiliwa: utume WhatsApp/SMS'))},e=>toast('GPS: '+e.message),{enableHighAccuracy:true,timeout:15000})}
+function siren(){if(sirT){clearInterval(sirT);au.close();sirT=null;return toast('Siren imezimwa')}au=new(window.AudioContext||window.webkitAudioContext)();const o=au.createOscillator(),g=au.createGain();g.gain.value=.15;o.connect(g).connect(au.destination);o.type='sawtooth';o.start();let u=1;sirT=setInterval(()=>{o.frequency.setTargetAtTime(u?1100:650,au.currentTime,.25);u=!u},700);toast('Siren imewashwa')}
+function incClear(){inc=null;incL.clearLayers();rg.clearLayers();al();show('eme')}
+async function incSet(ll){inc=L.latLng(ll);emCat=null;incL.clearLayers();rg.clearLayers();map.setView(inc,16,{animate:false});al();
+L.marker(inc,{icon:L.divIcon({className:'',html:'<div class="inc-p"></div>',iconSize:[26,26],iconAnchor:[13,13]})}).addTo(incL);
+[[100,'#ef4444','Hatari 100 m'],[250,'#f97316','Ondoa watu 250 m'],[500,'#eab308','Onyo 500 m']].forEach(([r,c,t])=>L.circle(inc,{radius:r,color:c,weight:2,dashArray:'6 6',fillColor:c,fillOpacity:.07}).addTo(incL).bindTooltip(t,{sticky:true}));
+incW=null;try{incW=(await jt(`https://api.open-meteo.com/v1/forecast?latitude=${inc.lat}&longitude=${inc.lng}&current=wind_speed_10m,wind_direction_10m,temperature_2m,relative_humidity_2m`)).current;
+const b=(incW.wind_direction_10m+180)%360,Ln=300+incW.wind_speed_10m*60;L.polygon([[inc.lat,inc.lng],dest(inc,b-20,Ln),dest(inc,b,Ln*1.1),dest(inc,b+20,Ln)],{color:'#7c3aed',weight:1,fillColor:'#7c3aed',fillOpacity:.3}).addTo(incL).bindTooltip('Njia ya moshi (makadirio)',{sticky:true})}catch{}
+show('eme');for(const k of ['fire','hosp','hydrant']){if(!navigator.onLine)break;const o=emSc;emSc=k==='hydrant'?0:1;try{await emFetch(k)}catch{}emSc=o;incRender()}}
+async function incRender(){const el=$('#incc');if(!el||!inc)return;const g=async k=>((await get('kv','em:'+k).catch(()=>null))||[]).map(e=>({...e,d:inc.distanceTo([e.la,e.lo])})).sort((a,b)=>a.d-b.d);
+const[F,H,Y]=await Promise.all([g('fire'),g('hosp'),g('hydrant')]);incSt=F.slice(0,3);const y5=Y.filter(e=>e.d<=500),w=incW;
+el.innerHTML=`<div class="card wxc st"><b>AMRI YA TUKIO</b><br><small>${inc.lat.toFixed(5)}, ${inc.lng.toFixed(5)}${w?`<br>Upepo ${Math.round(w.wind_speed_10m)} km/h kutoka ${DIR[Math.round(w.wind_direction_10m/45)%8]}; moshi unaelekea ${DIR[Math.round(((w.wind_direction_10m+180)%360)/45)%8]}<br>Joto ${Math.round(w.temperature_2m)}&deg;C &bull; Unyevu ${w.relative_humidity_2m}%`:''}<br>Hydrant ndani ya 500 m: <b>${y5.length}</b>${Y[0]?' (karibu zaidi '+Math.round(Y[0].d)+' m)':''}</small></div>`
++(F.length?'<small>Vituo vya zimamoto vilivyo karibu (bonyeza kutuma gari)</small>'+incSt.map((x,i)=>`<div class="it" onclick="incDispatch(${i})"><span class="bd" style="--c:#ef4444">${I('flame')}</span><div><b>${esc(x.n)}</b><br><small>${(x.d/1000).toFixed(1)} km &bull; ~${eta(x.d)} dakika</small></div><button class="b p" style="min-height:34px">Tuma</button></div>`).join(''):'<small>Hakuna vituo vilivyohifadhiwa bado (vinapakia ukiwa na mtandao).</small>')
++(H[0]?`<div class="it"><span class="bd" style="--c:#10b981">${I('cross')}</span><div><b>${esc(H[0].n)}</b><br><small>Hospitali ya karibu &bull; ${(H[0].d/1000).toFixed(1)} km &bull; ~${eta(H[0].d)} dakika</small></div></div>`:'')
++`<div class="row"><button class="b" onclick="share(inc.lat,inc.lng,'TUKIO LA DHARURA')">${I('share')}Shiriki ripoti</button></div>`}
+async function incDispatch(i){const x=incSt[i];if(!x||!inc)return;let pts,dist,dur;
+try{const d=await jt(`https://routing.openstreetmap.de/routed-car/route/v1/driving/${x.lo},${x.la};${inc.lng},${inc.lat}?overview=full&geometries=geojson`),r=d.routes[0];pts=r.geometry.coordinates.map(c=>[c[1],c[0]]);dist=r.distance;dur=r.duration}
+catch{pts=[[x.la,x.lo],[inc.lat,inc.lng]];dist=x.d*1.35;dur=eta(x.d)*60;toast('Njia ya makadirio (mtandao haupo)')}
+rg.clearLayers();L.polyline(pts,{color:'#ef4444',weight:7,opacity:.9}).addTo(rg);L.polyline(pts,{color:'#fff',weight:2,dashArray:'2 10',lineCap:'round'}).addTo(rg);map.fitBounds(L.latLngBounds(pts),{padding:[60,60]});
+const mkr=L.marker(pts[0],{icon:mkIcon('fire'),zIndexOffset:900}).addTo(rg),t0=performance.now(),T=Math.min(12000,Math.max(5000,dur*8));
+const st=n=>{const f=Math.min(1,(n-t0)/T),k=f*(pts.length-1),i0=Math.floor(k),p=pts[i0],q=pts[Math.min(i0+1,pts.length-1)],u=k-i0;mkr.setLatLng([p[0]+(q[0]-p[0])*u,p[1]+(q[1]-p[1])*u]);if(f<1&&rg.hasLayer(mkr))requestAnimationFrame(st)};requestAnimationFrame(st);
+toast(`${x.n}: ${(dist/1000).toFixed(1)} km - takriban dakika ${Math.round(dur/60)}`,7000)}
 /* ===== Anza ===== */
 bases.sat.addTo(map);setTimeout(()=>map.invalidateSize(),300);let tileErr=0;
 bases.sat.on('tileerror',()=>{if(!tileErr){tileErr=1;toast('Tiles hazipakii: angalia mtandao',5000)}});
