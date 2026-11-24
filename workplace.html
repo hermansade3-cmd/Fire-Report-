@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
 <title>WORLD SATELLITE EXPLORER</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <style>
 :root{--bg:#0b1220;--fg:#e8eefc;--mu:#8ea0c0;--card:rgba(15,23,42,.88);--bd:rgba(148,163,184,.22);--ac:#22d3ee;--ac2:#3b82f6;--in:rgba(148,163,184,.12)}
 :root.light{--bg:#f1f5f9;--fg:#0f172a;--mu:#52617d;--card:rgba(255,255,255,.92);--bd:rgba(15,23,42,.14);--ac:#0891b2;--ac2:#2563eb;--in:rgba(15,23,42,.06)}
@@ -174,9 +173,31 @@ input,select{border-radius:14px}input[type=range]{accent-color:var(--ac)}
 <div id="pn" class="fl"></div>
 <div id="nav" class="fl"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<!-- ===== Kipakiaji cha maktaba (IndexedDB): Leaflet na MapLibre huhifadhiwa mara ya kwanza ukiwa online, kisha hufanya kazi offline ===== -->
 <script>
-if(typeof L==='undefined'){document.body.insertAdjacentHTML('afterbegin','<div class="ov"><div class="box" style="color:var(--fg)">Leaflet haijapakia. Washa mtandao kisha fungua upya faili hili kwenye Chrome (si ndani ya preview ya Claude).</div></div>');throw new Error('no leaflet')}
+(function(){
+var LV='https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet';
+var open=function(){return new Promise(function(ok,no){var r=indexedDB.open('wse-libs',1);r.onupgradeneeded=function(){r.result.createObjectStore('f')};r.onsuccess=function(){ok(r.result)};r.onerror=function(){no(r.error)}})};
+var idb=function(m,f){return open().then(function(d){return new Promise(function(ok,no){var t=d.transaction('f',m),q=f(t.objectStore('f'));t.oncomplete=function(){ok(q&&q.result)};t.onerror=function(){no(t.error)}})})};
+window.getLib=async function(u){
+var t=await idb('readonly',function(s){return s.get(u)}).catch(function(){return null});
+if(t)return t;
+var r=await fetch(u);if(!r.ok)throw new Error(r.status);
+t=await r.text();
+idb('readwrite',function(s){return s.put(t,u)}).catch(function(){});
+return t};
+window.injectLib=function(t,css){var e=document.createElement(css?'style':'script');e.textContent=t;document.head.appendChild(e)};
+(async function(){
+try{window.injectLib(await window.getLib(LV+'.css'),1)}catch(e){}
+try{window.injectLib(await window.getLib(LV+'.js'))}catch(e){}
+window.injectLib(document.getElementById('app').textContent);
+})();
+})();
+</script>
+
+<!-- ===== App kuu: huanza baada ya Leaflet kupakiwa kutoka IndexedDB ===== -->
+<script type="text/plain" id="app">
+if(typeof L==='undefined'){document.body.insertAdjacentHTML('afterbegin','<div class="ov"><div class="box" style="color:var(--fg)">Leaflet haijapakia. Fungua app mara moja ukiwa na mtandao ili ihifadhiwe, kisha itafanya kazi offline.</div></div>');throw new Error('no leaflet')}
 const $=s=>document.querySelector(s);
 const I=(n,c='')=>`<svg class="ic ${c}"><use href="#i-${n}"/></svg>`;
 const toast=(t,ms=3200)=>{const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',ms)};
@@ -447,10 +468,10 @@ el().innerHTML=`<div class="card wxc ${c.weather_code>=95?'st':c.weather_code>=5
 ${D.time.map((t,n)=>`<div class="it"><div><b>${new Date(t).toLocaleDateString('sw',{weekday:'short',day:'numeric',month:'short'})}</b><br><small>${wd(D.weather_code[n])} &bull; Mvua ${D.precipitation_probability_max[n]??0}% (${D.precipitation_sum[n]} mm)</small></div><b>${Math.round(D.temperature_2m_max[n])}&deg; / ${Math.round(D.temperature_2m_min[n])}&deg;</b></div>`).join('')}
 <small>UV leo ${D.uv_index_max[0]} &bull; Jua huchomoza ${D.sunrise[0].slice(11,16)}, huzama ${D.sunset[0].slice(11,16)}</small>`}
 
-/* ===== 3D (MapLibre: milima, majengo) ===== */
+/* ===== 3D (MapLibre: milima, majengo) - maktaba huhifadhiwa kwenye IndexedDB ===== */
 let m3=null,m3on=false,m3s={b:'sat',t:1,bd:1,bl:1,rot:0,ex:1.5,pt:65},m3m=[];
 const MLU='https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl';
-const ld=(u,css)=>new Promise((ok,no)=>{const e=document.createElement(css?'link':'script');css?(e.rel='stylesheet',e.href=u):e.src=u;e.onload=ok;e.onerror=no;document.head.appendChild(e)});
+const ld=(u,css)=>getLib(u).then(t=>injectLib(t,css));
 function st3(){const r=(u,z)=>({type:'raster',tiles:[u],tileSize:256,maxzoom:z||17}),v=b=>({visibility:b?'visible':'none'});
 return{version:8,sources:{sat:r(esri('World_Imagery')),street:r('https://tile.openstreetmap.org/{z}/{x}/{y}.png',19),topo:r(esri('World_Topo_Map')),lab:r(esri('Reference/World_Boundaries_and_Places')),dem:{type:'raster-dem',tiles:['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],encoding:'terrarium',tileSize:256,maxzoom:15},omt:{type:'vector',url:'https://tiles.openfreemap.org/planet'}},
 layers:[{id:'bg',type:'background',paint:{'background-color':'#0b1220'}},...['sat','street','topo'].map(k=>({id:k,type:'raster',source:k,layout:v(m3s.b===k)})),{id:'lab',type:'raster',source:'lab',layout:v(m3s.bl)},
